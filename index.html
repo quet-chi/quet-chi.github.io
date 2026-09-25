@@ -107,6 +107,78 @@ textarea{width:100%;min-height:220px;background:var(--panel);color:var(--ink);bo
 .toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--panel2);border:1px solid var(--line);
   color:var(--ink);padding:11px 14px;border-radius:12px;font-size:.84rem;display:flex;gap:14px;align-items:center;z-index:30;max-width:92vw}
 .toast button{background:none;color:var(--accent);font-weight:700}
+
+/* ══ v2 — iPhone: việc chính nằm dưới ngón cái, màn nhập tiền vừa một màn không cuộn ══ */
+html,body{overscroll-behavior:none}
+body{-webkit-user-select:none;user-select:none}
+input,textarea{-webkit-user-select:text;user-select:text}
+.hm{padding-bottom:calc(120px + env(safe-area-inset-bottom))}
+.hd{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 2px 4px}
+.tot{display:flex;align-items:baseline;gap:4px;background:none;color:var(--ink);padding:4px 0 0;font:700 2.35rem ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:-.04em}
+.tot small{font-size:.4em;color:var(--ink3);font-weight:500}
+.tot i{font-style:normal;font-size:.55em;color:var(--ink3);margin-left:6px;font-family:-apple-system,system-ui,sans-serif}
+.sub{font-size:.84rem;color:var(--ink2);margin-top:2px}.sub b{color:var(--ink);font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.eye{width:44px;height:44px;border-radius:14px;background:var(--panel);border:1px solid var(--line)}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 4px}
+.pill{display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--line);color:var(--ink2);padding:9px 13px;border-radius:99px;font-size:.8rem;font-weight:600;min-height:38px}
+.pill b{color:var(--accent);font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.pill.warnp{border-color:var(--accent);color:var(--accent)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block;flex:none}
+.dh{display:flex;justify-content:space-between;margin:20px 2px 4px;font:600 .66rem ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+.row{position:relative;display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;background:none;color:var(--ink);padding:10px 2px;border-bottom:1px solid var(--line);min-height:60px}
+.row:active{background:var(--panel)}
+.row .ic{width:38px;height:38px;border-radius:12px;font-size:1.1rem}
+.row .mid{min-width:0}.row .n{font-weight:600;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .s{font-size:.74rem;color:var(--ink3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .r{text-align:right}.row .a{font:600 .95rem ui-monospace,"SF Mono",Menlo,monospace}
+.row>.dot{position:absolute;left:34px;top:10px;box-shadow:0 0 0 2px var(--bg)}
+.dock{position:fixed;left:0;right:0;bottom:0;z-index:10;display:flex;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  background:linear-gradient(transparent,var(--bg) 26%);max-width:520px;margin:0 auto}
+.dk1{flex:1;height:58px;border-radius:18px;background:var(--accent);color:#0B100E;font-weight:700;font-size:1.05rem;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.dk2{width:78px;height:58px;border-radius:18px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);font-size:1.05rem;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.dk2 span{font-size:.66rem;font-weight:600;color:var(--ink2)}
+.dk1:active,.dk2:active{transform:scale(.97)}
+.toast{bottom:calc(88px + env(safe-area-inset-bottom))}
+/* màn nhập tiền */
+.sheet{height:100dvh}
+.wrap.am{display:flex;flex-direction:column;min-height:100%;padding:8px 16px calc(12px + env(safe-area-inset-bottom))}
+.bar1{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px}
+.bar1 .back{width:32px;height:40px;font-size:1.6rem;line-height:1;padding:0;text-align:left}
+.bar1 b{font-size:1rem}
+.bar1 .back.bk2{width:64px;font-size:1rem;font-weight:600}
+.dh span+span{text-transform:none;letter-spacing:0}
+.bar1 .who{flex:1;margin:0;min-width:0}
+.am .amt{margin:6px 0 2px;font-size:2.7rem}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 2px}
+.sp{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:14px;padding:8px 10px;font:700 1.35rem ui-monospace,"SF Mono",Menlo,monospace;text-align:left}
+.sp .cap{display:block;font:600 .6rem ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:2px}
+.waitl{text-align:center;font-size:.76rem;color:var(--ink2);min-height:18px;margin-top:4px}.waitl b{color:var(--accent);font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.opts{display:flex;gap:6px;align-items:center;justify-content:center;margin:8px 0 2px}
+.seg{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:2px}
+.seg button{background:none;color:var(--ink3);padding:7px 10px;border-radius:9px;font-size:.76rem;font-weight:600}
+.seg button.on{background:var(--panel2);color:var(--ink);box-shadow:0 1px 0 rgba(255,255,255,.04)}
+.op{background:var(--panel);border:1px solid var(--line);color:var(--ink2);padding:8px 10px;border-radius:11px;font-size:.76rem;font-weight:600;min-width:38px}
+.op.on{border-color:var(--accent);color:var(--accent)}
+.am .nt{margin-top:8px;padding:9px 12px}
+.cg{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0 0}
+.cgb{display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--panel);border:1px solid var(--line);color:var(--ink2);border-radius:12px;padding:7px 2px 6px;font-size:.66rem;font-weight:600;white-space:nowrap}
+.cgb i{font-style:normal;font-size:1.15rem;line-height:1.2}
+.cgb.on{background:var(--accent);border-color:var(--accent);color:#0B100E}
+.padw{margin-top:auto;padding-top:10px}
+.am .pad{margin-top:0;gap:7px}
+.am .pad button{padding:0;height:50px;font-size:1.35rem}
+.am .cta{margin-top:10px;height:56px;padding:0;border-radius:16px}
+.cta.off{opacity:.4}
+.hint{font-size:.72rem;color:var(--ink3);text-align:center;margin-top:8px}.hint b{color:var(--ink2)}
+.am .warn{margin-top:8px;padding:8px 10px;font-size:.74rem}
+/* màn sửa */
+.fl{display:block;font-size:.72rem;color:var(--ink3);font-weight:600;margin-top:14px}
+.fl input{display:block;width:100%;margin-top:6px;background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:11px 12px;font:500 16px -apple-system,system-ui,sans-serif}
+.f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.f2 .fl input{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.f2:has(.fl:only-child){grid-template-columns:1fr}
+.meta{font-size:.74rem;color:var(--ink3);margin-top:16px}
+.del{display:block;width:100%;margin-top:22px;height:50px;border-radius:14px;background:rgba(226,131,116,.1);border:1px solid rgba(226,131,116,.3);color:var(--bad);font-weight:600}
+@media (max-height:700px){.am .pad button{height:44px}.cgb{padding:5px 2px 4px}.am .amt{font-size:2.3rem;margin:2px 0}}
 </style></head>
 <body><div id="app"></div><div id="toast"></div>
 <script>/* jsQR 1.4.0 — Apache-2.0 — nhúng thẳng để chạy được cả khi mất mạng */
@@ -10246,12 +10318,12 @@ function readQR(s){
    THIẾU tham số url= → trang chỉ mở "mbbank://" trống, mất số TK và số tiền.
    CÓ url= → VietQR tạo "mbbank://applink?targetPage=QRPay&qrContent=<QR có sẵn số tiền>&signature=…",
    MB mở thẳng màn thanh toán đã điền. Không gửi bn= (tên người nhận): sai tên là VietQR trả lỗi "invalid accountName". */
-function mbLink(q,amt){
-  if(!q||!q.napas||!BANK[q.bin])return 'https://dl.vietqr.io/pay?app=mb';
+function mbLink(q,amt,app){app=app||'mb';
+  if(!q||!q.napas||!BANK[q.bin])return 'https://dl.vietqr.io/pay?app='+app;
   /* viết đúng như mẫu tài liệu VietQR: ba=SỐTK@mã — không mã hoá "@" */
   const acc=String(q.acc).replace(/[^0-9A-Za-z]/g,'');
   const back=encodeURIComponent(location.origin+location.pathname);
-  return 'https://dl.vietqr.io/pay?app=mb&ba='+acc+'@'+BANK[q.bin]+'&am='+Math.round(amt)+(q.memo?'&tn='+encodeURIComponent(q.memo):'')+'&url='+back;}
+  return 'https://dl.vietqr.io/pay?app='+app+'&ba='+acc+'@'+BANK[q.bin]+'&am='+Math.round(amt)+(q.memo?'&tn='+encodeURIComponent(q.memo):'')+'&url='+back;}
 
 /* ── trạng thái màn hình ── */
 let S={v:'home',q:null,amt:'',cat:null,name:'',tay:false};
@@ -10280,35 +10352,62 @@ function dayLab(d){if(d===today())return'Hôm nay';const y=new Date();y.setDate(
   const ys=y.getFullYear()+'-'+pad2(y.getMonth()+1)+'-'+pad2(y.getDate());if(d===ys)return'Hôm qua';
   const p=d.split('-');return p[2]+'/'+p[1];}
 
+/* tên loại ngắn cho lưới chọn và dòng phụ */
+const SH={an:'Ăn uống',giaitri:'Cà phê',dilai:'Đi lại',muasam:'Mua sắm',nha:'Nhà · HĐ',con:'Con cái',suckhoe:'Sức khoẻ',giadinh:'Gia đình',khac:'Khác',nap:'Của mình'};
+const catGrid=sel=>`<div class="cg">${CATS.map(c=>`<button class="cgb${sel===c[0]?' on':''}" data-c="${c[0]}"><i>${c[2]}</i>${SH[c[0]]||c[1]}</button>`).join('')}</div>`;
 function home(){
-  const s=stats(),now=new Date(),T=['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'][now.getDay()];
-  const L=D.tx.slice().sort((a,b)=>b.ts-a.ts).slice(0,40);let last='',list='';
-  L.forEach(x=>{if(x.d!==last){list+=`<div class="sec"><span class="lab">${dayLab(x.d)}</span></div>`;last=x.d;}
-    const c=cat(x.cat);list+=`<div class="it"><div class="ic">${c[2]}</div><div><div class="n">${esc(x.name||'Không tên')}</div>
-      <div class="s">${x.note?esc(x.note)+' · ':''}${c[1]}${x.via&&x.via!=='mb'?' · '+viaName(x.via):''}${x.mine!=null?' · trả dùm, mình '+short(x.mine)+(x.nhan?' · đã nhận lại':''):''}${x.src==='qr'?' · quét QR':' · ghi tay'}${x.synced?'':' · <span style="color:var(--accent)">chưa chép sang sổ</span>'}</div></div>
-      <div><div class="a">−${short(x.amt)}</div><button class="x" data-del="${x.id}">xoá</button></div></div>`;});
-  $('app').innerHTML=`<div class="wrap">
-    <div class="top"><div><b>${T}, ${now.getDate()}/${now.getMonth()+1}</b><br><span>Quét chi — sổ nằm trên máy này</span></div>
-      <button class="eye" id="eye">${D.hide?'🙈':'👁'}</button></div>
-    <button class="card tap" id="thang"><div class="lab">Tháng ${now.getMonth()+1} đã chi<span class="more">Xem thống kê ›</span></div>
-      <div class="big">${money(s.mo)}<small> đ</small></div><div class="mut" style="font-size:.8rem">${s.moN} khoản · không tính tiền chuyển cho chính mình</div>
-      <div class="row2"><div class="mini"><span class="lab">Hôm nay</span><b>${short(s.to)}</b></div>
-        <div class="mini"><span class="lab">Số khoản hôm nay</span><b>${s.toN}</b></div></div></button>
-    ${s.cho?`<button class="wait" id="cho"><span>👥 Chờ mọi người trả lại · ${s.choN} lần</span><b>${short(s.cho)} ›</b></button>`:''}
-    <button class="cta" id="scan">▣ Quét QR thanh toán</button>
-    <button class="cta ghost" id="tay">＋ Ghi tay — khoản không có QR</button>
+  const s=stats(),now=new Date();
+  const L=D.tx.slice().sort((a,b)=>b.ts-a.ts).slice(0,60),dayT={};
+  L.forEach(x=>{if(x.cat!=='nap')dayT[x.d]=(dayT[x.d]||0)+mineOf(x);});
+  let last='',list='';
+  L.forEach(x=>{if(x.d!==last){list+=`<div class="dh"><span>${dayLab(x.d)}</span><span>${dayT[x.d]?'−'+short(dayT[x.d]):''}</span></div>`;last=x.d;}
+    const c=cat(x.cat),sub=[SH[x.cat]||c[1],x.note?esc(x.note):'',x.via&&x.via!=='mb'?viaName(x.via):''].filter(Boolean).join(' · ');
+    list+=`<button class="row" data-ed="${x.id}"><div class="ic">${c[2]}</div><div class="mid"><div class="n">${esc(x.name||'Không tên')}</div><div class="s">${sub}</div></div>
+      <div class="r"><div class="a">−${short(x.amt)}</div>${x.mine!=null?`<div class="s">${x.nhan?'đã nhận lại':'mình '+short(x.mine)}</div>`:''}</div>${x.synced?'':'<i class="dot"></i>'}</button>`;});
+  const pills=(s.cho?`<button class="pill" id="cho">👥 Chờ trả lại <b>${short(s.cho)}</b></button>`:'')
+    +(s.moi?`<button class="pill${s.cu>=7?' warnp':''}" id="exp"><i class="dot"></i>${s.moi} chưa chép${s.cu>=7?' · '+s.cu+' ngày':''}</button>`:'');
+  $('app').innerHTML=`<div class="wrap hm">
+    <div class="hd"><div><div class="lab">Tháng ${now.getMonth()+1} đã chi</div>
+      <button class="tot" id="thang">${money(s.mo)}<small> đ</small><i>›</i></button>
+      <div class="sub">Hôm nay <b>${short(s.to)}</b> · ${s.toN} khoản</div></div>
+      <button class="eye" id="eye" aria-label="ẩn số">${D.hide?'🙈':'👁'}</button></div>
+    ${pills?`<div class="pills">${pills}</div>`:''}
     ${L.length?list:'<div class="empty">Chưa có khoản nào.<br>Lần tới trả tiền, bấm <b>Quét QR</b> thay vì mở thẳng MB.</div>'}
   </div>
-  ${s.moi?`<div class="bar"><button class="cta ghost${s.cu>=7?' nhac':''}" id="exp" style="margin:0 auto">${s.cu>=7
-    ?`⚠ ${s.cu} ngày chưa chép — chép ${s.moi} khoản sang máy tính`:`⇪ Chép ${s.moi} khoản mới sang sổ trên máy tính`}</button></div>`:''}`;
-  if($('cho'))$('cho').onclick=()=>{S={v:'cho'};render();};
-  $('thang').onclick=()=>{S={v:'tk',m:today().slice(0,7)};render();};
+  <div class="dock"><button class="dk2" id="tay">✎<span>Ghi tay</span></button><button class="dk1" id="scan">▣ Quét QR</button></div>`;
   $('eye').onclick=()=>{D.hide=!D.hide;save();render();};
   $('scan').onclick=()=>{S={v:'scan',q:null,amt:'',cat:null,name:'',tay:false};render();};
   $('tay').onclick=()=>{S={v:'amt',q:null,amt:'',cat:null,name:'',tay:true};render();};
-  if($('exp'))$('exp').onclick=()=>{S.v='exp';render();};
-  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const id=b.dataset.del,x=D.tx.find(t=>t.id===id);
-    D.tx=D.tx.filter(t=>t.id!==id);save();render();toast('đã xoá '+esc(x.name||''),()=>{D.tx.push(x);save();render();});});}
+  $('thang').onclick=()=>{S={v:'tk',m:today().slice(0,7)};render();};
+  if($('exp'))$('exp').onclick=()=>{S={v:'exp'};render();};
+  if($('cho'))$('cho').onclick=()=>{S={v:'cho'};render();};
+  document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{S={v:'ed',id:b.dataset.ed};render();});}
+
+/* ── sửa một khoản: tên, số tiền, loại, ghi chú, phần của mình; xoá nằm ở đây, không nằm cạnh số tiền ── */
+function edView(){
+  const x=D.tx.find(t=>t.id===S.id);if(!x){S={v:'home'};render();return;}
+  const p=x.d.split('-');
+  $('app').innerHTML=`<div class="sheet"><div class="wrap">
+    <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Sửa khoản</b><span style="width:64px"></span></div>
+    <label class="fl">Tên<input id="e_n" value="${esc(x.name)}"></label>
+    <div class="f2"><label class="fl">Số tiền đã chuyển<input id="e_a" inputmode="numeric" value="${Math.round(x.amt)}"></label>
+      ${x.mine!=null?`<label class="fl">Phần của mình<input id="e_m" inputmode="numeric" value="${Math.round(x.mine)}"></label>`:''}</div>
+    <label class="fl">Ghi chú<input id="e_t" value="${esc(x.note||'')}" placeholder="không bắt buộc"></label>
+    <div class="fl">Loại</div>${catGrid(x.cat)}
+    <div class="meta">${p[2]}/${p[1]}/${p[0]} · ${x.src==='qr'?'quét QR':'ghi tay'} · ${viaName(x.via||'mb')}${x.synced?' · đã chép sang máy tính':''}</div>
+    ${x.synced?'<div class="note">Khoản này đã chép sang máy tính — sửa ở đây không tự sửa bên đó.</div>':''}
+    <button class="del" id="e_x">Xoá khoản này</button>
+  </div></div>`;
+  const num=v=>+String(v).replace(/\D/g,'')||0;
+  const put=()=>{x.name=$('e_n').value.trim();const a=num($('e_a').value);if(a>0)x.amt=a;
+    if($('e_m')){const m=num($('e_m').value);x.mine=Math.min(m,x.amt);}
+    const t=$('e_t').value.trim();if(t)x.note=t;else delete x.note;save();};
+  ['e_n','e_a','e_m','e_t'].forEach(id=>{if($(id))$(id).onchange=put;});
+  document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{x.cat=b.dataset.c;save();
+    document.querySelectorAll('[data-c]').forEach(y=>y.classList.toggle('on',y===b));});
+  $('bk').onclick=()=>{put();S={v:'home'};render();};
+  $('e_x').onclick=()=>{D.tx=D.tx.filter(t=>t.id!==x.id);save();S={v:'home'};render();
+    toast('đã xoá '+esc(x.name||''),()=>{D.tx.push(x);save();render();});};}
 
 /* ── quét: camera trực tiếp; không mở được camera thì chụp ảnh rồi đọc ── */
 let stream=null,raf=null;
@@ -10338,30 +10437,28 @@ function scan(){
   .catch(()=>{$('hint').textContent='Chưa được phép dùng camera — bấm "Chọn ảnh QR" hoặc cho phép camera trong Cài đặt';});}
 
 /* ── nhập tiền ── */
-function goLabel(){return S.tay||S.via!=='mb'?'Ghi vào sổ':'Chuyển qua MB';}
+function goLabel(){return S.tay?'Ghi vào sổ':'Chuyển qua '+viaName(S.via);}
+function hintTxt(){return S.tay?'Chỉ ghi sổ, không mở ngân hàng.':S.via==='mb'?'Trong MB, nhìn <b>tên người nhận</b> trước khi xác nhận.'
+  :'Đang thử với '+viaName(S.via)+' — chưa điền sẵn thì quét lại QR trong app đó.';}
 /* phần của mình khi trả dùm: không nhập → coi như cả khoản là của mình */
 const mineOf=x=>x.mine!=null?x.mine:x.amt;
 function amtView(){
   if(!S.via)S.via=lastVia();if(!S.tgt)S.tgt='amt';
   const q=S.q,v=+S.amt||0,ok=v>0&&S.cat;
-  const nhan=q&&q.napas?`${esc(BANKNAME[q.bin]||q.bin)} · ${esc(q.acc)}`:'';
-  const khongNapas=q&&!q.napas;
-  $('app').innerHTML=`<div class="sheet"><div class="wrap" style="padding-bottom:30px">
-    <button class="back" id="bk">‹ Quay lại</button>
-    <div class="who"><input id="nm" value="${esc(S.name)}" placeholder="${S.tay?'Chi cho ai / việc gì':'Tên quán — gõ một lần, lần sau tự nhớ'}"><div class="acc">${nhan}</div></div>
-    <button class="amt${S.dum&&S.tgt==='amt'?' tgt':''}" id="amtT"></button>
-    <div class="dum">${S.dum?`<button id="mineT" class="${S.tgt==='mine'?'tgt':''}"></button><button id="dumX" class="lk">bỏ trả dùm</button>`
-      :`<button id="dumOn" class="lk">👥 Trả dùm người khác?</button>`}</div>
-    <div class="chips">${CATS.map(c=>`<button class="chip${S.cat===c[0]?' on':''}" data-c="${c[0]}">${c[2]} ${c[1].split(' — ')[0]}</button>`).join('')}</div>
-    ${khongNapas?'<div class="warn">QR này là QR thanh toán của cửa hàng, không phải QR chuyển khoản — MB sẽ mở nhưng không điền sẵn được. Quét lại trong MB. Khoản vẫn được ghi vào sổ.</div>':''}
-    <div class="via"><span class="lab">Trả bằng</span>${VIA.map(v=>`<button data-via="${v[0]}" class="${S.via===v[0]?'on':''}">${v[1]}</button>`).join('')}</div>
-    <input id="nt" class="nt" value="${esc(S.note||'')}" placeholder="＋ Ghi chú (không bắt buộc)">
-    <div class="pad">${['1','2','3','4','5','6','7','8','9','000','0','⌫'].map(k=>`<button data-k="${k}">${k}</button>`).join('')}</div>
-    <button class="cta" id="go" ${ok?'':'style="opacity:.4"'}>${goLabel()}</button>
-    <div id="mbn" style="${!S.tay&&S.via!=='mb'?'display:none':''}"><div class="note">${S.tay?'Ghi tay chỉ ghi sổ, không mở ngân hàng — dùng cho khoản đã chuyển xong hoặc tự trừ.'
-      :'Bấm là khoản được ghi ngay, rồi MB mở với người nhận và số tiền điền sẵn. Không chuyển thì bấm "Huỷ" ở thông báo khi quay lại.'}</div>
-    ${S.tay?'':'<div class="warn" style="text-align:center">Trong MB, <b>nhìn tên người nhận</b> trước khi xác nhận — ngân hàng tự tra tên đó, không ai giả được.</div>'}</div>
-    <div id="othn" class="note" style="${!S.tay&&S.via!=='mb'?'':'display:none'}">Chỉ ghi vào sổ. Mở app ${esc(viaName(S.via))} và quét lại mã QR trong đó để trả.</div>
+  const nhan=q&&q.napas?`${esc(BANKNAME[q.bin]||q.bin)} · ${esc(q.acc)}`:S.tay?'Ghi tay':'';
+  const khongNapas=q&&!q.napas,showNt=S.ntOn||S.note;
+  $('app').innerHTML=`<div class="sheet"><div class="wrap am">
+    <div class="bar1"><button class="back" id="bk">‹</button>
+      <div class="who"><input id="nm" value="${esc(S.name)}" placeholder="${S.tay?'Chi cho ai / việc gì':'Tên quán'}"><div class="acc">${nhan}</div></div><span style="width:32px"></span></div>
+    ${S.dum?`<div class="split"><button id="amtT" class="sp"></button><button id="mineT" class="sp"></button></div><div class="waitl" id="wl"></div>`
+      :`<button class="amt" id="amtT"></button>`}
+    <div class="opts"><div class="seg">${VIA.map(v=>`<button data-via="${v[0]}" class="${S.via===v[0]?'on':''}">${v[1]}</button>`).join('')}</div>
+      <button class="op${S.dum?' on':''}" id="dumT">👥 Trả dùm</button><button class="op${showNt?' on':''}" id="ntT" aria-label="ghi chú">✎</button></div>
+    <input id="nt" class="nt" value="${esc(S.note||'')}" placeholder="Ghi chú" style="${showNt?'':'display:none'}">
+    ${catGrid(S.cat)}
+    ${khongNapas?'<div class="warn">QR cửa hàng — ngân hàng mở nhưng không điền sẵn. Quét lại trong app. Khoản vẫn được ghi.</div>':''}
+    <div class="padw"><div class="pad">${['1','2','3','4','5','6','7','8','9','000','0','⌫'].map(k=>`<button data-k="${k}">${k}</button>`).join('')}</div>
+      <button class="cta" id="go">${goLabel()}</button><div class="hint" id="hint">${hintTxt()}</div></div>
   </div></div>`;
   $('bk').onclick=()=>{S.v='home';render();};
   $('nm').oninput=e=>{S.name=e.target.value;};
@@ -10369,20 +10466,18 @@ function amtView(){
   /* bấm số / chọn loại: sửa tại chỗ, không vẽ lại cả màn — vẽ lại làm trang nhảy về đầu */
   const f=n=>n?n.toLocaleString('vi-VN'):'0';
   const sync=()=>{const n=+S.amt||0,m=+S.mine||0;
-    $('amtT').innerHTML=(S.dum?'<span class="cap">Tổng chuyển</span>':'')+f(n)+'<small> đ</small>';
-    if(S.dum){$('mineT').innerHTML=`Phần của mình <b>${f(m)} đ</b>`+(n>m?` · chờ nhận lại <b>${f(n-m)}</b>`:'');
-      $('amtT').classList.toggle('tgt',S.tgt==='amt');$('mineT').classList.toggle('tgt',S.tgt==='mine');}
-    $('go').style.opacity=n>0&&S.cat?'':'.4';};
+    if(S.dum){$('amtT').innerHTML=`<span class="cap">Tổng chuyển</span>${f(n)}`;$('mineT').innerHTML=`<span class="cap">Phần của mình</span>${f(m)}`;
+      $('amtT').classList.toggle('tgt',S.tgt==='amt');$('mineT').classList.toggle('tgt',S.tgt==='mine');
+      $('wl').innerHTML=n>m?`Chờ mọi người trả lại <b>${f(n-m)} đ</b>`:'&nbsp;';}
+    else $('amtT').innerHTML=f(n)+'<small> đ</small>';
+    $('go').classList.toggle('off',!(n>0&&S.cat));};
   sync();
-  const dumSet=on=>{S.dum=on;S.tgt=on?'mine':'amt';if(!on)S.mine='';render();};
-  if($('dumOn'))$('dumOn').onclick=()=>dumSet(true);
-  if($('dumX'))$('dumX').onclick=()=>dumSet(false);
+  $('dumT').onclick=()=>{S.dum=!S.dum;S.tgt=S.dum?'mine':'amt';if(!S.dum)S.mine='';render();};
+  $('ntT').onclick=()=>{S.ntOn=true;$('nt').style.display='';$('ntT').classList.add('on');$('nt').focus();};
   $('amtT').onclick=()=>{if(S.dum){S.tgt='amt';sync();}};
   if($('mineT'))$('mineT').onclick=()=>{S.tgt='mine';sync();};
   document.querySelectorAll('[data-via]').forEach(b=>b.onclick=()=>{S.via=b.dataset.via;
-    document.querySelectorAll('[data-via]').forEach(x=>x.classList.toggle('on',x===b));$('go').textContent=goLabel();
-    const oth=!S.tay&&S.via!=='mb';$('mbn').style.display=oth?'none':'';$('othn').style.display=oth?'':'none';
-    $('othn').textContent='Chỉ ghi vào sổ. Mở app '+viaName(S.via)+' và quét lại mã QR trong đó để trả.';});
+    document.querySelectorAll('[data-via]').forEach(x=>x.classList.toggle('on',x===b));$('go').textContent=goLabel();$('hint').innerHTML=hintTxt();});
   document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{S.cat=b.dataset.c;
     document.querySelectorAll('[data-c]').forEach(x=>x.classList.toggle('on',x===b));sync();});
   document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const k=b.dataset.k,key=S.tgt==='mine'?'mine':'amt';let t=String(S[key]||'');
@@ -10400,8 +10495,8 @@ function amtView(){
     D.tx.push(x);save();
     const undo=()=>{D.tx=D.tx.filter(t=>t.id!==x.id);save();render();};
     S={v:'home'};render();
-    if(x.src==='tay'||x.via!=='mb'){toast('đã ghi '+short(x.amt)+' · '+esc(x.name),undo);return;}
-    pendingUndo={x,undo};location.href=mbLink(q,x.amt);};}
+    if(x.src==='tay'){toast('đã ghi '+short(x.amt)+' · '+esc(x.name),undo);return;}
+    pendingUndo={x,undo};location.href=mbLink(q,x.amt,x.via);};}
 /* bấm nhanh liên tiếp (000, ⌫): iOS hiểu là chạm đôi để phóng to — chặn và tự bấm */
 let lastTap=0;
 document.addEventListener('touchend',e=>{const b=e.target.closest('button'),n=Date.now();
@@ -10492,7 +10587,7 @@ function choView(){
     toast('đã nhận '+short(x.amt-x.mine)+' · '+esc(x.name),()=>{x.nhan=false;save();render();});});}
 
 function render(){if(S.v!=='scan')stopCam();
-  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else home();}
+  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else home();}
 /* ĐƯỜNG TẮT: mở link có #quet → vào thẳng camera; #tay → vào thẳng ghi tay.
    Dùng cho Phím tắt iPhone (chạm 2 lần mặt lưng / nút Tác vụ / Trung tâm điều khiển). Xoá hash ngay
    để tải lại trang không bị bật camera lần nữa. */
