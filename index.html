@@ -50,6 +50,22 @@ button{font-family:inherit;cursor:pointer;border:0}
 .empty{padding:26px 8px;text-align:center;color:var(--ink3);font-size:.85rem;line-height:1.6}
 .bar{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 30%)}
 .bar .cta{margin:0 auto;max-width:520px}
+.bar .cta.nhac{border-color:var(--accent);color:var(--accent)}
+.card.tap{display:block;width:100%;text-align:left;color:inherit;font:inherit}
+.more{float:right;font:600 .7rem -apple-system,system-ui,sans-serif;color:var(--accent);letter-spacing:0;text-transform:none}
+.via{display:flex;gap:6px;justify-content:center;margin:10px 0 0;align-items:center}
+.via .lab{margin-right:4px}
+.via button{background:none;border:1px solid var(--line);color:var(--ink3);padding:6px 11px;border-radius:99px;font-size:.76rem;font-weight:600}
+.via button.on{border-color:var(--ink2);color:var(--ink);background:var(--panel2)}
+.mnav{display:flex;justify-content:space-between;align-items:center;margin:8px 0 12px}
+.mnav button{background:var(--panel);border:1px solid var(--line);color:var(--ink);width:40px;height:40px;border-radius:12px;font-size:1.1rem}
+.mnav button:disabled{opacity:.25}
+.cmp{font-size:.8rem;margin-top:4px}
+.brow{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:.86rem}
+.brow .t{display:flex;justify-content:space-between;gap:8px}.brow .t span{color:var(--ink3);font-size:.74rem}
+.brow .bt{height:5px;border-radius:3px;background:var(--panel2);margin-top:5px;overflow:hidden}
+.brow .bt i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.brow .v{font:600 .86rem ui-monospace,"SF Mono",Menlo,monospace;text-align:right;min-width:62px}
 /* màn quét */
 .cam{position:fixed;inset:0;background:#000;z-index:20;display:flex;flex-direction:column}
 .cam video{flex:1;width:100%;object-fit:cover}
@@ -67,6 +83,18 @@ button{font-family:inherit;cursor:pointer;border:0}
 .who .acc{font-size:.74rem;color:var(--ink3)}
 .amt{text-align:center;font:700 2.5rem ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:-.03em;margin:8px 0 2px}
 .amt small{font-size:.45em;color:var(--ink3)}
+button.amt{display:block;width:100%;background:none;color:var(--ink);border-radius:14px;padding:4px 0;border:1px solid transparent}
+.amt .cap{display:block;font:600 .62rem ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+.tgt{border-color:var(--accent)!important}
+.dum{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap;margin:2px 0 4px}
+.dum #mineT{background:var(--panel);border:1px solid var(--line);color:var(--ink2);padding:9px 12px;border-radius:12px;font-size:.84rem}
+.dum #mineT b{color:var(--ink);font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.lk{background:none;color:var(--accent);font-size:.8rem;font-weight:600;padding:6px}
+.nt{display:block;width:100%;margin-top:10px;background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:10px 12px;font:500 16px -apple-system,system-ui,sans-serif}
+.nt::placeholder{color:var(--ink3)}
+.wait{display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:10px;background:rgba(224,164,78,.1);border:1px solid rgba(224,164,78,.35);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:.86rem}
+.wait b{font-family:ui-monospace,"SF Mono",Menlo,monospace;color:var(--accent)}
+.ok{background:var(--panel2);color:var(--good);border:1px solid var(--line);padding:6px 10px;border-radius:10px;font-size:.76rem;font-weight:600}
 .chips{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;margin:12px 0 4px}
 .chip{background:var(--panel);border:1px solid var(--line);color:var(--ink2);padding:8px 12px;border-radius:99px;font-size:.8rem;font-weight:600}
 .chip.on{background:var(--accent);border-color:var(--accent);color:#0B100E}
@@ -10227,6 +10255,10 @@ function mbLink(q,amt){
 
 /* ── trạng thái màn hình ── */
 let S={v:'home',q:null,amt:'',cat:null,name:'',tay:false};
+/* trả bằng gì: MB là chính, Techcom/Momo chỉ ghi sổ (app đó tự mở, quét lại trong đó) */
+const VIA=[['mb','MB'],['tcb','Techcom'],['momo','Momo']];
+const viaName=k=>(VIA.find(v=>v[0]===k)||VIA[0])[1];
+const lastVia=()=>D.via||'mb';
 const $=id=>document.getElementById(id);
 let toastT=null;
 function toast(msg,undo){const t=$('toast');t.innerHTML=`<div class="toast"><span>${msg}</span>${undo?'<button id="undo">Huỷ</button>':''}</div>`;
@@ -10235,8 +10267,15 @@ function toast(msg,undo){const t=$('toast');t.innerHTML=`<div class="toast"><spa
 function stats(){const m=today().slice(0,7),td=today();
   const out=D.tx.filter(x=>x.cat!=='nap');
   const mo=out.filter(x=>x.d.slice(0,7)===m),to=out.filter(x=>x.d===td);
-  return{mo:mo.reduce((a,x)=>a+x.amt,0),moN:mo.length,to:to.reduce((a,x)=>a+x.amt,0),toN:to.length,
-    moi:D.tx.filter(x=>!x.synced).length};}
+  const cho=D.tx.filter(x=>x.mine!=null&&!x.nhan);
+  return{mo:mo.reduce((a,x)=>a+mineOf(x),0),moN:mo.length,to:to.reduce((a,x)=>a+mineOf(x),0),toN:to.length,
+    cho:cho.reduce((a,x)=>a+x.amt-x.mine,0),choN:cho.length,
+    moi:D.tx.filter(x=>!x.synced).length,cu:unsyncedDays()};}
+/* số ngày khoản chưa chép cũ nhất đã nằm trên máy — Safari có thể xoá dữ liệu trang không mở 7 ngày,
+   nên sổ trên máy tính là bản sao lưu duy nhất */
+function unsyncedDays(){const u=D.tx.filter(x=>!x.synced);if(!u.length)return 0;
+  return Math.floor((Date.now()-Math.min(...u.map(x=>x.ts)))/864e5);}
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch(e){}
 function dayLab(d){if(d===today())return'Hôm nay';const y=new Date();y.setDate(y.getDate()-1);
   const ys=y.getFullYear()+'-'+pad2(y.getMonth()+1)+'-'+pad2(y.getDate());if(d===ys)return'Hôm qua';
   const p=d.split('-');return p[2]+'/'+p[1];}
@@ -10246,20 +10285,24 @@ function home(){
   const L=D.tx.slice().sort((a,b)=>b.ts-a.ts).slice(0,40);let last='',list='';
   L.forEach(x=>{if(x.d!==last){list+=`<div class="sec"><span class="lab">${dayLab(x.d)}</span></div>`;last=x.d;}
     const c=cat(x.cat);list+=`<div class="it"><div class="ic">${c[2]}</div><div><div class="n">${esc(x.name||'Không tên')}</div>
-      <div class="s">${c[1]}${x.src==='qr'?' · quét QR':' · ghi tay'}${x.synced?'':' · <span style="color:var(--accent)">chưa chép sang sổ</span>'}</div></div>
+      <div class="s">${x.note?esc(x.note)+' · ':''}${c[1]}${x.via&&x.via!=='mb'?' · '+viaName(x.via):''}${x.mine!=null?' · trả dùm, mình '+short(x.mine)+(x.nhan?' · đã nhận lại':''):''}${x.src==='qr'?' · quét QR':' · ghi tay'}${x.synced?'':' · <span style="color:var(--accent)">chưa chép sang sổ</span>'}</div></div>
       <div><div class="a">−${short(x.amt)}</div><button class="x" data-del="${x.id}">xoá</button></div></div>`;});
   $('app').innerHTML=`<div class="wrap">
     <div class="top"><div><b>${T}, ${now.getDate()}/${now.getMonth()+1}</b><br><span>Quét chi — sổ nằm trên máy này</span></div>
       <button class="eye" id="eye">${D.hide?'🙈':'👁'}</button></div>
-    <div class="card"><div class="lab">Tháng ${now.getMonth()+1} đã chi</div>
+    <button class="card tap" id="thang"><div class="lab">Tháng ${now.getMonth()+1} đã chi<span class="more">Xem thống kê ›</span></div>
       <div class="big">${money(s.mo)}<small> đ</small></div><div class="mut" style="font-size:.8rem">${s.moN} khoản · không tính tiền chuyển cho chính mình</div>
       <div class="row2"><div class="mini"><span class="lab">Hôm nay</span><b>${short(s.to)}</b></div>
-        <div class="mini"><span class="lab">Số khoản hôm nay</span><b>${s.toN}</b></div></div></div>
+        <div class="mini"><span class="lab">Số khoản hôm nay</span><b>${s.toN}</b></div></div></button>
+    ${s.cho?`<button class="wait" id="cho"><span>👥 Chờ mọi người trả lại · ${s.choN} lần</span><b>${short(s.cho)} ›</b></button>`:''}
     <button class="cta" id="scan">▣ Quét QR thanh toán</button>
     <button class="cta ghost" id="tay">＋ Ghi tay — khoản không có QR</button>
     ${L.length?list:'<div class="empty">Chưa có khoản nào.<br>Lần tới trả tiền, bấm <b>Quét QR</b> thay vì mở thẳng MB.</div>'}
   </div>
-  ${s.moi?`<div class="bar"><button class="cta ghost" id="exp" style="margin:0 auto">⇪ Chép ${s.moi} khoản mới sang sổ trên máy tính</button></div>`:''}`;
+  ${s.moi?`<div class="bar"><button class="cta ghost${s.cu>=7?' nhac':''}" id="exp" style="margin:0 auto">${s.cu>=7
+    ?`⚠ ${s.cu} ngày chưa chép — chép ${s.moi} khoản sang máy tính`:`⇪ Chép ${s.moi} khoản mới sang sổ trên máy tính`}</button></div>`:''}`;
+  if($('cho'))$('cho').onclick=()=>{S={v:'cho'};render();};
+  $('thang').onclick=()=>{S={v:'tk',m:today().slice(0,7)};render();};
   $('eye').onclick=()=>{D.hide=!D.hide;save();render();};
   $('scan').onclick=()=>{S={v:'scan',q:null,amt:'',cat:null,name:'',tay:false};render();};
   $('tay').onclick=()=>{S={v:'amt',q:null,amt:'',cat:null,name:'',tay:true};render();};
@@ -10295,40 +10338,69 @@ function scan(){
   .catch(()=>{$('hint').textContent='Chưa được phép dùng camera — bấm "Chọn ảnh QR" hoặc cho phép camera trong Cài đặt';});}
 
 /* ── nhập tiền ── */
+function goLabel(){return S.tay||S.via!=='mb'?'Ghi vào sổ':'Chuyển qua MB';}
+/* phần của mình khi trả dùm: không nhập → coi như cả khoản là của mình */
+const mineOf=x=>x.mine!=null?x.mine:x.amt;
 function amtView(){
+  if(!S.via)S.via=lastVia();if(!S.tgt)S.tgt='amt';
   const q=S.q,v=+S.amt||0,ok=v>0&&S.cat;
   const nhan=q&&q.napas?`${esc(BANKNAME[q.bin]||q.bin)} · ${esc(q.acc)}`:'';
   const khongNapas=q&&!q.napas;
   $('app').innerHTML=`<div class="sheet"><div class="wrap" style="padding-bottom:30px">
     <button class="back" id="bk">‹ Quay lại</button>
     <div class="who"><input id="nm" value="${esc(S.name)}" placeholder="${S.tay?'Chi cho ai / việc gì':'Tên quán — gõ một lần, lần sau tự nhớ'}"><div class="acc">${nhan}</div></div>
-    <div class="amt">${v?v.toLocaleString('vi-VN'):'0'}<small> đ</small></div>
+    <button class="amt${S.dum&&S.tgt==='amt'?' tgt':''}" id="amtT"></button>
+    <div class="dum">${S.dum?`<button id="mineT" class="${S.tgt==='mine'?'tgt':''}"></button><button id="dumX" class="lk">bỏ trả dùm</button>`
+      :`<button id="dumOn" class="lk">👥 Trả dùm người khác?</button>`}</div>
     <div class="chips">${CATS.map(c=>`<button class="chip${S.cat===c[0]?' on':''}" data-c="${c[0]}">${c[2]} ${c[1].split(' — ')[0]}</button>`).join('')}</div>
     ${khongNapas?'<div class="warn">QR này là QR thanh toán của cửa hàng, không phải QR chuyển khoản — MB sẽ mở nhưng không điền sẵn được. Quét lại trong MB. Khoản vẫn được ghi vào sổ.</div>':''}
+    <div class="via"><span class="lab">Trả bằng</span>${VIA.map(v=>`<button data-via="${v[0]}" class="${S.via===v[0]?'on':''}">${v[1]}</button>`).join('')}</div>
+    <input id="nt" class="nt" value="${esc(S.note||'')}" placeholder="＋ Ghi chú (không bắt buộc)">
     <div class="pad">${['1','2','3','4','5','6','7','8','9','000','0','⌫'].map(k=>`<button data-k="${k}">${k}</button>`).join('')}</div>
-    <button class="cta" id="go" ${ok?'':'style="opacity:.4"'}>${S.tay?'Ghi vào sổ':'Chuyển qua MB'}</button>
-    <div class="note">${S.tay?'Ghi tay chỉ ghi sổ, không mở ngân hàng — dùng cho khoản đã chuyển xong hoặc tự trừ.'
+    <button class="cta" id="go" ${ok?'':'style="opacity:.4"'}>${goLabel()}</button>
+    <div id="mbn" style="${!S.tay&&S.via!=='mb'?'display:none':''}"><div class="note">${S.tay?'Ghi tay chỉ ghi sổ, không mở ngân hàng — dùng cho khoản đã chuyển xong hoặc tự trừ.'
       :'Bấm là khoản được ghi ngay, rồi MB mở với người nhận và số tiền điền sẵn. Không chuyển thì bấm "Huỷ" ở thông báo khi quay lại.'}</div>
-    ${S.tay?'':'<div class="warn" style="text-align:center">Trong MB, <b>nhìn tên người nhận</b> trước khi xác nhận — ngân hàng tự tra tên đó, không ai giả được.</div>'}
+    ${S.tay?'':'<div class="warn" style="text-align:center">Trong MB, <b>nhìn tên người nhận</b> trước khi xác nhận — ngân hàng tự tra tên đó, không ai giả được.</div>'}</div>
+    <div id="othn" class="note" style="${!S.tay&&S.via!=='mb'?'':'display:none'}">Chỉ ghi vào sổ. Mở app ${esc(viaName(S.via))} và quét lại mã QR trong đó để trả.</div>
   </div></div>`;
   $('bk').onclick=()=>{S.v='home';render();};
   $('nm').oninput=e=>{S.name=e.target.value;};
+  $('nt').oninput=e=>{S.note=e.target.value;};
   /* bấm số / chọn loại: sửa tại chỗ, không vẽ lại cả màn — vẽ lại làm trang nhảy về đầu */
-  const sync=()=>{const n=+S.amt||0;document.querySelector('.amt').innerHTML=(n?n.toLocaleString('vi-VN'):'0')+'<small> đ</small>';
+  const f=n=>n?n.toLocaleString('vi-VN'):'0';
+  const sync=()=>{const n=+S.amt||0,m=+S.mine||0;
+    $('amtT').innerHTML=(S.dum?'<span class="cap">Tổng chuyển</span>':'')+f(n)+'<small> đ</small>';
+    if(S.dum){$('mineT').innerHTML=`Phần của mình <b>${f(m)} đ</b>`+(n>m?` · chờ nhận lại <b>${f(n-m)}</b>`:'');
+      $('amtT').classList.toggle('tgt',S.tgt==='amt');$('mineT').classList.toggle('tgt',S.tgt==='mine');}
     $('go').style.opacity=n>0&&S.cat?'':'.4';};
+  sync();
+  const dumSet=on=>{S.dum=on;S.tgt=on?'mine':'amt';if(!on)S.mine='';render();};
+  if($('dumOn'))$('dumOn').onclick=()=>dumSet(true);
+  if($('dumX'))$('dumX').onclick=()=>dumSet(false);
+  $('amtT').onclick=()=>{if(S.dum){S.tgt='amt';sync();}};
+  if($('mineT'))$('mineT').onclick=()=>{S.tgt='mine';sync();};
+  document.querySelectorAll('[data-via]').forEach(b=>b.onclick=()=>{S.via=b.dataset.via;
+    document.querySelectorAll('[data-via]').forEach(x=>x.classList.toggle('on',x===b));$('go').textContent=goLabel();
+    const oth=!S.tay&&S.via!=='mb';$('mbn').style.display=oth?'none':'';$('othn').style.display=oth?'':'none';
+    $('othn').textContent='Chỉ ghi vào sổ. Mở app '+viaName(S.via)+' và quét lại mã QR trong đó để trả.';});
   document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{S.cat=b.dataset.c;
     document.querySelectorAll('[data-c]').forEach(x=>x.classList.toggle('on',x===b));sync();});
-  document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const k=b.dataset.k;
-    if(k==='⌫')S.amt=S.amt.slice(0,-1);else if(S.amt.length<12)S.amt=(S.amt+k).replace(/^0+/,'');sync();});
+  document.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{const k=b.dataset.k,key=S.tgt==='mine'?'mine':'amt';let t=String(S[key]||'');
+    if(k==='⌫')t=t.slice(0,-1);else if(t.length<12)t=(t+k).replace(/^0+/,'');S[key]=t;sync();});
   $('go').onclick=()=>{
-    if(!(+S.amt>0)){toast('chưa gõ số tiền');return;}
+    const amt=+S.amt||0,mine=+S.mine||0;
+    if(!(amt>0)){toast('chưa gõ số tiền');return;}
     if(!S.cat){toast('chọn một loại');return;}
-    const x={id:'p'+Date.now(),ts:Date.now(),d:today(),amt:+S.amt,name:(S.name||'').trim()||(q&&q.acc)||'',cat:S.cat,src:S.tay?'tay':'qr',synced:false};
+    if(S.dum&&mine>amt){toast('phần của mình lớn hơn tổng chuyển');return;}
+    const x={id:'p'+Date.now(),ts:Date.now(),d:today(),amt,name:(S.name||'').trim()||(q&&q.acc)||'',cat:S.cat,src:S.tay?'tay':'qr',via:S.via||'mb',synced:false};
+    const nt=(S.note||'').trim();if(nt)x.note=nt;
+    if(S.dum&&mine<amt){x.mine=mine;x.nhan=false;}
+    D.via=x.via;
     if(q&&q.napas){x.bin=q.bin;x.acc=q.acc;D.who[q.bin+'|'+q.acc]={name:x.name,cat:S.cat};}
     D.tx.push(x);save();
     const undo=()=>{D.tx=D.tx.filter(t=>t.id!==x.id);save();render();};
     S={v:'home'};render();
-    if(S.tay||x.src==='tay'){toast('đã ghi '+short(x.amt)+' · '+esc(x.name),undo);return;}
+    if(x.src==='tay'||x.via!=='mb'){toast('đã ghi '+short(x.amt)+' · '+esc(x.name),undo);return;}
     pendingUndo={x,undo};location.href=mbLink(q,x.amt);};}
 /* bấm nhanh liên tiếp (000, ⌫): iOS hiểu là chạm đôi để phóng to — chặn và tự bấm */
 let lastTap=0;
@@ -10345,7 +10417,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&pendingUn
 function expView(){
   const L=D.tx.filter(x=>!x.synced).sort((a,b)=>a.ts-b.ts);
   const txt=['Ngày\tNội dung\tSố tiền\tLoại',...L.map(x=>{const p=x.d.split('-');
-    return p[2]+'/'+p[1]+'/'+p[0]+'\t'+(x.name||'').replace(/\t/g,' ')+'\t-'+Math.round(x.amt)+'\t'+cat(x.cat)[1];})].join('\n');
+    return p[2]+'/'+p[1]+'/'+p[0]+'\t'+(x.name||'').replace(/\t/g,' ')+(x.note?' — '+x.note.replace(/\t/g,' '):'')+(x.via&&x.via!=='mb'?' ('+viaName(x.via)+')':'')+(x.mine!=null?' [mình '+Math.round(x.mine)+']':'')+'\t-'+Math.round(x.amt)+'\t'+cat(x.cat)[1];})].join('\n');
   $('app').innerHTML=`<div class="sheet"><div class="wrap">
     <button class="back" id="bk">‹ Quay lại</button>
     <div class="lab" style="margin:10px 0 8px">${L.length} khoản chưa có trong sổ</div>
@@ -10358,8 +10430,69 @@ function expView(){
   $('cp').onclick=async()=>{try{await navigator.clipboard.writeText(txt);}catch(e){$('tx').select();document.execCommand('copy');}toast('đã chép');};
   $('done').onclick=()=>{L.forEach(x=>x.synced=true);save();S.v='home';render();toast('đã đánh dấu');};}
 
+/* ── thống kê tháng: tổng, so với cùng kỳ tháng trước, theo loại, chi cho ai nhiều nhất ── */
+function mAdd(m,k){const [y,mo]=m.split('-').map(Number),d=new Date(y,mo-1+k,1);return d.getFullYear()+'-'+pad2(d.getMonth()+1);}
+function tkView(){
+  const m=S.m,cur=today().slice(0,7),isCur=m===cur,first=D.tx.length?D.tx.map(x=>x.d).sort()[0].slice(0,7):cur;
+  const out=D.tx.filter(x=>x.cat!=='nap'),L=out.filter(x=>x.d.slice(0,7)===m),tot=L.reduce((a,x)=>a+mineOf(x),0);
+  /* tháng đang chạy: so với tháng trước tính tới cùng ngày, cho công bằng */
+  const dd=isCur?today().slice(8):'31',pm=mAdd(m,-1);
+  const P=out.filter(x=>x.d.slice(0,7)===pm&&x.d.slice(8)<=dd),ptot=P.reduce((a,x)=>a+mineOf(x),0);
+  const days=isCur?+today().slice(8):new Date(+m.slice(0,4),+m.slice(5),0).getDate();
+  let cmp='';if(ptot>0){const r=(tot-ptot)/ptot*100,up=r>=0;
+    cmp=`<div class="cmp" style="color:var(--${up?'bad':'good'})">${up?'▲':'▼'} ${Math.abs(r).toFixed(0)}% so với tháng ${+pm.slice(5)}${isCur?' cùng kỳ':''} (${short(ptot)})</div>`;}
+  else if(P.length===0&&first<=pm)cmp='<div class="cmp dim">Tháng trước chưa có khoản nào để so.</div>';
+  const by={};L.forEach(x=>{by[x.cat]=(by[x.cat]||0)+mineOf(x);});
+  const cats=Object.entries(by).sort((a,b)=>b[1]-a[1]),mx=cats.length?cats[0][1]:1;
+  const pb={};P.forEach(x=>{pb[x.cat]=(pb[x.cat]||0)+mineOf(x);});
+  const catRows=cats.map(([k,v])=>{const c=cat(k),n=L.filter(x=>x.cat===k).length,pv=pb[k]||0;
+    const d=pv?` · ${v>=pv?'▲':'▼'}${Math.abs((v-pv)/pv*100).toFixed(0)}%`:'';
+    return `<div class="brow"><div>${c[2]}</div><div><div class="t">${c[1].split(' — ')[0]}<span>${n} khoản · ${tot?Math.round(v/tot*100):0}%${d}</span></div>
+      <div class="bt"><i style="width:${Math.max(3,v/mx*100)}%"></i></div></div><div class="v">${short(v)}</div></div>`;}).join('');
+  const who={};L.forEach(x=>{const k=(x.name||'Không tên').trim().toLowerCase();who[k]=who[k]||{n:x.name||'Không tên',v:0,c:0,cat:x.cat};who[k].v+=mineOf(x);who[k].c++;});
+  const top=Object.values(who).sort((a,b)=>b.v-a.v).slice(0,5);
+  const topRows=top.map(w=>`<div class="brow"><div>${cat(w.cat)[2]}</div><div><div class="t">${esc(w.n)}<span>${w.c} lần</span></div></div><div class="v">${short(w.v)}</div></div>`).join('');
+  const big=L.slice().sort((a,b)=>mineOf(b)-mineOf(a)).slice(0,3);
+  const bigRows=big.map(x=>{const p=x.d.split('-');return `<div class="brow"><div>${cat(x.cat)[2]}</div><div><div class="t">${esc(x.name||'Không tên')}<span>${p[2]}/${p[1]}</span></div></div><div class="v">${short(mineOf(x))}</div></div>`;}).join('');
+  const nap=D.tx.filter(x=>x.cat==='nap'&&x.d.slice(0,7)===m).reduce((a,x)=>a+x.amt,0);
+  $('app').innerHTML=`<div class="sheet"><div class="wrap">
+    <button class="back" id="bk">‹ Quay lại</button>
+    <div class="mnav"><button id="pv" ${m<=first?'disabled':''}>‹</button><b>Tháng ${+m.slice(5)}/${m.slice(0,4)}</b><button id="nx" ${isCur?'disabled':''}>›</button></div>
+    <div class="card"><div class="lab">${isCur?'Đã chi tới hôm nay':'Tổng chi'}</div>
+      <div class="big">${money(tot)}<small> đ</small></div>${cmp}
+      <div class="row2"><div class="mini"><span class="lab">Trung bình / ngày</span><b>${short(days?tot/days:0)}</b></div>
+        <div class="mini"><span class="lab">Số khoản</span><b>${L.length}</b></div></div></div>
+    ${L.length?`<div class="sec"><span class="lab">Theo loại</span></div>${catRows}
+    <div class="sec"><span class="lab">Chi cho ai nhiều nhất</span></div>${topRows}
+    <div class="sec"><span class="lab">3 khoản lớn nhất</span></div>${bigRows}`
+    :'<div class="empty">Tháng này chưa có khoản nào.</div>'}
+    ${nap?`<div class="note">Không tính ${short(nap)} chuyển cho chính mình (nạp / tiết kiệm).</div>`:''}
+    ${L.some(x=>x.mine!=null)?'<div class="note">Khoản trả dùm chỉ tính phần của mình.</div>':''}
+    <div class="note">Chỉ gồm các khoản đã ghi trong app. Khoản quên ghi sẽ hiện trên máy tính sau khi dán sao kê.</div>
+  </div></div>`;
+  $('bk').onclick=()=>{S={v:'home'};render();};
+  $('pv').onclick=()=>{S.m=mAdd(m,-1);render();};$('nx').onclick=()=>{S.m=mAdd(m,1);render();};}
+
+/* ── chờ nhận lại: các lần trả dùm, bấm khi mọi người đã chuyển đủ ── */
+function choView(){
+  const L=D.tx.filter(x=>x.mine!=null).sort((a,b)=>b.ts-a.ts),W=L.filter(x=>!x.nhan),tot=W.reduce((a,x)=>a+x.amt-x.mine,0);
+  const row=x=>{const p=x.d.split('-');return `<div class="it"><div class="ic">${cat(x.cat)[2]}</div><div><div class="n">${esc(x.name||'Không tên')}</div>
+    <div class="s">${p[2]}/${p[1]} · chuyển ${short(x.amt)}, mình ${short(x.mine)}${x.note?' · '+esc(x.note):''}</div></div>
+    <div><div class="a">${short(x.amt-x.mine)}</div>${x.nhan?'<div class="s" style="text-align:right">đã nhận</div>':`<button class="ok" data-ok="${x.id}">Đã nhận đủ</button>`}</div></div>`;};
+  $('app').innerHTML=`<div class="sheet"><div class="wrap">
+    <button class="back" id="bk">‹ Quay lại</button>
+    <div class="card" style="margin-top:8px"><div class="lab">Mọi người còn nợ lại</div><div class="big">${money(tot)}<small> đ</small></div>
+      <div class="mut" style="font-size:.8rem">${W.length} lần trả dùm chưa nhận đủ</div></div>
+    ${W.length?W.map(row).join(''):'<div class="empty">Không còn ai nợ.</div>'}
+    ${L.length>W.length?`<div class="sec"><span class="lab">Đã nhận lại</span></div>${L.filter(x=>x.nhan).slice(0,10).map(row).join('')}`:''}
+    <div class="note">Tiền mọi người chuyển lại không phải thu nhập, cũng không trừ vào chi — chi của mình chỉ là phần của mình.</div>
+  </div></div>`;
+  $('bk').onclick=()=>{S={v:'home'};render();};
+  document.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{const x=D.tx.find(t=>t.id===b.dataset.ok);x.nhan=true;save();render();
+    toast('đã nhận '+short(x.amt-x.mine)+' · '+esc(x.name),()=>{x.nhan=false;save();render();});});}
+
 function render(){if(S.v!=='scan')stopCam();
-  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else home();}
+  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else home();}
 /* ĐƯỜNG TẮT: mở link có #quet → vào thẳng camera; #tay → vào thẳng ghi tay.
    Dùng cho Phím tắt iPhone (chạm 2 lần mặt lưng / nút Tác vụ / Trung tâm điều khiển). Xoá hash ngay
    để tải lại trang không bị bật camera lần nữa. */
