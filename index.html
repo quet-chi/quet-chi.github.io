@@ -10474,7 +10474,7 @@ function amtView(){
   if(!S.via)S.via=lastVia();if(!S.tgt)S.tgt='amt';
   const q=S.q,v=+S.amt||0,ok=v>0&&S.cat;
   const nhan=q&&q.napas?`${esc(BANKNAME[q.bin]||q.bin)} · ${esc(q.acc)}`:S.tay?'Ghi tay':'';
-  const khongNapas=q&&!q.napas,showNt=S.ntOn||S.note;
+  const khongNapas=q&&!q.napas;
   $('app').innerHTML=`<div class="sheet"><div class="wrap am">
     <div class="bar1"><button class="back" id="bk">‹</button>
       <div class="who"><input id="nm" value="${esc(S.name)}" placeholder="${S.tay?'Chi cho ai / việc gì':'Tên quán'}"><div class="acc">${nhan}</div></div><span style="width:32px"></span></div>
@@ -10482,8 +10482,8 @@ function amtView(){
     ${S.dum?`<div class="split"><button id="amtT" class="sp"></button><button id="mineT" class="sp"></button></div><div class="waitl" id="wl"></div>`
       :`<button class="amt" id="amtT"></button>`}
     <div class="opts"><div class="seg">${VIA.map(v=>`<button data-via="${v[0]}" class="${S.via===v[0]?'on':''}">${v[1]}</button>`).join('')}</div>
-      <button class="op${S.dum?' on':''}" id="dumT">👥 Trả dùm</button><button class="op${showNt?' on':''}" id="ntT" aria-label="ghi chú">✎</button></div>
-    <input id="nt" class="nt" value="${esc(S.note||'')}" placeholder="Ghi chú" style="${showNt?'':'display:none'}">
+      <button class="op${S.dum?' on':''}" id="dumT">👥 Trả dùm</button></div>
+    <input id="nt" class="nt" value="${esc(S.note||'')}" placeholder="✎ Mua gì? (không bắt buộc)" enterkeyhint="done">
     ${catGrid(S.cat)}
     ${khongNapas?'<div class="warn">QR cửa hàng — ngân hàng mở nhưng không điền sẵn. Quét lại trong app. Khoản vẫn được ghi.</div>':''}
     <div class="padw"><div class="pad">${['1','2','3','4','5','6','7','8','9','000','0','⌫'].map(k=>`<button data-k="${k}">${k}</button>`).join('')}</div>
@@ -10492,6 +10492,7 @@ function amtView(){
   $('bk').onclick=()=>{S.v='home';render();};
   $('nm').oninput=e=>{S.name=e.target.value;};
   $('nt').oninput=e=>{S.note=e.target.value;};
+  $('nt').onkeydown=e=>{if(e.key==='Enter')e.target.blur();};
   document.querySelectorAll('[data-qp]').forEach(b=>b.onclick=()=>{S.name=b.dataset.qp;S.cat=b.dataset.qc;render();});
   /* bấm số / chọn loại: sửa tại chỗ, không vẽ lại cả màn — vẽ lại làm trang nhảy về đầu */
   const f=n=>n?n.toLocaleString('vi-VN'):'0';
@@ -10503,7 +10504,6 @@ function amtView(){
     $('go').classList.toggle('off',!(n>0&&S.cat));};
   sync();
   $('dumT').onclick=()=>{S.dum=!S.dum;S.tgt=S.dum?'mine':'amt';if(!S.dum)S.mine='';render();};
-  $('ntT').onclick=()=>{S.ntOn=true;$('nt').style.display='';$('ntT').classList.add('on');$('nt').focus();};
   $('amtT').onclick=()=>{if(S.dum){S.tgt='amt';sync();}};
   if($('mineT'))$('mineT').onclick=()=>{S.tgt='mine';sync();};
   document.querySelectorAll('[data-via]').forEach(b=>b.onclick=()=>{S.via=b.dataset.via;
