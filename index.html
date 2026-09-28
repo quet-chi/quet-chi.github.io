@@ -10302,8 +10302,18 @@ const today=()=>{const d=new Date();return d.getFullYear()+'-'+pad2(d.getMonth()
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 /* ── lưu trữ: chỉ trên máy này ── */
 let D={tx:[],who:{},hide:false};
-try{D=Object.assign(D,JSON.parse(localStorage.getItem('quetchi_v1')||'{}'));}catch(e){}
-function save(){try{localStorage.setItem('quetchi_v1',JSON.stringify(D));}catch(e){toast('không lưu được — trình duyệt đang chặn bộ nhớ');}}
+/* NHIỀU TAB: mỗi lần chạm lưng Safari mở một tab mới. Tab cũ giữ D cũ trong bộ nhớ — lưu từ tab đó là ghi đè
+   mất khoản tab mới vừa ghi (Mau gặp 28/09). Nên: đọc lại sổ mỗi khi tab hiện ra / tab khác vừa lưu,
+   và đọc lại ngay trước mỗi lần lưu rồi chỉ ghi phần mình đổi. */
+const gone=new Set();   /* id đã xoá ở tab này — để save() không kéo lại từ bản lưu */
+function load(){try{const v=JSON.parse(localStorage.getItem('quetchi_v1')||'{}');D=Object.assign({tx:[],who:{},hide:false},v);}catch(e){}}
+load();
+function save(){try{
+  /* gộp với bản đang lưu: khoản nào tab khác đã ghi mà D chưa có thì giữ lại (trừ khoản chính tab này vừa xoá) */
+  const cur=JSON.parse(localStorage.getItem('quetchi_v1')||'{}'),have=new Set(D.tx.map(x=>x.id));
+  (cur.tx||[]).forEach(x=>{if(!have.has(x.id)&&!gone.has(x.id))D.tx.push(x);});
+  D.who=Object.assign({},cur.who||{},D.who);
+  localStorage.setItem('quetchi_v1',JSON.stringify(D));}catch(e){toast('không lưu được — trình duyệt đang chặn bộ nhớ');}}
 const money=n=>D.hide?'•••':Math.round(n).toLocaleString('vi-VN');
 const short=n=>{if(D.hide)return'•••';const a=Math.abs(n);return a>=1e6?(a/1e6).toFixed(a>=1e7?1:2).replace(/\.?0+$/,'').replace('.',',')+'tr':a>=1e3?Math.round(a/1e3)+'K':''+a;};
 
@@ -10340,7 +10350,7 @@ const viaName=k=>(VIA.find(v=>v[0]===k)||VIA[0])[1];
 const lastVia=()=>D.via||'mb';
 const $=id=>document.getElementById(id);
 let toastT=null;
-function toast(msg,undo){const t=$('toast');t.innerHTML=`<div class="toast"><span>${msg}</span>${undo?'<button id="undo">Huỷ</button>':''}</div>`;
+function toast(msg,undo,lab){const t=$('toast');t.innerHTML=`<div class="toast"><span>${msg}</span>${undo?`<button id="undo">${lab||'Hoàn tác'}</button>`:''}</div>`;
   if(undo)$('undo').onclick=()=>{undo();t.innerHTML='';};clearTimeout(toastT);toastT=setTimeout(()=>t.innerHTML='',undo?12000:2600);}
 
 function stats(){const m=today().slice(0,7),td=today();
@@ -10418,8 +10428,8 @@ function edView(){
   document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{x.cat=b.dataset.c;if(x.synced)x.edited=true;save();
     document.querySelectorAll('[data-c]').forEach(y=>y.classList.toggle('on',y===b));});
   $('bk').onclick=()=>{put();S={v:'home'};render();};
-  $('e_x').onclick=()=>{D.tx=D.tx.filter(t=>t.id!==x.id);save();S={v:'home'};render();
-    toast('đã xoá '+esc(dispName(x)),()=>{D.tx.push(x);save();render();});};}
+  $('e_x').onclick=()=>{gone.add(x.id);D.tx=D.tx.filter(t=>t.id!==x.id);save();S={v:'home'};render();
+    toast('đã xoá '+esc(dispName(x)),()=>{gone.delete(x.id);D.tx.push(x);save();render();});};}
 
 /* ── quét: camera trực tiếp; không mở được camera thì chụp ảnh rồi đọc ── */
 let stream=null,raf=null;
@@ -10513,7 +10523,7 @@ function amtView(){
     D.via=x.via;
     if(q&&q.napas){x.bin=q.bin;x.acc=q.acc;const k=q.bin+'|'+q.acc;D.who[k]={name:x.name||(D.who[k]||{}).name||'',cat:S.cat};}
     D.tx.push(x);save();
-    const undo=()=>{D.tx=D.tx.filter(t=>t.id!==x.id);save();render();};
+    const undo=()=>{gone.add(x.id);D.tx=D.tx.filter(t=>t.id!==x.id);save();render();};
     S={v:'home'};render();
     if(x.src==='tay'){toast('đã ghi '+short(mineOf(x))+' · '+esc(dispName(x)),undo);return;}
     pendingUndo={x,undo};location.href=x.via==='momo'?'momo://':mbLink(q,x.amt,x.via);};}
@@ -10525,8 +10535,12 @@ document.addEventListener('gesturestart',e=>e.preventDefault());
 document.addEventListener('dblclick',e=>e.preventDefault());
 /* quay lại từ MB → hỏi lại nếu chưa chuyển */
 let pendingUndo=null;
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&pendingUndo){const p=pendingUndo;pendingUndo=null;
-  toast('đã ghi '+short(mineOf(p.x))+' · '+esc(dispName(p.x))+' — chưa chuyển thì huỷ',p.undo);}});
+const refresh=()=>{load();if(S.v!=='scan'&&S.v!=='amt')render();};
+window.addEventListener('storage',e=>{if(e.key==='quetchi_v1')refresh();});
+window.addEventListener('pageshow',e=>{if(e.persisted)refresh();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)return;refresh();
+  if(pendingUndo){const p=pendingUndo;pendingUndo=null;
+    toast('đã ghi '+short(mineOf(p.x))+' · '+esc(dispName(p.x)),p.undo,'Chưa chuyển? Xoá');}});
 
 /* ── chép sang sổ trên máy tính: bảng tab-separated, tab Chi tiêu đọc được cả cột Loại ── */
 function expTxt(L){return ['Ngày\tNội dung\tSố tiền\tLoại',...L.map(x=>{const p=x.d.split('-');
