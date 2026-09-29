@@ -12,7 +12,7 @@ self.addEventListener('fetch',e=>{
     const fromCache=()=>caches.match(key,{ignoreSearch:true}).then(m=>m||caches.match('./'));
     const t=setTimeout(()=>fromCache().then(m=>{if(m&&!xong){xong=true;done(m);}}),4000);
     /* no-cache: luôn hỏi lại GitHub (ETag, rẻ) — không lấy bản cũ trong bộ nhớ đệm HTTP 10 phút của GitHub Pages */
-    fetch(r,{cache:'no-cache'}).then(res=>{clearTimeout(t);
+    fetch(r.mode==='navigate'?r.url:r,{cache:'no-cache'}).then(res=>{clearTimeout(t);
       if(res.ok){const cp=res.clone();caches.open(C).then(c=>c.put(key,cp));}
       if(!xong){xong=true;done(res);}})
     .catch(()=>{clearTimeout(t);fromCache().then(m=>{if(!xong){xong=true;done(m||Response.error());}});});
