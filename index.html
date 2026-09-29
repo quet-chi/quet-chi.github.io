@@ -170,6 +170,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .am .pad button{padding:0;height:50px;font-size:1.35rem}
 .am .cta{margin-top:10px;height:56px;padding:0;border-radius:16px}
 .cta.off{opacity:.4}
+.resend{display:block;margin:18px auto 0;background:none;color:var(--ink3);font-size:.78rem;font-weight:600;padding:10px}
 .qp{display:flex;gap:6px;overflow-x:auto;margin:6px -16px 0;padding:0 16px;scrollbar-width:none}.qp::-webkit-scrollbar{display:none}
 .qp button{flex:none;background:var(--panel);border:1px solid var(--line);color:var(--ink2);padding:7px 11px;border-radius:99px;font-size:.76rem;font-weight:600}
 .hint{font-size:.72rem;color:var(--ink3);text-align:center;margin-top:8px}.hint b{color:var(--ink2)}
@@ -10394,7 +10395,7 @@ function home(){
       <div class="sub">Hôm nay <b>${short(s.to)}</b> · ${s.toN} khoản</div></div>
       <button class="eye" id="eye" aria-label="ẩn số">${D.hide?'🙈':'👁'}</button></div>
     ${pills?`<div class="pills">${pills}</div>`:''}
-    ${L.length?list:'<div class="empty">Chưa có khoản nào.<br>Lần tới trả tiền, bấm <b>Quét QR</b> thay vì mở thẳng MB.</div>'}
+    ${L.length?list+(s.moi?'':`<button class="resend" id="exp2">⇪ Chép lại 14 ngày sang Mac</button>`):'<div class="empty">Chưa có khoản nào.<br>Lần tới trả tiền, bấm <b>Quét QR</b> thay vì mở thẳng MB.</div>'}
   </div>
   <div class="dock"><button class="dk2" id="tay">✎<span>Ghi tay</span></button><button class="dk1" id="scan">▣ Quét QR</button></div>`;
   $('eye').onclick=()=>{D.hide=!D.hide;save();render();};
@@ -10402,6 +10403,7 @@ function home(){
   $('tay').onclick=()=>{S={v:'amt',q:null,amt:'',cat:null,name:'',tay:true};render();};
   $('thang').onclick=()=>{S={v:'tk',m:today().slice(0,7)};render();};
   if($('exp'))$('exp').onclick=quickCopy;
+  if($('exp2'))$('exp2').onclick=quickCopy;
   if($('cho'))$('cho').onclick=()=>{S={v:'cho'};render();};
   document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{S={v:'ed',id:b.dataset.ed};render();});}
 
@@ -10552,11 +10554,11 @@ function expTxt(L){return ['Ngày\tNội dung\tSố tiền\tLoại',...L.map(x=>
    là mất. Nên mỗi lần chép kèm luôn các khoản đã chép trong 14 ngày qua; sổ trên Mac tự bỏ khoản đã có.
    Khoản đã sửa sau khi chép thì không gửi lại (sổ sẽ tưởng là khoản mới). */
 async function quickCopy(){
-  const now=Date.now(),moi=D.tx.filter(x=>!x.synced);if(!moi.length)return;
-  const L=D.tx.filter(x=>!x.synced||(x.sentAt>now-14*864e5&&!x.edited)).sort((a,b)=>a.ts-b.ts);
+  const now=Date.now(),moi=D.tx.filter(x=>!x.synced);
+  const L=D.tx.filter(x=>!x.synced||(x.sentAt>now-14*864e5&&!x.edited)).sort((a,b)=>a.ts-b.ts);if(!L.length)return;
   try{await navigator.clipboard.writeText(expTxt(L));}catch(e){S={v:'exp'};render();return;}
   moi.forEach(x=>{x.synced=true;x.sentAt=now;});save();render();
-  toast('đã chép '+moi.length+' khoản mới — mở sổ trên Mac là tự vào',()=>{moi.forEach(x=>{x.synced=false;delete x.sentAt;});save();render();});}
+  toast(moi.length?'đã chép '+moi.length+' khoản mới — mở sổ trên Mac là tự vào':'đã chép lại '+L.length+' khoản 14 ngày qua',()=>{moi.forEach(x=>{x.synced=false;delete x.sentAt;});save();render();});}
 function expView(){
   const L=D.tx.filter(x=>!x.synced).sort((a,b)=>a.ts-b.ts),txt=expTxt(L);
   $('app').innerHTML=`<div class="sheet"><div class="wrap">
