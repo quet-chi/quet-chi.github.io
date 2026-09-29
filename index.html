@@ -12,7 +12,7 @@
 <!-- KHOÁ MẠNG (CSP): trang không được gọi ra ngoài, không tải gì từ nơi khác. Kể cả khi có đoạn mã lạ lọt vào,
      nó cũng không gửi được dữ liệu đi đâu. Mở MB là chuyển trang (navigation) nên không bị chặn.
      Không dùng Google Fonts nữa: font hệ thống của iPhone, Google khỏi biết mỗi lần mở app. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src 'none'; worker-src 'self'; font-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src https://firestore.googleapis.com; worker-src 'self'; font-src 'none'; form-action 'none'; base-uri 'none'">
 <style>
 /* Quét chi — ghi từng khoản NGAY LÚC TRẢ: quét QR → gõ tiền → MB mở sẵn → khoản đã nằm trong sổ.
    Dữ liệu CHỈ nằm trên điện thoại (localStorage). Không tài khoản, không máy chủ riêng.
@@ -10314,7 +10314,8 @@ function save(){try{
   const cur=JSON.parse(localStorage.getItem('quetchi_v1')||'{}'),have=new Set(D.tx.map(x=>x.id));
   (cur.tx||[]).forEach(x=>{if(!have.has(x.id)&&!gone.has(x.id))D.tx.push(x);});
   D.who=Object.assign({},cur.who||{},D.who);
-  localStorage.setItem('quetchi_v1',JSON.stringify(D));}catch(e){toast('không lưu được — trình duyệt đang chặn bộ nhớ');}}
+  localStorage.setItem('quetchi_v1',JSON.stringify(D));}catch(e){toast('không lưu được — trình duyệt đang chặn bộ nhớ');}
+  syncSoon();}
 const money=n=>D.hide?'•••':Math.round(n).toLocaleString('vi-VN');
 const short=n=>{if(D.hide)return'•••';const a=Math.abs(n);return a>=1e6?(a/1e6).toFixed(a>=1e7?1:2).replace(/\.?0+$/,'').replace('.',',')+'tr':a>=1e3?Math.round(a/1e3)+'K':''+a;};
 
@@ -10380,22 +10381,23 @@ const noName=x=>!(x.name||'').trim()||/^\d{5,}$/.test((x.name||'').trim());
 const catGrid=sel=>`<div class="cg">${CATS.map(c=>`<button class="cgb${sel===c[0]?' on':''}" data-c="${c[0]}"><i>${c[2]}</i>${SH[c[0]]||c[1]}</button>`).join('')}</div>`;
 function home(){
   const s=stats(),now=new Date();
-  const L=D.tx.slice().sort((a,b)=>b.ts-a.ts).slice(0,60),dayT={};
+  const L=D.tx.slice().sort((a,b)=>b.ts-a.ts).slice(0,60),dayT={},SY=syncCfg()?syncCfg().sent||{}:null;
   L.forEach(x=>{if(x.cat!=='nap')dayT[x.d]=(dayT[x.d]||0)+mineOf(x);});
   let last='',list='';
   L.forEach(x=>{if(x.d!==last){list+=`<div class="dh"><span>${dayLab(x.d)}</span><span>${dayT[x.d]?'−'+short(dayT[x.d]):''}</span></div>`;last=x.d;}
     const c=cat(x.cat),sub=[SH[x.cat]||c[1],x.note?esc(x.note):'',x.via&&x.via!=='mb'?viaName(x.via):''].filter(Boolean).join(' · ');
     list+=`<button class="row" data-ed="${x.id}"><div class="ic">${c[2]}</div><div class="mid"><div class="n${noName(x)?' nn':''}">${esc(dispName(x))}</div><div class="s">${sub}</div></div>
-      <div class="r"><div class="a">−${short(mineOf(x))}</div>${x.mine!=null?`<div class="s">chuyển ${short(x.amt)}${x.nhan?' · đã nhận':''}</div>`:''}</div>${x.synced?'':'<i class="dot"></i>'}</button>`;});
+      <div class="r"><div class="a">−${short(mineOf(x))}</div>${x.mine!=null?`<div class="s">chuyển ${short(x.amt)}${x.nhan?' · đã nhận':''}</div>`:''}</div>${(SY?SY[x.id]===hashOf(payOf(x)):x.synced)?'':'<i class="dot"></i>'}</button>`;});
   const pills=(s.cho?`<button class="pill" id="cho">👥 Chờ trả lại <b>${short(s.cho)}</b></button>`:'')
-    +(s.moi?`<button class="pill${s.cu>=7?' warnp':''}" id="exp"><i class="dot"></i>Chép ${s.moi} sang Mac${s.cu>=7?' · '+s.cu+' ngày':''}</button>`:'');
+    +(syncCfg()?(()=>{const n=syncPending();return `<button class="pill${syncErr?' warnp':''}" id="sy">${syncErr?'⚠ Chưa gửi '+n:n?'☁ Đang gửi '+n:'☁ Đã đồng bộ'}</button>`;})()
+     :s.moi?`<button class="pill${s.cu>=7?' warnp':''}" id="exp"><i class="dot"></i>Chép ${s.moi} sang Mac${s.cu>=7?' · '+s.cu+' ngày':''}</button><button class="pill" id="sy">☁ Tự đồng bộ</button>`:`<button class="pill" id="sy">☁ Tự đồng bộ</button>`);
   $('app').innerHTML=`<div class="wrap hm">
     <div class="hd"><div><div class="lab">Tháng ${now.getMonth()+1} đã chi</div>
       <button class="tot" id="thang">${money(s.mo)}<small> đ</small><i>›</i></button>
       <div class="sub">Hôm nay <b>${short(s.to)}</b> · ${s.toN} khoản</div></div>
       <button class="eye" id="eye" aria-label="ẩn số">${D.hide?'🙈':'👁'}</button></div>
     ${pills?`<div class="pills">${pills}</div>`:''}
-    ${L.length?list+(s.moi?'':`<button class="resend" id="exp2">⇪ Chép lại 14 ngày sang Mac</button>`):'<div class="empty">Chưa có khoản nào.<br>Lần tới trả tiền, bấm <b>Quét QR</b> thay vì mở thẳng MB.</div>'}
+    ${L.length?list+(s.moi||syncCfg()?'':`<button class="resend" id="exp2">⇪ Chép lại 14 ngày sang Mac</button>`):'<div class="empty">Chưa có khoản nào.<br>Lần tới trả tiền, bấm <b>Quét QR</b> thay vì mở thẳng MB.</div>'}
   </div>
   <div class="dock"><button class="dk2" id="tay">✎<span>Ghi tay</span></button><button class="dk1" id="scan">▣ Quét QR</button></div>`;
   $('eye').onclick=()=>{D.hide=!D.hide;save();render();};
@@ -10404,6 +10406,7 @@ function home(){
   $('thang').onclick=()=>{S={v:'tk',m:today().slice(0,7)};render();};
   if($('exp'))$('exp').onclick=quickCopy;
   if($('exp2'))$('exp2').onclick=quickCopy;
+  if($('sy'))$('sy').onclick=()=>{S={v:'sync'};render();};
   if($('cho'))$('cho').onclick=()=>{S={v:'cho'};render();};
   document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{S={v:'ed',id:b.dataset.ed};render();});}
 
@@ -10541,7 +10544,7 @@ let pendingUndo=null;
 const refresh=()=>{load();if(S.v!=='scan'&&S.v!=='amt')render();};
 window.addEventListener('storage',e=>{if(e.key==='quetchi_v1')refresh();});
 window.addEventListener('pageshow',e=>{if(e.persisted)refresh();});
-document.addEventListener('visibilitychange',()=>{if(document.hidden)return;refresh();
+document.addEventListener('visibilitychange',()=>{if(document.hidden)return;refresh();syncSoon();
   if(pendingUndo){const p=pendingUndo;pendingUndo=null;
     toast('đã ghi '+short(mineOf(p.x))+' · '+esc(dispName(p.x)),p.undo,'Chưa chuyển? Xoá');}});
 
@@ -10634,8 +10637,76 @@ function choView(){
   document.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{const x=D.tx.find(t=>t.id===b.dataset.ok);x.nhan=true;save();render();
     toast('đã nhận '+short(x.amt-x.mine)+' · '+esc(dispName(x)),()=>{x.nhan=false;save();render();});});}
 
+/* ══ ĐỒNG BỘ — Firebase Firestore, MÃ HOÁ ĐẦU-CUỐI (29/09) ══
+   Mỗi khoản được mã hoá AES-GCM ngay trên máy rồi mới gửi. Khoá sinh từ MẬT KHẨU ĐỒNG BỘ Mau tự gõ
+   (PBKDF2 250.000 vòng) — không lưu mật khẩu, chỉ lưu khoá dẫn xuất. Địa chỉ trên Firebase (vid) cũng sinh từ mật
+   khẩu, không đoán được. Google chỉ thấy chuỗi đã mã hoá. Sổ đầu tư trên Mac gõ cùng mật khẩu → cùng khoá → đọc được.
+   Đồng bộ một chiều: điện thoại gửi, Mac nhận. Xoá trên điện thoại → gửi "đã xoá". */
+const FB_PID='quet-chi-sync';
+const SYNC_KEY='quetchi_sync';
+const b64=u=>{let s='';new Uint8Array(u).forEach(b=>s+=String.fromCharCode(b));return btoa(s);};
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function deriveSync(pass){const enc=new TextEncoder(),base=await crypto.subtle.importKey('raw',enc.encode(pass),'PBKDF2',false,['deriveBits']);
+  const bits=async salt=>new Uint8Array(await crypto.subtle.deriveBits({name:'PBKDF2',hash:'SHA-256',salt:enc.encode(salt),iterations:250000},base,256));
+  const v=await bits('quetchi/v1/vid'),k=await bits('quetchi/v1/key');
+  return{vid:[...v.slice(0,20)].map(b=>b.toString(16).padStart(2,'0')).join(''),k:b64(k)};}
+function syncCfg(){try{return JSON.parse(localStorage.getItem(SYNC_KEY)||'null');}catch(e){return null;}}
+function syncSet(c){try{c?localStorage.setItem(SYNC_KEY,JSON.stringify(c)):localStorage.removeItem(SYNC_KEY);}catch(e){}}
+async function sealed(k,obj){const key=await crypto.subtle.importKey('raw',unb64(k),'AES-GCM',false,['encrypt']);
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(obj))));
+  const out=new Uint8Array(12+ct.length);out.set(iv);out.set(ct,12);return b64(out);}
+const memoOf=x=>dispName(x)+(x.note?' — '+x.note:'')+(x.via&&x.via!=='mb'?' ('+viaName(x.via)+')':'');
+const payOf=x=>({id:x.id,d:x.d,amt:Math.round(x.amt),mine:x.mine!=null?Math.round(x.mine):null,cat:x.cat,memo:memoOf(x),ts:x.ts});
+const hashOf=o=>{const s=JSON.stringify(o);let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return String(h);};
+const fbDoc=(vid,id)=>`https://firestore.googleapis.com/v1/projects/${FB_PID}/databases/(default)/documents/v/${vid}/tx/${encodeURIComponent(id)}`;
+let syncBusy=false,syncErr='',syncT=null;
+function syncSoon(){if(syncCfg()){clearTimeout(syncT);syncT=setTimeout(syncNow,600);}}
+/* khoản chưa gửi = nội dung khác bản đã gửi. Đọc sổ từ bộ nhớ (không từ D) — tab cũ không làm gửi nhầm "đã xoá" */
+function syncPending(){const c=syncCfg();if(!c)return 0;const sent=c.sent||{};let n=0;
+  let cur=[];try{cur=JSON.parse(localStorage.getItem('quetchi_v1')||'{}').tx||[];}catch(e){}
+  cur.forEach(x=>{if(sent[x.id]!==hashOf(payOf(x)))n++;});return n;}
+async function fbPut(c,id,p){const r=await fetch(fbDoc(c.vid,id),{method:'PATCH',headers:{'Content-Type':'application/json'},
+  body:JSON.stringify({fields:{c:{stringValue:await sealed(c.k,p)},t:{integerValue:String(Date.now())}}})});
+  if(!r.ok)throw new Error('Firebase trả '+r.status);}
+async function syncNow(){const c=syncCfg();if(!c||syncBusy||FB_PID.startsWith('__'))return;syncBusy=true;
+  const sent=Object.assign({},c.sent||{});
+  try{const cur=JSON.parse(localStorage.getItem('quetchi_v1')||'{}').tx||[],seen=new Set();
+    for(const x of cur){seen.add(x.id);const p=payOf(x),h=hashOf(p);if(sent[x.id]===h)continue;await fbPut(c,x.id,p);sent[x.id]=h;}
+    for(const id of Object.keys(sent))if(!seen.has(id)){await fbPut(c,id,{id,del:true});delete sent[id];}
+    syncErr='';}
+  catch(e){syncErr=navigator.onLine===false?'mất mạng':String(e.message||e);}
+  const c2=syncCfg();if(c2&&c2.vid===c.vid){c2.sent=sent;if(!syncErr)c2.last=Date.now();syncSet(c2);}
+  syncBusy=false;if(S.v==='home'||S.v==='sync')render();}
+window.addEventListener('online',syncSoon);
+
+/* ── màn đồng bộ ── */
+function syncView(){const c=syncCfg(),n=syncPending();
+  const t=c&&c.last?new Date(c.last):null;
+  $('app').innerHTML=`<div class="sheet"><div class="wrap">
+    <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Đồng bộ sang Mac</b><span style="width:64px"></span></div>
+    ${c?`<div class="card" style="margin-top:10px"><div class="lab">Trạng thái</div>
+        <div style="font-size:1.05rem;font-weight:600;margin-top:6px">${syncErr?'⚠ Chưa gửi được':n?'☁ Đang chờ gửi '+n+' khoản':'✓ Đã đồng bộ hết'}</div>
+        <div class="sub">${syncErr?esc(syncErr)+' — sẽ tự thử lại':''}${t?'Lần cuối '+pad2(t.getHours())+':'+pad2(t.getMinutes())+' '+t.getDate()+'/'+(t.getMonth()+1):''}</div></div>
+      <button class="cta" id="sn">Đồng bộ ngay</button>
+      <div class="note">Mỗi khoản ghi xong tự gửi lên, đã mã hoá. Sổ đầu tư trên Mac mở khoá là tự nhận.</div>
+      <button class="del" id="off" style="margin-top:30px">Tắt đồng bộ trên máy này</button>`
+    :`<div class="note" style="text-align:left;font-size:.84rem;line-height:1.6;margin-top:14px">Gõ <b>mật khẩu đồng bộ</b> — tự đặt, ít nhất 12 ký tự. Gõ <b>đúng mật khẩu này</b> ở Cài đặt của sổ đầu tư trên Mac.
+      <br>Khoản chi được mã hoá bằng mật khẩu này trước khi gửi; quên thì chỉ cần đặt lại ở cả hai nơi.</div>
+      <label class="fl">Mật khẩu đồng bộ<input id="p1" type="password" autocomplete="new-password"></label>
+      <label class="fl">Gõ lại<input id="p2" type="password" autocomplete="new-password"></label>
+      <button class="cta" id="on">Bật đồng bộ</button>`}
+  </div></div>`;
+  $('bk').onclick=()=>{S={v:'home'};render();};
+  if($('sn'))$('sn').onclick=()=>{syncErr='';syncNow();toast('đang gửi…');};
+  if($('off'))$('off').onclick=()=>{syncSet(null);render();toast('đã tắt đồng bộ trên máy này');};
+  if($('on'))$('on').onclick=async()=>{const a=$('p1').value,b=$('p2').value;
+    if(a.length<12){toast('ít nhất 12 ký tự');return;}if(a!==b){toast('hai lần gõ không khớp');return;}
+    $('on').textContent='Đang tạo khoá…';const r=await deriveSync(a);$('p1').value=$('p2').value='';
+    syncSet({vid:r.vid,k:r.k,sent:{}});render();syncNow();};}
+
 function render(){if(S.v!=='scan')stopCam();
-  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else home();}
+  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else if(S.v==='sync')syncView();else home();}
 /* ĐƯỜNG TẮT: mở link có #quet → vào thẳng camera; #tay → vào thẳng ghi tay.
    Dùng cho Phím tắt iPhone (chạm 2 lần mặt lưng / nút Tác vụ / Trung tâm điều khiển). Xoá hash ngay
    để tải lại trang không bị bật camera lần nữa. */
@@ -10648,4 +10719,5 @@ window.addEventListener('hashchange',fromHash);
 /* chạy được khi mạng chập chờn: sw.js lấy bản mới nếu mạng trả lời trong 4 giây, không thì mở bản đã lưu */
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 if(!fromHash())render();
+syncSoon();
 </script></body></html>
