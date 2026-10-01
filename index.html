@@ -10691,17 +10691,17 @@ function syncView(){const c=syncCfg(),n=syncPending();
       <button class="cta" id="sn">Đồng bộ ngay</button>
       <div class="note">Mỗi khoản ghi xong tự gửi lên, đã mã hoá. Sổ đầu tư trên Mac mở khoá là tự nhận.</div>
       <button class="del" id="off" style="margin-top:30px">Tắt đồng bộ trên máy này</button>`
-    :`<div class="note" style="text-align:left;font-size:.84rem;line-height:1.6;margin-top:14px">Gõ <b>mật khẩu đồng bộ</b> — tự đặt, ít nhất 12 ký tự. Gõ <b>đúng mật khẩu này</b> ở Cài đặt của sổ đầu tư trên Mac.
+    :`<div class="note" style="text-align:left;font-size:.84rem;line-height:1.6;margin-top:14px">Gõ <b>mật khẩu đồng bộ</b> — tự đặt, ít nhất 8 ký tự (8 số cũng được, đừng dùng ngày sinh/số điện thoại). Gõ <b>đúng mật khẩu này</b> ở Cài đặt của sổ đầu tư trên Mac.
       <br>Khoản chi được mã hoá bằng mật khẩu này trước khi gửi; quên thì chỉ cần đặt lại ở cả hai nơi.</div>
-      <label class="fl">Mật khẩu đồng bộ<input id="p1" type="password" autocomplete="new-password"></label>
-      <label class="fl">Gõ lại<input id="p2" type="password" autocomplete="new-password"></label>
+      <label class="fl">Mật khẩu đồng bộ<input id="p1" type="password" autocomplete="new-password" autocapitalize="off"></label>
+      <label class="fl">Gõ lại<input id="p2" type="password" autocomplete="new-password" autocapitalize="off"></label>
       <button class="cta" id="on">Bật đồng bộ</button>`}
   </div></div>`;
   $('bk').onclick=()=>{S={v:'home'};render();};
   if($('sn'))$('sn').onclick=()=>{syncErr='';syncNow();toast('đang gửi…');};
   if($('off'))$('off').onclick=()=>{syncSet(null);render();toast('đã tắt đồng bộ trên máy này');};
   if($('on'))$('on').onclick=async()=>{const a=$('p1').value,b=$('p2').value;
-    if(a.length<12){toast('ít nhất 12 ký tự');return;}if(a!==b){toast('hai lần gõ không khớp');return;}
+    if(a.length<8){toast('ít nhất 8 ký tự');return;}if(a!==b){toast('hai lần gõ không khớp');return;}
     $('on').textContent='Đang tạo khoá…';const r=await deriveSync(a);$('p1').value=$('p2').value='';
     syncSet({vid:r.vid,k:r.k,sent:{}});render();syncNow();};}
 
@@ -10717,7 +10717,9 @@ function fromHash(){const h=location.hash.replace('#','');
   history.replaceState(null,'',location.pathname);render();return true;}
 window.addEventListener('hashchange',fromHash);
 /* chạy được khi mạng chập chờn: sw.js lấy bản mới nếu mạng trả lời trong 4 giây, không thì mở bản đã lưu */
-if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{});
+  /* sw.js mở app bằng bản đã lưu cho nhanh; tải xong bản mới ở nền thì báo ở đây */
+  navigator.serviceWorker.addEventListener('message',e=>{if(e.data==='ban-moi')toast('Có bản mới',()=>location.reload(),'Tải lại');});}
 if(!fromHash())render();
 syncSoon();
 </script></body></html>
