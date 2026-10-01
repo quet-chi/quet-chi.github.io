@@ -10338,7 +10338,11 @@ function mbLink(q,amt,app){app=app||'mb';
   /* viết đúng như mẫu tài liệu VietQR: ba=SỐTK@mã — không mã hoá "@" */
   const acc=String(q.acc).replace(/[^0-9A-Za-z]/g,'');
   const back=encodeURIComponent(location.origin+location.pathname);
-  return 'https://dl.vietqr.io/pay?app='+app+'&ba='+acc+'@'+BANK[q.bin]+'&am='+Math.round(amt)+(q.memo?'&tn='+encodeURIComponent(q.memo):'')+'&url='+back;}
+  return 'https://dl.vietqr.io/pay?app='+app+'&ba='+acc+'@'+BANK[q.bin]+'&am='+Math.round(amt)+(tnOf(q.memo)?'&tn='+encodeURIComponent(tnOf(q.memo)):'')+'&url='+back;}
+/* nội dung chuyển khoản: VietQR chỉ nhận chữ KHÔNG DẤU, số, dấu cách, tối đa ~40 ký tự — có dấu tiếng Việt,
+   gạch ngang, dấu chấm hay dài hơn là trả "invalid transaction note" và MB không mở (Mau gặp 01/10) */
+function tnOf(m){return String(m||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D')
+  .replace(/[^A-Za-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim().slice(0,40).trim();}
 
 /* ── trạng thái màn hình ── */
 let S={v:'home',q:null,amt:'',cat:null,name:'',tay:false};
