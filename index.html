@@ -10381,6 +10381,11 @@ const SH={an:'Ăn uống',giaitri:'Cà phê',dilai:'Đi lại',muasam:'Mua sắm
 /* tên hiển thị: chưa gõ tên (hoặc tên là số TK) → "TPBank ··4481", không có TK → tên loại */
 const dispName=x=>{const n=(x.name||'').trim();if(n&&!/^\d{5,}$/.test(n))return n;
   if(x.acc)return (BANKNAME[x.bin]||'TK')+' ··'+String(x.acc).slice(-4);return SH[x.cat]||'Không tên';};
+/* KÍN: đang bấm 👁 (ẩn số) thì khoản loại Gia đình cũng ẩn tên người nhận + ghi chú — người đứng cạnh chỉ thấy
+   "Gia đình", không biết chi cho ai. Chép/đồng bộ sang Mac vẫn giữ tên thật. */
+const kin=x=>D.hide&&x.cat==='giadinh';
+const kinName=x=>kin(x)?'Gia đình':dispName(x);
+const kinNote=x=>kin(x)?'':(x.note||'');
 const noName=x=>!(x.name||'').trim()||/^\d{5,}$/.test((x.name||'').trim());
 const catGrid=sel=>`<div class="cg">${CATS.map(c=>`<button class="cgb${sel===c[0]?' on':''}" data-c="${c[0]}"><i>${c[2]}</i>${SH[c[0]]||c[1]}</button>`).join('')}</div>`;
 function home(){
@@ -10389,8 +10394,8 @@ function home(){
   L.forEach(x=>{if(x.cat!=='nap')dayT[x.d]=(dayT[x.d]||0)+mineOf(x);});
   let last='',list='';
   L.forEach(x=>{if(x.d!==last){list+=`<div class="dh"><span>${dayLab(x.d)}</span><span>${dayT[x.d]?'−'+short(dayT[x.d]):''}</span></div>`;last=x.d;}
-    const c=cat(x.cat),sub=[SH[x.cat]||c[1],x.note?esc(x.note):'',x.via&&x.via!=='mb'?viaName(x.via):''].filter(Boolean).join(' · ');
-    list+=`<button class="row" data-ed="${x.id}"><div class="ic">${c[2]}</div><div class="mid"><div class="n${noName(x)?' nn':''}">${esc(dispName(x))}</div><div class="s">${sub}</div></div>
+    const c=cat(x.cat),sub=[SH[x.cat]||c[1],kinNote(x)?esc(kinNote(x)):'',x.via&&x.via!=='mb'?viaName(x.via):''].filter(Boolean).join(' · ');
+    list+=`<button class="row" data-ed="${x.id}"><div class="ic">${c[2]}</div><div class="mid"><div class="n${noName(x)&&!kin(x)?' nn':''}">${esc(kinName(x))}</div><div class="s">${sub}</div></div>
       <div class="r"><div class="a">−${short(mineOf(x))}</div>${x.mine!=null?`<div class="s">chuyển ${short(x.amt)}${x.nhan?' · đã nhận':''}</div>`:''}</div>${(SY?SY[x.id]===hashOf(payOf(x)):x.synced)?'':'<i class="dot"></i>'}</button>`;});
   const pills=(s.cho?`<button class="pill" id="cho">👥 Chờ trả lại <b>${short(s.cho)}</b></button>`:'')
     +(syncCfg()?(()=>{const n=syncPending();return `<button class="pill${syncErr?' warnp':''}" id="sy">${syncErr?'⚠ Chưa gửi '+n:n?'☁ Đang gửi '+n:'☁ Đã đồng bộ'}</button>`;})()
@@ -10400,6 +10405,8 @@ function home(){
       <button class="tot" id="thang">${money(s.mo)}<small> đ</small><i>›</i></button>
       <div class="sub">Hôm nay <b>${short(s.to)}</b> · ${s.toN} khoản</div></div>
       <button class="eye" id="eye" aria-label="ẩn số">${D.hide?'🙈':'👁'}</button></div>
+    ${location.host==='quet-chi.github.io'?`<div class="warn" style="margin:12px 0 0;line-height:1.55">📍 <b>Địa chỉ cũ</b> — mạng nhà hay chặn trang này.
+      Bật <b>☁ Tự đồng bộ</b> ở đây (cùng mật khẩu) để các khoản cũ lên Mac, rồi dùng <b>quet-chi-sync.web.app</b>.</div>`:''}
     ${pills?`<div class="pills">${pills}</div>`:''}
     ${L.length?list+(s.moi||syncCfg()?'':`<button class="resend" id="exp2">⇪ Chép lại 14 ngày sang Mac</button>`):'<div class="empty">Chưa có khoản nào.<br>Lần tới trả tiền, bấm <b>Quét QR</b> thay vì mở thẳng MB.</div>'}
   </div>
@@ -10439,7 +10446,7 @@ function edView(){
     document.querySelectorAll('[data-c]').forEach(y=>y.classList.toggle('on',y===b));});
   $('bk').onclick=()=>{put();S={v:'home'};render();};
   $('e_x').onclick=()=>{gone.add(x.id);D.tx=D.tx.filter(t=>t.id!==x.id);save();S={v:'home'};render();
-    toast('đã xoá '+esc(dispName(x)),()=>{gone.delete(x.id);D.tx.push(x);save();render();});};}
+    toast('đã xoá '+esc(kinName(x)),()=>{gone.delete(x.id);D.tx.push(x);save();render();});};}
 
 /* ── quét: camera trực tiếp; không mở được camera thì chụp ảnh rồi đọc ── */
 let stream=null,raf=null;
@@ -10535,7 +10542,7 @@ function amtView(){
     D.tx.push(x);save();
     const undo=()=>{gone.add(x.id);D.tx=D.tx.filter(t=>t.id!==x.id);save();render();};
     S={v:'home'};render();
-    if(x.src==='tay'){toast('đã ghi '+short(mineOf(x))+' · '+esc(dispName(x)),undo);return;}
+    if(x.src==='tay'){toast('đã ghi '+short(mineOf(x))+' · '+esc(kinName(x)),undo);return;}
     pendingUndo={x,undo};location.href=x.via==='momo'?'momo://':mbLink(q,x.amt,x.via);};}
 /* bấm nhanh liên tiếp (000, ⌫): iOS hiểu là chạm đôi để phóng to — chặn và tự bấm */
 let lastTap=0;
@@ -10550,7 +10557,7 @@ window.addEventListener('storage',e=>{if(e.key==='quetchi_v1')refresh();});
 window.addEventListener('pageshow',e=>{if(e.persisted)refresh();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)return;refresh();syncSoon();
   if(pendingUndo){const p=pendingUndo;pendingUndo=null;
-    toast('đã ghi '+short(mineOf(p.x))+' · '+esc(dispName(p.x)),p.undo,'Chưa chuyển? Xoá');}});
+    toast('đã ghi '+short(mineOf(p.x))+' · '+esc(kinName(p.x)),p.undo,'Chưa chuyển? Xoá');}});
 
 /* ── chép sang sổ trên máy tính: bảng tab-separated, tab Chi tiêu đọc được cả cột Loại ── */
 function expTxt(L){return ['Ngày\tNội dung\tSố tiền\tLoại',...L.map(x=>{const p=x.d.split('-');
@@ -10599,11 +10606,11 @@ function tkView(){
     const d=pv?` · ${v>=pv?'▲':'▼'}${Math.abs((v-pv)/pv*100).toFixed(0)}%`:'';
     return `<div class="brow"><div>${c[2]}</div><div><div class="t">${c[1].split(' — ')[0]}<span>${n} khoản · ${tot?Math.round(v/tot*100):0}%${d}</span></div>
       <div class="bt"><i style="width:${Math.max(3,v/mx*100)}%"></i></div></div><div class="v">${short(v)}</div></div>`;}).join('');
-  const who={};L.forEach(x=>{const k=dispName(x).toLowerCase();who[k]=who[k]||{n:dispName(x),v:0,c:0,cat:x.cat};who[k].v+=mineOf(x);who[k].c++;});
+  const who={};L.forEach(x=>{const k=kinName(x).toLowerCase();who[k]=who[k]||{n:kinName(x),v:0,c:0,cat:x.cat};who[k].v+=mineOf(x);who[k].c++;});
   const top=Object.values(who).sort((a,b)=>b.v-a.v).slice(0,5);
   const topRows=top.map(w=>`<div class="brow"><div>${cat(w.cat)[2]}</div><div><div class="t">${esc(w.n)}<span>${w.c} lần</span></div></div><div class="v">${short(w.v)}</div></div>`).join('');
   const big=L.slice().sort((a,b)=>mineOf(b)-mineOf(a)).slice(0,3);
-  const bigRows=big.map(x=>{const p=x.d.split('-');return `<div class="brow"><div>${cat(x.cat)[2]}</div><div><div class="t">${esc(dispName(x))}<span>${p[2]}/${p[1]}</span></div></div><div class="v">${short(mineOf(x))}</div></div>`;}).join('');
+  const bigRows=big.map(x=>{const p=x.d.split('-');return `<div class="brow"><div>${cat(x.cat)[2]}</div><div><div class="t">${esc(kinName(x))}<span>${p[2]}/${p[1]}</span></div></div><div class="v">${short(mineOf(x))}</div></div>`;}).join('');
   const nap=D.tx.filter(x=>x.cat==='nap'&&x.d.slice(0,7)===m).reduce((a,x)=>a+x.amt,0);
   $('app').innerHTML=`<div class="sheet"><div class="wrap">
     <button class="back" id="bk">‹ Quay lại</button>
@@ -10626,8 +10633,8 @@ function tkView(){
 /* ── chờ nhận lại: các lần trả dùm, bấm khi mọi người đã chuyển đủ ── */
 function choView(){
   const L=D.tx.filter(x=>x.mine!=null).sort((a,b)=>b.ts-a.ts),W=L.filter(x=>!x.nhan),tot=W.reduce((a,x)=>a+x.amt-x.mine,0);
-  const row=x=>{const p=x.d.split('-');return `<div class="it"><div class="ic">${cat(x.cat)[2]}</div><div><div class="n">${esc(dispName(x))}</div>
-    <div class="s">${p[2]}/${p[1]} · chuyển ${short(x.amt)}, mình ${short(x.mine)}${x.note?' · '+esc(x.note):''}</div></div>
+  const row=x=>{const p=x.d.split('-');return `<div class="it"><div class="ic">${cat(x.cat)[2]}</div><div><div class="n">${esc(kinName(x))}</div>
+    <div class="s">${p[2]}/${p[1]} · chuyển ${short(x.amt)}, mình ${short(x.mine)}${kinNote(x)?' · '+esc(kinNote(x)):''}</div></div>
     <div><div class="a">${short(x.amt-x.mine)}</div>${x.nhan?'<div class="s" style="text-align:right">đã nhận</div>':`<button class="ok" data-ok="${x.id}">Đã nhận đủ</button>`}</div></div>`;};
   $('app').innerHTML=`<div class="sheet"><div class="wrap">
     <button class="back" id="bk">‹ Quay lại</button>
@@ -10639,7 +10646,7 @@ function choView(){
   </div></div>`;
   $('bk').onclick=()=>{S={v:'home'};render();};
   document.querySelectorAll('[data-ok]').forEach(b=>b.onclick=()=>{const x=D.tx.find(t=>t.id===b.dataset.ok);x.nhan=true;save();render();
-    toast('đã nhận '+short(x.amt-x.mine)+' · '+esc(dispName(x)),()=>{x.nhan=false;save();render();});});}
+    toast('đã nhận '+short(x.amt-x.mine)+' · '+esc(kinName(x)),()=>{x.nhan=false;save();render();});});}
 
 /* ══ ĐỒNG BỘ — Firebase Firestore, MÃ HOÁ ĐẦU-CUỐI (29/09) ══
    Mỗi khoản được mã hoá AES-GCM ngay trên máy rồi mới gửi. Khoá sinh từ MẬT KHẨU ĐỒNG BỘ Mau tự gõ
