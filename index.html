@@ -161,7 +161,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .op{background:var(--panel);border:1px solid var(--line);color:var(--ink2);padding:8px 10px;border-radius:11px;font-size:.76rem;font-weight:600;min-width:38px}
 .op.on{border-color:var(--accent);color:var(--accent)}
 .am .nt{margin-top:8px;padding:9px 12px}
-.cg{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0 0}
+.cg{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:10px 0 0}
 .cgb{display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--panel);border:1px solid var(--line);color:var(--ink2);border-radius:12px;padding:7px 2px 6px;font-size:.66rem;font-weight:600;white-space:nowrap}
 .cgb i{font-style:normal;font-size:1.15rem;line-height:1.2}
 .cgb.on{background:var(--accent);border-color:var(--accent);color:#0B100E}
@@ -170,6 +170,9 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .am .pad button{padding:0;height:50px;font-size:1.35rem}
 .am .cta{margin-top:10px;height:56px;padding:0;border-radius:16px}
 .cta.off{opacity:.4}
+.askn{margin:12px 0 0;background:var(--panel);border:1px solid var(--accent);border-radius:14px;padding:10px 12px}
+.askr{display:flex;gap:6px;margin-top:8px}.askr input{flex:1;min-width:0;background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:9px 10px;font:500 16px -apple-system,system-ui,sans-serif}
+.askr button{background:var(--accent);color:#0B100E;border-radius:10px;padding:0 14px;font-weight:700}.askr #askX{background:var(--panel2);color:var(--ink3)}
 .resend{display:block;margin:18px auto 0;background:none;color:var(--ink3);font-size:.78rem;font-weight:600;padding:10px}
 .qp{display:flex;gap:6px;overflow-x:auto;margin:6px -16px 0;padding:0 16px;scrollbar-width:none}.qp::-webkit-scrollbar{display:none}
 .qp button{flex:none;background:var(--panel);border:1px solid var(--line);color:var(--ink2);padding:7px 11px;border-radius:99px;font-size:.76rem;font-weight:600}
@@ -10295,8 +10298,8 @@ function findAlignmentPattern(matrix, alignmentPatternQuads, topRight, topLeft, 
 const BANK={"970415":"icb","970436":"vcb","970418":"bidv","970405":"vba","970448":"ocb","970422":"mb","970407":"tcb","970416":"acb","970432":"vpb","970423":"tpb","970403":"stb","970437":"hdb","970454":"vccb","970429":"scb","970441":"vib","970443":"shb","970431":"eib","970426":"msb","546034":"cake","546035":"ubank","971005":"vtlmoney","963388":"timo","971011":"vnptmoney","970400":"sgicb","970409":"bab","971025":"momo","971133":"pvdb","970412":"pvcb","970414":"mbv","970419":"ncb","970424":"shbvn","970425":"abb","970427":"vab","970428":"nab","970430":"pgb","970433":"vietbank","970438":"bvb","970440":"seab","970446":"coopbank","970449":"lpb","970452":"klb","668888":"kbank","977777":"mafc","970442":"hlbvn","970467":"kebhanahn","970466":"kebhanahcm","533948":"citibank","970444":"cbb","422589":"cimb","796500":"dbs","970406":"vikki","999888":"vbsp","970408":"gpb","970463":"kbhcm","970462":"kbhn","970457":"wvn","970421":"vrb","458761":"hsbc","970455":"ibk - hn","970456":"ibk - hcm","970434":"ivb","970458":"uob","801011":"nhb hn","970410":"scvn","970439":"pbvn"}, BANKNAME={"970415":"VietinBank","970436":"Vietcombank","970418":"BIDV","970405":"Agribank","970448":"OCB","970422":"MBBank","970407":"Techcombank","970416":"ACB","970432":"VPBank","970423":"TPBank","970403":"Sacombank","970437":"HDBank","970454":"VietCapitalBank","970429":"SCB","970441":"VIB","970443":"SHB","970431":"Eximbank","970426":"MSB","546034":"CAKE","546035":"Ubank","971005":"ViettelMoney","963388":"Timo","971011":"VNPTMoney","970400":"SaigonBank","970409":"BacABank","971025":"MoMo","971133":"PVcomBank Pay","970412":"PVcomBank","970414":"MBV","970419":"NCB","970424":"ShinhanBank","970425":"ABBANK","970427":"VietABank","970428":"NamABank","970430":"PGBank","970433":"VietBank","970438":"BaoVietBank","970440":"SeABank","970446":"COOPBANK","970449":"LPBank","970452":"KienLongBank","668888":"KBank","977777":"MAFC","970442":"HongLeong","970467":"KEBHANAHN","970466":"KEBHanaHCM","533948":"Citibank","970444":"CBBank","422589":"CIMB","796500":"DBSBank","970406":"Vikki","999888":"VBSP","970408":"GPBank","970463":"KookminHCM","970462":"KookminHN","970457":"Woori","970421":"VRB","458761":"HSBC","970455":"IBKHN","970456":"IBKHCM","970434":"IndovinaBank","970458":"UnitedOverseas","801011":"Nonghyup","970410":"StandardChartered","970439":"PublicBank"};
 /* CÙNG danh sách loại với tab Chi tiêu trên máy tính — chép sang là loại đi theo, khỏi chọn lại */
 const CATS=[['an','Ăn uống','🍜'],['giaitri','Giải trí · cà phê','☕'],['dilai','Đi lại','🛵'],['muasam','Mua sắm','🛍'],
-  ['nha','Nhà cửa · hoá đơn','🏠'],['con','Con cái','🧸'],['suckhoe','Sức khoẻ','💊'],['giadinh','Gia đình · biếu','👪'],
-  ['khac','Khác','•'],['nap','Của mình — nạp/tiết kiệm','↪']];
+  ['nha','Nhà cửa · hoá đơn','🏠'],['con','Con cái','🧸'],['suckhoe','Sức khoẻ','💊'],['giadinh','Gia đình','👪'],
+  ['bieu','Biếu · hỗ trợ','🎁'],['khac','Khác','•'],['nap','Của mình — nạp/tiết kiệm','↪']];
 const cat=k=>CATS.find(c=>c[0]===k)||['','chưa phân loại','?'];
 const pad2=n=>n<10?'0'+n:''+n;
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());};
@@ -10377,14 +10380,14 @@ function dayLab(d){if(d===today())return'Hôm nay';const y=new Date();y.setDate(
   const p=d.split('-');return p[2]+'/'+p[1];}
 
 /* tên loại ngắn cho lưới chọn và dòng phụ */
-const SH={an:'Ăn uống',giaitri:'Cà phê',dilai:'Đi lại',muasam:'Mua sắm',nha:'Nhà · HĐ',con:'Con cái',suckhoe:'Sức khoẻ',giadinh:'Gia đình',khac:'Khác',nap:'Của mình'};
+const SH={an:'Ăn uống',giaitri:'Cà phê',dilai:'Đi lại',muasam:'Mua sắm',nha:'Nhà · HĐ',con:'Con cái',suckhoe:'Sức khoẻ',giadinh:'Gia đình',bieu:'Biếu',khac:'Khác',nap:'Của mình'};
 /* tên hiển thị: chưa gõ tên (hoặc tên là số TK) → "TPBank ··4481", không có TK → tên loại */
 const dispName=x=>{const n=(x.name||'').trim();if(n&&!/^\d{5,}$/.test(n))return n;
   if(x.acc)return (BANKNAME[x.bin]||'TK')+' ··'+String(x.acc).slice(-4);return SH[x.cat]||'Không tên';};
 /* KÍN: đang bấm 👁 (ẩn số) thì khoản loại Gia đình cũng ẩn tên người nhận + ghi chú — người đứng cạnh chỉ thấy
    "Gia đình", không biết chi cho ai. Chép/đồng bộ sang Mac vẫn giữ tên thật. */
-const kin=x=>D.hide&&x.cat==='giadinh';
-const kinName=x=>kin(x)?'Gia đình':dispName(x);
+const kin=x=>D.hide&&(x.cat==='giadinh'||x.cat==='bieu');
+const kinName=x=>kin(x)?(x.cat==='bieu'?'Biếu':'Gia đình'):dispName(x);
 const kinNote=x=>kin(x)?'':(x.note||'');
 const noName=x=>!(x.name||'').trim()||/^\d{5,}$/.test((x.name||'').trim());
 const catGrid=sel=>`<div class="cg">${CATS.map(c=>`<button class="cgb${sel===c[0]?' on':''}" data-c="${c[0]}"><i>${c[2]}</i>${SH[c[0]]||c[1]}</button>`).join('')}</div>`;
@@ -10407,6 +10410,9 @@ function home(){
       <button class="eye" id="eye" aria-label="ẩn số">${D.hide?'🙈':'👁'}</button></div>
     ${location.host==='quet-chi.github.io'?`<div class="warn" style="margin:12px 0 0;line-height:1.55">📍 <b>Địa chỉ cũ</b> — mạng nhà hay chặn trang này.
       Bật <b>☁ Tự đồng bộ</b> ở đây (cùng mật khẩu) để các khoản cũ lên Mac, rồi dùng <b>quet-chi-sync.web.app</b>.</div>`:''}
+    ${(()=>{const a=D.ask&&D.tx.find(t=>t.id===D.ask);if(!a||!noName(a)||Date.now()-a.ts>2*864e5)return'';
+      return `<div class="askn"><div class="tiny">Khoản <b>${short(a.amt)}</b> vừa rồi chuyển cho ai? <span class="dim">MB vừa hiện tên — gõ một lần, lần sau tự điền</span></div>
+        <div class="askr"><input id="askN" placeholder="Tên người nhận / quán" enterkeyhint="done"><button id="askOk">Lưu</button><button id="askX" aria-label="bỏ qua">×</button></div></div>`;})()}
     ${pills?`<div class="pills">${pills}</div>`:''}
     ${L.length?list+(s.moi||syncCfg()?'':`<button class="resend" id="exp2">⇪ Chép lại 14 ngày sang Mac</button>`):'<div class="empty">Chưa có khoản nào.<br>Lần tới trả tiền, bấm <b>Quét QR</b> thay vì mở thẳng MB.</div>'}
   </div>
@@ -10418,6 +10424,10 @@ function home(){
   if($('exp'))$('exp').onclick=quickCopy;
   if($('exp2'))$('exp2').onclick=quickCopy;
   if($('sy'))$('sy').onclick=()=>{S={v:'sync'};render();};
+  if($('askOk')){const done=()=>{const a=D.tx.find(t=>t.id===D.ask),n=$('askN').value.trim();
+      if(a&&n){a.name=n;if(a.bin&&a.acc)D.who[a.bin+'|'+a.acc]={name:n,cat:a.cat};}delete D.ask;save();render();if(n)toast('đã nhớ tên '+esc(n));};
+    $('askOk').onclick=done;$('askN').onkeydown=e=>{if(e.key==='Enter')done();};
+    $('askX').onclick=()=>{delete D.ask;save();render();};}
   if($('cho'))$('cho').onclick=()=>{S={v:'cho'};render();};
   document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{S={v:'ed',id:b.dataset.ed};render();});}
 
@@ -10499,7 +10509,7 @@ function amtView(){
     ${S.dum?`<div class="split"><button id="amtT" class="sp"></button><button id="mineT" class="sp"></button></div><div class="waitl" id="wl"></div>`
       :`<button class="amt" id="amtT"></button>`}
     <div class="opts"><div class="seg">${VIA.map(v=>`<button data-via="${v[0]}" class="${S.via===v[0]?'on':''}">${v[1]}</button>`).join('')}</div>
-      <button class="op${S.dum?' on':''}" id="dumT">👥 Trả dùm</button></div>
+      <button class="op${S.dum?' on':''}" id="dumT">👥 Trả dùm</button><button class="op${S.once?' on':''}" id="onceT" title="Khoản lớn một lần — học phí, bảo hiểm năm…">1 lần</button></div>
     <input id="nt" class="nt" value="${esc(S.note||'')}" placeholder="✎ Mua gì? (không bắt buộc)" enterkeyhint="done">
     ${catGrid(S.cat)}
     ${khongNapas?'<div class="warn">QR cửa hàng — ngân hàng mở nhưng không điền sẵn. Quét lại trong app. Khoản vẫn được ghi.</div>':''}
@@ -10520,6 +10530,7 @@ function amtView(){
     else $('amtT').innerHTML=f(n)+'<small> đ</small>';
     $('go').classList.toggle('off',!(n>0&&S.cat));};
   sync();
+  $('onceT').onclick=()=>{S.once=!S.once;$('onceT').classList.toggle('on',S.once);};
   $('dumT').onclick=()=>{S.dum=!S.dum;S.tgt=S.dum?'mine':'amt';if(!S.dum)S.mine='';render();};
   $('amtT').onclick=()=>{if(S.dum){S.tgt='amt';sync();}};
   if($('mineT'))$('mineT').onclick=()=>{S.tgt='mine';sync();};
@@ -10537,6 +10548,9 @@ function amtView(){
     const x={id:'p'+Date.now(),ts:Date.now(),d:today(),amt,name:(S.name||'').trim(),cat:S.cat,src:S.tay?'tay':'qr',via:S.via||'mb',synced:false};
     const nt=(S.note||'').trim();if(nt)x.note=nt;
     if(S.dum&&mine<amt){x.mine=mine;x.nhan=false;}
+    if(S.once)x.once=true;
+    /* QR không kèm tên → nhớ hỏi tên khi quay lại (MB vừa hiện tên người nhận); hỏi một lần cho mỗi tài khoản */
+    if(!x.name&&q&&q.napas)D.ask=x.id;
     D.via=x.via;
     if(q&&q.napas){x.bin=q.bin;x.acc=q.acc;const k=q.bin+'|'+q.acc;D.who[k]={name:x.name||(D.who[k]||{}).name||'',cat:S.cat};}
     D.tx.push(x);save();
@@ -10561,7 +10575,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)return;refr
 
 /* ── chép sang sổ trên máy tính: bảng tab-separated, tab Chi tiêu đọc được cả cột Loại ── */
 function expTxt(L){return ['Ngày\tNội dung\tSố tiền\tLoại',...L.map(x=>{const p=x.d.split('-');
-    return p[2]+'/'+p[1]+'/'+p[0]+'\t'+dispName(x).replace(/\t/g,' ')+(x.note?' — '+x.note.replace(/\t/g,' '):'')+(x.via&&x.via!=='mb'?' ('+viaName(x.via)+')':'')+(x.mine!=null?' [mình '+Math.round(x.mine)+']':'')+' [#'+x.id+']'+'\t-'+Math.round(x.amt)+'\t'+cat(x.cat)[1];})].join('\n');}
+    return p[2]+'/'+p[1]+'/'+p[0]+'\t'+dispName(x).replace(/\t/g,' ')+(x.note?' — '+x.note.replace(/\t/g,' '):'')+(x.via&&x.via!=='mb'?' ('+viaName(x.via)+')':'')+(x.mine!=null?' [mình '+Math.round(x.mine)+']':'')+(x.once?' [1 lần]':'')+' [#'+x.id+']'+'\t-'+Math.round(x.amt)+'\t'+cat(x.cat)[1];})].join('\n');}
 /* CHÉP MỘT CHẠM: bảng vào bộ nhớ tạm → Universal Clipboard sang Mac → sổ đầu tư tự nhận khi mở cửa sổ.
    Đánh dấu đã chép ngay, có Hoàn tác. Chép không được (trình duyệt chặn) → mở màn chép tay như cũ. */
 /* GỬI LẠI: bộ nhớ tạm chỉ sang Mac khi Mac đang thức, ở gần, và sổ được mở trước khi chép thứ khác — lỡ một lần
@@ -10668,7 +10682,7 @@ async function sealed(k,obj){const key=await crypto.subtle.importKey('raw',unb64
   const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(obj))));
   const out=new Uint8Array(12+ct.length);out.set(iv);out.set(ct,12);return b64(out);}
 const memoOf=x=>dispName(x)+(x.note?' — '+x.note:'')+(x.via&&x.via!=='mb'?' ('+viaName(x.via)+')':'');
-const payOf=x=>({id:x.id,d:x.d,amt:Math.round(x.amt),mine:x.mine!=null?Math.round(x.mine):null,cat:x.cat,memo:memoOf(x),ts:x.ts});
+const payOf=x=>({id:x.id,d:x.d,amt:Math.round(x.amt),mine:x.mine!=null?Math.round(x.mine):null,cat:x.cat,memo:memoOf(x),ts:x.ts,...(x.once?{once:true}:{})});
 const hashOf=o=>{const s=JSON.stringify(o);let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return String(h);};
 const fbDoc=(vid,id)=>`https://firestore.googleapis.com/v1/projects/${FB_PID}/databases/(default)/documents/v/${vid}/tx/${encodeURIComponent(id)}`;
 let syncBusy=false,syncErr='',syncT=null;
