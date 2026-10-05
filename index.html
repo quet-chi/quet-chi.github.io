@@ -10748,7 +10748,9 @@ window.addEventListener('hashchange',fromHash);
 /* chạy được khi mạng chập chờn: sw.js lấy bản mới nếu mạng trả lời trong 4 giây, không thì mở bản đã lưu */
 if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(()=>{});
   /* sw.js mở app bằng bản đã lưu cho nhanh; tải xong bản mới ở nền thì báo ở đây */
-  navigator.serviceWorker.addEventListener('message',e=>{if(e.data==='ban-moi')toast('Có bản mới',()=>location.reload(),'Tải lại');});}
+  navigator.serviceWorker.addEventListener('message',e=>{if(e.data!=='ban-moi')return;
+    /* đang ở màn chính (không gõ dở gì) → tự tải lại luôn; đang nhập/sửa thì chỉ báo, khỏi mất số đang gõ */
+    if(S.v==='home'||S.v==='tk')location.reload();else toast('Có bản mới',()=>location.reload(),'Tải lại');});}
 if(!fromHash())render();
 syncSoon();
 </script></body></html>
