@@ -10404,7 +10404,12 @@ function tlv(s){const o={};let i=0;while(i+4<=s.length){const t=s.substr(i,2),l=
 function readQR(s){
   const top=tlv(s),r={raw:s,napas:false,bin:null,acc:null,amt:null,name:(top['59']||'').trim(),memo:''};
   for(const k of Object.keys(top)){const n=+k;if(n<26||n>51)continue;const sub=tlv(top[k]);
-    if((sub['00']||'').toUpperCase()==='A000000727'&&sub['01']){const b=tlv(sub['01']);r.bin=b['00']||null;r.acc=b['01']||null;r.napas=!!(r.bin&&r.acc);break;}}
+    if((sub['00']||'').toUpperCase()==='A000000727'&&sub['01']){const b=tlv(sub['01']);
+      /* MÃ DỊCH VỤ (tag 02): QRIBFTTA/QRIBFTTC = chuyển vào tài khoản/thẻ · QRPUSH = THANH TOÁN CỬA HÀNG (Circle K…).
+         QR cửa hàng mà coi là số tài khoản → link MB sai → lỗi (Mau gặp 05/10). */
+      if((sub['02']||'').toUpperCase()==='QRPUSH'){r.merchant=true;r.mid=(b['00']||'')+'-'+(b['01']||'');break;}
+      r.bin=b['00']||null;r.acc=b['01']||null;r.napas=!!(r.bin&&r.acc);break;}
+    if(sub['00']&&!r.merchant){r.merchant=true;r.mid=r.mid||(sub['00']+'-'+(sub['01']||''));}}
   if(top['54'])r.amt=Math.round(parseFloat(top['54']))||null;
   if(top['62']){const a=tlv(top['62']);r.memo=(a['08']||'').trim();}
   return r;}
@@ -10584,7 +10589,7 @@ function edView(){
 /* ── quét: camera trực tiếp; không mở được camera thì chụp ảnh rồi đọc ── */
 let stream=null,raf=null;
 function stopCam(){if(raf)cancelAnimationFrame(raf);raf=null;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}}
-function gotQR(txt){stopCam();const q=readQR(txt);const k=q.napas?q.bin+'|'+q.acc:null,mem=k?D.who[k]:null;
+function gotQR(txt){stopCam();const q=readQR(txt);const k=q.napas?q.bin+'|'+q.acc:q.mid?'m|'+q.mid:null,mem=k?D.who[k]:null;
   S={v:'amt',q,amt:q.amt?String(q.amt):'',cat:mem?mem.cat:null,name:mem&&mem.name&&!/^\d{5,}$/.test(mem.name)?mem.name:(q.name||''),tay:false};
   if(navigator.vibrate)navigator.vibrate(30);render();}
 function decodeImage(img){const c=document.createElement('canvas'),w=Math.min(1000,img.width),h=Math.round(img.height*w/img.width);
@@ -10601,15 +10606,21 @@ function scan(){
     img.onload=()=>{const r=decodeImage(img);if(r)gotQR(r.data);else $('hint').textContent='Không đọc được QR trong ảnh — thử ảnh rõ hơn';};
     img.src=URL.createObjectURL(f);};
   if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){$('hint').textContent='Trình duyệt không mở được camera — bấm "Chọn ảnh QR"';return;}
-  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false}).then(st=>{stream=st;const v=$('vid');v.srcObject=st;v.play();
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1920},height:{ideal:1080}},audio:false}).then(st=>{stream=st;const v=$('vid');v.srcObject=st;v.play();
     const c=document.createElement('canvas'),x=c.getContext('2d',{willReadFrequently:true});
-    const tick=()=>{if(!stream)return;if(v.readyState===v.HAVE_ENOUGH_DATA){const w=480,h=Math.round(v.videoHeight*w/v.videoWidth);
-      c.width=w;c.height=h;x.drawImage(v,0,0,w,h);const r=jsQR(x.getImageData(0,0,w,h).data,w,h,{inversionAttempts:'dontInvert'});
+    /* ĐỌC QR KHÓ (05/10): QR cửa hàng dày, in trên mica loá, nhiều quầy dùng mã TRẮNG trên nền TỐI → xoay vòng 3 cách đọc:
+       vùng giữa khung ngắm ở độ phân giải cao (mã nhỏ/xa) · cả khung · đảo màu. */
+    let fr=0;
+    const tick=()=>{if(!stream)return;if(v.readyState===v.HAVE_ENOUGH_DATA){const vw=v.videoWidth,vh=v.videoHeight,m=fr++%3;let r=null;
+      if(m===0){const s=Math.round(Math.min(vw,vh)*0.7),sx=(vw-s)/2,sy=(vh-s)/2,o=Math.min(720,s);
+        c.width=o;c.height=o;x.drawImage(v,sx,sy,s,s,0,0,o,o);r=jsQR(x.getImageData(0,0,o,o).data,o,o,{inversionAttempts:'dontInvert'});}
+      else{const w=640,h=Math.round(vh*w/vw);c.width=w;c.height=h;x.drawImage(v,0,0,w,h);
+        r=jsQR(x.getImageData(0,0,w,h).data,w,h,{inversionAttempts:m===1?'dontInvert':'onlyInvert'});}
       if(r&&r.data){gotQR(r.data);return;}}raf=requestAnimationFrame(tick);};tick();})
   .catch(()=>{$('hint').textContent='Chưa được phép dùng camera — bấm "Chọn ảnh QR" hoặc cho phép camera trong Cài đặt';});}
 
 /* ── nhập tiền ── */
-function goLabel(){return S.tay?'Ghi vào sổ':AUTOFILL[S.via]?'Chuyển qua '+viaName(S.via):'Ghi sổ · mở '+viaName(S.via);}
+function goLabel(){return S.tay?'Ghi vào sổ':S.q&&!S.q.napas?'Ghi sổ · mở '+viaName(S.via)+' để quét':AUTOFILL[S.via]?'Chuyển qua '+viaName(S.via):'Ghi sổ · mở '+viaName(S.via);}
 function hintTxt(){return S.tay?'Chỉ ghi sổ, không mở ngân hàng.':S.via==='mb'?'Trong MB, nhìn <b>tên người nhận</b> trước khi xác nhận.'
   :viaName(S.via)+' không cho điền sẵn — app sẽ mở, quét lại QR trong đó. Khoản đã được ghi.';}
 /* phần của mình khi trả dùm: không nhập → coi như cả khoản là của mình */
@@ -10635,7 +10646,7 @@ function amtView(){
       <button class="op${S.dum?' on':''}" id="dumT">👥 Trả dùm</button><button class="op${S.once?' on':''}" id="onceT" title="Khoản lớn một lần — học phí, bảo hiểm năm…">1 lần</button></div>
     <input id="nt" class="nt" value="${esc(S.note||'')}" placeholder="✎ Mua gì? (không bắt buộc)" enterkeyhint="done">
     ${catGrid(S.cat)}
-    ${khongNapas?'<div class="warn">QR cửa hàng — ngân hàng mở nhưng không điền sẵn. Quét lại trong app. Khoản vẫn được ghi.</div>':''}
+    ${khongNapas?'<div class="warn">🏪 <b>QR thanh toán cửa hàng</b> — ngân hàng không cho tự điền loại này. Bấm nút: khoản được ghi, MB mở ra → <b>quét lại mã ở quầy bằng MB</b>.</div>':''}
     <div class="padw"><div class="pad">${['1','2','3','4','5','6','7','8','9','000','0','⌫'].map(k=>`<button data-k="${k}">${k}</button>`).join('')}</div>
       <button class="cta" id="go">${goLabel()}</button><div class="hint" id="hint">${hintTxt()}</div></div>
   </div></div>`;
@@ -10678,11 +10689,14 @@ function amtView(){
     if(!x.name&&q&&q.napas)D.ask=x.id;
     D.via=x.via;
     if(q&&q.napas){x.bin=q.bin;x.acc=q.acc;const k=q.bin+'|'+q.acc;D.who[k]={name:x.name||(D.who[k]||{}).name||'',cat:S.cat};}
+    else if(q&&q.mid){const k='m|'+q.mid;D.who[k]={name:x.name||(D.who[k]||{}).name||'',cat:S.cat};}
     D.tx.push(x);save();
     const undo=()=>{gone.add(x.id);D.tx=D.tx.filter(t=>t.id!==x.id);save();render();};
     S={v:'home'};render();
     if(x.src==='tay'){toast('đã ghi '+short(mineOf(x))+' · '+esc(kinName(x)),undo);return;}
-    pendingUndo={x,undo};location.href=x.via==='momo'?'momo://':mbLink(q,x.amt,x.via);};}
+    /* QR cửa hàng: không có link điền sẵn hợp lệ → mở thẳng app ngân hàng, quét lại mã ở quầy bằng app đó */
+    const plain={mb:'mbbank://',momo:'momo://'};
+    pendingUndo={x,undo};location.href=x.via==='momo'?'momo://':q&&!q.napas?(plain[x.via]||'https://dl.vietqr.io/pay?app='+x.via):mbLink(q,x.amt,x.via);};}
 /* bấm nhanh liên tiếp (000, ⌫): iOS hiểu là chạm đôi để phóng to — chặn và tự bấm */
 document.addEventListener('gesturestart',e=>e.preventDefault());
 document.addEventListener('dblclick',e=>e.preventDefault());
