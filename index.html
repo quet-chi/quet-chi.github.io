@@ -171,6 +171,16 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .pad,.pad button{touch-action:none}   /* vùng bàn phím: không phóng to, không cuộn — bấm nhanh bao nhiêu cũng chỉ là bấm */
 .am .cta{margin-top:10px;height:56px;padding:0;border-radius:16px}
 .cta.off{opacity:.4}
+.eye2.add{background:var(--accent);color:#0B100E;border-color:var(--accent);font-size:1.3rem;font-weight:700}
+.tspark{width:100%;height:56px;display:block;margin-top:10px}
+.tsleg{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:.74rem;color:var(--ink2)}.tsleg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}.tsleg b{color:var(--ink);font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.lbv{font:700 2rem ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:-.03em;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}.lbv small{font-size:.42em;color:var(--ink3)}
+.chip2{font:600 .66rem -apple-system,system-ui,sans-serif;padding:3px 8px;border-radius:99px;letter-spacing:0}.chip2.g{background:rgba(79,177,131,.15);color:var(--good)}.chip2.w{background:rgba(224,164,78,.15);color:var(--accent)}.chip2.b{background:rgba(226,131,116,.15);color:var(--bad)}
+.lbt{position:relative;height:10px;background:var(--panel2);border-radius:5px;margin:10px 0 6px;overflow:visible}
+.lbt i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:#199e70}.lbt i.all{background:rgba(25,158,112,.3)}
+.lbt b{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);border-radius:1px}
+.hs3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.hs3 span{display:block;font-size:.68rem;color:var(--ink3)}.hs3 b{font:700 .98rem ui-monospace,"SF Mono",Menlo,monospace}.upc{color:var(--good)}
+
 .wstrip{display:flex;gap:8px;overflow-x:auto;margin:14px -16px 0;padding:0 16px;scrollbar-width:none}.wstrip::-webkit-scrollbar{display:none}
 .wcard{flex:none;min-width:118px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:10px 12px;color:var(--ink);text-align:left;display:flex;flex-direction:column;gap:4px}
 .wcard span{font-size:.72rem;color:var(--ink2)}.wcard b{font:700 .95rem ui-monospace,"SF Mono",Menlo,monospace}.wcard.add{min-width:auto;justify-content:center;color:var(--ink3);font-size:.8rem}
@@ -10413,7 +10423,7 @@ function save(){try{
   localStorage.setItem('quetchi_v1',JSON.stringify(D));}catch(e){toast('không lưu được — trình duyệt đang chặn bộ nhớ');}
   syncSoon();}
 const money=n=>D.hide?'•••':Math.round(n).toLocaleString('vi-VN');
-const short=n=>{if(D.hide)return'•••';const a=Math.abs(n);return a>=1e6?(a/1e6).toFixed(a>=1e7?1:2).replace(/\.?0+$/,'').replace('.',',')+'tr':a>=1e3?Math.round(a/1e3)+'K':''+a;};
+const short=n=>{if(D.hide)return'•••';const a=Math.abs(n);if(a>=1e9)return (a/1e9).toFixed(a>=1e10?1:2).replace(/\.?0+$/,'').replace('.',',')+' tỷ';return a>=1e6?(a/1e6).toFixed(a>=1e7?1:2).replace(/\.?0+$/,'').replace('.',',')+'tr':a>=1e3?Math.round(a/1e3)+'K':''+a;};
 
 /* ── đọc QR VietQR (chuẩn EMVCo): tag 38 → 00 = A000000727 (NAPAS) → 01 → {00: BIN, 01: số TK};
    54 = số tiền đã gắn sẵn · 59 = tên · 62/08 = nội dung ── */
@@ -10498,11 +10508,12 @@ const IC={
   tk:'<svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>',
   qr:'<svg viewBox="0 0 24 24"><path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4M8 12h8"/></svg>',
   tay:'<svg viewBox="0 0 24 24"><path d="M15.5 5.5l3 3L9 18l-4 1 1-4z"/></svg>',
+  ts:'<svg viewBox="0 0 24 24"><path d="M4 18h16M6 18V10l6-4 6 4v8M10 18v-5h4v5"/></svg>',
   cai:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/></svg>'};
 function tabbar(on){const t=(k,l)=>`<button class="tb${on===k?' on':''}" data-tab="${k}">${IC[k]}<span>${l}</span></button>`;
-  return `<nav class="tabs">${t('so','Sổ')}${t('tk','Thống kê')}<button class="tbq" data-tab="qr" aria-label="Quét QR">${IC.qr}</button>${t('tay','Ghi tay')}${t('cai','Cài đặt')}</nav>`;}
+  return `<nav class="tabs">${t('so','Sổ')}${t('tk','Thống kê')}<button class="tbq" data-tab="qr" aria-label="Quét QR">${IC.qr}</button>${t('ts','Tài sản')}${t('cai','Cài đặt')}</nav>`;}
 function bindTabs(){document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{const k=b.dataset.tab;
-  if(k==='so')S={v:'home'};else if(k==='tk')S={v:'tk',m:today().slice(0,7)};else if(k==='cai')S={v:'cai'};
+  if(k==='so')S={v:'home'};else if(k==='tk')S={v:'tk',m:today().slice(0,7)};else if(k==='cai')S={v:'cai'};else if(k==='ts'){S={v:'ts'};render();tsPull();return;}
   else if(k==='qr')S={v:'scan',q:null,amt:'',cat:null,name:'',tay:false};else S={v:'amt',q:null,amt:'',cat:null,name:'',tay:true};render();});}
 /* icon loại: nền tô nhạt đúng màu loại (cùng bảng màu với Thống kê) */
 const icoBg=k=>{const c=TKC[k];return c?`background:${c}26`:'';};
@@ -10526,7 +10537,7 @@ function home(){
     :`<button class="chipb warnp" data-tab="cai">☁ Chưa bật đồng bộ</button>`;
   $('app').innerHTML=`<div class="wrap hm2">
     <div class="topb"><div><div class="hi">${['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'][now.getDay()]}, ${now.getDate()}/${now.getMonth()+1}</div><b>Sổ chi tiêu</b></div>
-      <span style="display:flex;gap:8px"><button class="eye2" id="fnd" aria-label="tìm kiếm">🔍</button><button class="eye2" id="eye" aria-label="ẩn số">${D.hide?'🙈':'👁'}</button></span></div>
+      <span style="display:flex;gap:8px"><button class="eye2 add" data-tab="tay" aria-label="ghi tay">＋</button><button class="eye2" id="fnd" aria-label="tìm kiếm">🔍</button><button class="eye2" id="eye" aria-label="ẩn số">${D.hide?'🙈':'👁'}</button></span></div>
     ${location.host==='quet-chi.github.io'?`<div class="warn" style="margin:0 0 12px;line-height:1.55">📍 <b>Địa chỉ cũ</b> — mạng nhà hay chặn trang này.
       Bật <b>☁ Tự đồng bộ</b> ở Cài đặt (cùng mật khẩu) để các khoản cũ lên Mac, rồi dùng <b>quet-chi-sync.web.app</b>.</div>`:''}
     <button class="hcard" data-tab="tk">
@@ -10906,7 +10917,9 @@ async function syncPull(c,sent){
   do{const r=await fetch(base+'?pageSize=300'+(tok?'&pageToken='+encodeURIComponent(tok):''));
     if(!r.ok)throw new Error('Firebase trả '+r.status);const j=await r.json();docs=docs.concat(j.documents||[]);tok=j.nextPageToken||'';}while(tok);
   load();const have=new Map(D.tx.map(x=>[x.id,x]));let add=0,del=0;
-  for(const doc of docs){let p;try{p=await unseal(c.k,doc.fields.c.stringValue);}catch(e){continue;}
+  for(const doc of docs){if(/\/z-taisan$/.test(doc.name))continue;   /* bản tóm tắt tài sản từ Mac — không phải khoản chi */
+    let p;try{p=await unseal(c.k,doc.fields.c.stringValue);}catch(e){continue;}
+    if(!p||!p.id)continue;
     if(p.del){if(have.has(p.id)){gone.add(p.id);D.tx=D.tx.filter(x=>x.id!==p.id);del++;}continue;}
     if(have.has(p.id))continue;
     /* đã từng đồng bộ mà nay không còn trên máy = vừa xoá ở máy NÀY → đừng kéo lại, để lệnh xoá được gửi đi */
@@ -11065,8 +11078,65 @@ function findView(){const f=S.f||(S.f={q:'',c:'',w:'',m:''});
   document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{f[b.dataset.f]=b.dataset.v;render();});
   document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{S={v:'ed',id:b.dataset.ed,back:'find',f};render();});}
 
+/* ══ TAB TÀI SẢN (05/10) — đọc bản tóm tắt do sổ trên Mac mã hoá gửi lên (doc "z-taisan"), giải bằng khoá đồng bộ.
+   Chỉ đọc. Lưu bản gần nhất trong máy để mở được khi mất mạng. Ẩn số (👁) che cả số tháng và % — như sổ trên Mac. ══ */
+const TS_KEY='quetchi_taisan';
+function tsGet(){try{return JSON.parse(localStorage.getItem(TS_KEY)||'null');}catch(e){return null;}}
+let tsBusy=false,tsErr='';
+async function tsPull(){const c=syncCfg();if(!c||tsBusy||FB_PID.startsWith('__'))return;tsBusy=true;
+  try{const r=await fetch(fbDoc(c.vid,'z-taisan'));
+    if(r.status===404){tsErr='chưa có — mở khoá sổ trên Mac một lần để gửi lên';}
+    else if(!r.ok)throw new Error('Firebase trả '+r.status);
+    else{const j=await r.json(),a=await unseal(c.k,j.fields.c.stringValue);localStorage.setItem(TS_KEY,JSON.stringify(a));tsErr='';}}
+  catch(e){tsErr=navigator.onLine===false?'mất mạng — đang xem bản lưu':String(e.message||e);}
+  tsBusy=false;if(S.v==='ts')render();}
+function tsView(){const a=tsGet(),H=D.hide,c=syncCfg();
+  const M=n=>H?'•••':money(n),Sh=n=>H?'•••':short(n),N=(v,d)=>H?'•••':(Math.round(v*10)/10).toFixed(d==null?1:d).replace('.',',');
+  const toDate=m=>{const d=new Date();d.setMonth(d.getMonth()+Math.floor(m));return pad2(d.getMonth()+1)+'/'+d.getFullYear();};
+  let body;
+  if(!c)body=`<div class="empty">Bật <b>đồng bộ</b> ở Cài đặt (cùng mật khẩu với sổ trên Mac) để xem tài sản ở đây.</div>`;
+  else if(!a)body=`<div class="empty">${tsBusy?'Đang tải…':esc(tsErr||'Chưa có dữ liệu tài sản.')}</div>`;
+  else{
+    const parts=[['Tiết kiệm',a.savings,'#199e70'],['Vàng',a.gold,'#c98500'],['Crypto',a.crypto,'#d95926']].filter(x=>x[1]>0);
+    const st=a.runSave>=a.lim?['g','đủ luật '+a.lim+' tháng']:a.runSave>=3?['w','dưới luật '+a.lim+' tháng']:['b','mỏng'];
+    const scale=Math.max(a.runAll,a.lim*1.25,6);
+    const hist=a.hist||[],hv=hist.map(x=>x[1]),mn=Math.min(...hv),mx=Math.max(...hv);
+    const W=340,Hh=56,pts=hv.map((v,i)=>[(i/(Math.max(1,hv.length-1))*W).toFixed(1),(Hh-4-((v-mn)/((mx-mn)||1))*(Hh-8)).toFixed(1)]);
+    const d30=hv.length>1?hv[hv.length-1]-hv[0]:0;
+    const ago=Math.round((Date.now()-a.ts)/6e4);
+    body=`
+    <div class="hcard" style="cursor:default">
+      <div class="hcl">Tổng tài sản</div><div class="hcv">${M(a.total)}<small> đ</small></div>
+      <div class="hcd">${hv.length>1?`<span class="dchip ${d30>=0?'dn':'up'}">${d30>=0?'▲':'▼'} ${Sh(Math.abs(d30))}</span><span class="dsub">${hist.length} ngày gần nhất</span>`:''}</div>
+      ${hv.length>1&&!H?`<svg class="tspark" viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none"><path d="M${pts.map(p=>p.join(' ')).join(' L')}" fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round"/></svg>`:''}
+      <div class="segbar" style="margin-top:12px">${parts.map(x=>`<i style="flex:${x[1]};background:${x[2]}"></i>`).join('')}</div>
+      <div class="tsleg">${parts.map(x=>`<span><i style="background:${x[2]}"></i>${x[0]} <b>${H?'•••':Math.round(x[1]/a.total*100)+'%'}</b></span>`).join('')}</div>
+    </div>
+    <div class="tkc"><div class="tkh"><span>🧭 Nếu mất việc hôm nay</span><small>chi ${Sh(a.spend)}/tháng</small></div>
+      <div class="lbv">${N(a.runSave)}<small> tháng</small> ${H?'':`<span class="chip2 ${st[0]}">${st[1]}</span>`}</div>
+      <div class="dsub">chỉ bằng tiền tiết kiệm · sống tới khoảng <b>${H?'•••':toDate(a.runSave)}</b></div>
+      ${H?'<div class="lbt"></div>':`<div class="lbt"><i class="all" style="width:${Math.min(100,a.runAll/scale*100).toFixed(1)}%"></i><i style="width:${Math.min(100,a.runSave/scale*100).toFixed(1)}%"></i><b style="left:${(a.lim/scale*100).toFixed(1)}%"></b></div>`}
+      <div class="dsub">Bán cả vàng, crypto: <b>${N(a.runAll)} tháng</b>${H?'':' · vạch trắng = luật '+a.lim+' tháng'}</div></div>
+    <div class="tkc"><div class="tkh"><span>🏁 Tự do tài chính</span><small>đích ${Sh(a.fire.target)}</small></div>
+      <div class="lbv">${N(a.fire.pct)}<small> %</small></div>
+      <div class="lbt"><i style="width:${H?0:a.fire.pct.toFixed(1)}%;background:var(--accent)"></i></div>
+      <div class="dsub">${a.fire.years!=null&&isFinite(a.fire.years)?'Giữ nhịp nạp '+Sh(a.fire.contrib)+'/tháng → chạm đích khoảng <b>'+(H?'•••':new Date().getFullYear()+Math.ceil(a.fire.years))+'</b>':'Chưa đủ dữ liệu để ước năm chạm đích'}</div></div>
+    <div class="tkc"><div class="tkh"><span>🏦 Tiết kiệm</span><small>${a.sv.n} sổ</small></div>
+      <div class="hs3"><div><span>Đang có</span><b>${Sh(a.savings)}</b></div><div><span>Lãi đã nhận</span><b class="upc">+${Sh(a.sv.lai)}</b></div><div><span>Đang dồn</span><b class="upc">+${Sh(a.sv.dang)}</b></div></div>
+      <div class="dsub" style="margin:8px 0 4px">Sắp nhận</div>
+      ${a.soon.map(x=>{const dd=Math.round((new Date(x.d)-new Date(today()))/864e5);return `<div class="tli"><span>${x.d.slice(8)}/${x.d.slice(5,7)}</span><span class="n">${esc(x.name)}${x.ef?' <small>· KC</small>':''}<small> · còn ${dd} ngày</small></span><b>${Sh(x.v)}</b></div>`;}).join('')}
+    </div>
+    <div class="note">Cập nhật từ sổ trên Mac ${ago<60?ago+' phút':ago<1440?Math.round(ago/60)+' giờ':Math.round(ago/1440)+' ngày'} trước${tsErr?' · '+esc(tsErr):''}. Muốn mới hơn: mở khoá sổ trên Mac.</div>`;}
+  $('app').innerHTML=`<div class="wrap hm2">
+    <div class="topb"><div><div class="hi">Tiền riêng</div><b>Tài sản</b></div>
+      <span style="display:flex;gap:8px"><button class="eye2" id="tsr" aria-label="tải lại">↻</button><button class="eye2" id="eye" aria-label="ẩn số">${H?'🙈':'👁'}</button></span></div>
+    ${body}</div>${tabbar('ts')}`;
+  bindTabs();
+  $('eye').onclick=()=>{D.hide=!D.hide;save();render();};
+  $('tsr').onclick=()=>{tsPull();toast('đang tải…');};}
+
 function render(){if(S.v!=='scan')stopCam();
-  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else if(S.v==='sync')syncView();else if(S.v==='cai')caiView();else if(S.v==='vi')viView();else if(S.v==='mvf')mvfView();else if(S.v==='rec')recView();else if(S.v==='find')findView();else home();}
+  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else if(S.v==='sync')syncView();else if(S.v==='cai')caiView();else if(S.v==='vi')viView();else if(S.v==='mvf')mvfView();else if(S.v==='rec')recView();else if(S.v==='find')findView();else if(S.v==='ts')tsView();else home();}
 /* ĐƯỜNG TẮT: mở link có #quet → vào thẳng camera; #tay → vào thẳng ghi tay.
    Dùng cho Phím tắt iPhone (chạm 2 lần mặt lưng / nút Tác vụ / Trung tâm điều khiển). Xoá hash ngay
    để tải lại trang không bị bật camera lần nữa. */
