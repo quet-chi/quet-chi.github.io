@@ -171,6 +171,48 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .pad,.pad button{touch-action:none}   /* vùng bàn phím: không phóng to, không cuộn — bấm nhanh bao nhiêu cũng chỉ là bấm */
 .am .cta{margin-top:10px;height:56px;padding:0;border-radius:16px}
 .cta.off{opacity:.4}
+/* ══ giao diện app (05/10) ══ */
+.hm2{padding:calc(10px + env(safe-area-inset-top)) 16px calc(104px + env(safe-area-inset-bottom))}
+.topb{display:flex;justify-content:space-between;align-items:flex-end;margin:6px 2px 14px}
+.topb .hi{font-size:.78rem;color:var(--ink3)}.topb b{font-size:1.6rem;letter-spacing:-.02em}
+.eye2{width:42px;height:42px;border-radius:50%;background:var(--panel);border:1px solid var(--line);font-size:1.05rem}
+.hcard{display:block;width:100%;text-align:left;color:var(--ink);background:radial-gradient(120% 140% at 0% 0%,#24331F 0%,#162019 45%,#121915 100%);
+  border:1px solid #2A3A2F;border-radius:22px;padding:18px 18px 14px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.hcl{font-size:.8rem;color:var(--ink2)}.hcv{font:700 2.45rem ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:-.04em;margin:4px 0 6px}.hcv small{font-size:.38em;color:var(--ink3)}
+.hcd{display:flex;gap:8px;align-items:center;min-height:22px}
+.spark{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;height:74px;margin-top:14px}
+.sb{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:5px}
+.sb i{display:block;width:100%;max-width:26px;border-radius:6px 6px 3px 3px;background:#3987e5;opacity:.85;min-height:0}
+.sb.td i{background:var(--accent);opacity:1}.sb span{font:600 .6rem ui-monospace,"SF Mono",Menlo,monospace;color:var(--ink3)}.sb.td span{color:var(--accent)}
+.hcs{display:flex;justify-content:space-between;margin-top:12px;padding-top:11px;border-top:1px solid rgba(255,255,255,.06);font-size:.78rem;color:var(--ink2)}
+.hcs b{color:var(--ink);font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.chips2{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.chipb{background:var(--panel);border:1px solid var(--line);color:var(--ink2);padding:8px 12px;border-radius:99px;font-size:.78rem;font-weight:600}
+.chipb b{color:var(--accent);font-family:ui-monospace,"SF Mono",Menlo,monospace}.chipb.warnp{border-color:var(--accent);color:var(--accent)}
+.lh{display:flex;justify-content:space-between;margin:20px 2px 2px;font-weight:700;font-size:.95rem}
+.hm2 .row .ic{width:42px;height:42px;border-radius:14px;background:var(--panel2);font-size:1.2rem}
+.hm2 .row{grid-template-columns:42px 1fr auto}.hm2 .row>.dot{left:36px}
+.row .a.ns{color:var(--ink3)}
+/* thanh tab */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:12;display:grid;grid-template-columns:repeat(5,1fr);align-items:end;
+  padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:rgba(11,16,14,.88);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-top:1px solid var(--line)}
+.tb{background:none;color:var(--ink3);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.62rem;font-weight:600;padding:4px 0}
+.tb svg,.tbq svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.tb.on{color:var(--ink)}
+.tbq{justify-self:center;width:54px;height:54px;margin-top:-22px;border-radius:50%;background:var(--accent);color:#0B100E;display:grid;place-items:center;box-shadow:0 8px 22px rgba(224,164,78,.35),0 0 0 5px var(--bg)}
+.tbq svg{width:27px;height:27px;stroke-width:2.2}.tbq:active,.tb:active{transform:scale(.94)}
+/* cài đặt */
+.sgrp{background:var(--panel);border:1px solid var(--line);border-radius:18px;margin-bottom:14px;overflow:hidden}
+.sgl{font:600 .62rem ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);padding:12px 14px 4px}
+.srow{display:grid;grid-template-columns:32px 1fr auto;gap:12px;align-items:center;width:100%;background:none;color:var(--ink);padding:12px 14px;border-top:1px solid var(--line);text-align:left}
+.sgl+.srow{border-top:0}.sic{width:32px;height:32px;border-radius:10px;background:var(--panel2);display:grid;place-items:center}
+.st b{display:block;font-size:.92rem}.st small{display:block;font-size:.72rem;color:var(--ink3);margin-top:2px}.sr{color:var(--ink3);font-size:.85rem}
+.bd{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#0B100E;font-weight:800;font-size:.72rem}
+.sw{display:inline-block;width:44px;height:26px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);position:relative}
+.sw i{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--ink3);transition:left .15s}.sw.on{background:var(--good)}.sw.on i{left:20px;background:#fff}
+.toast{bottom:calc(96px + env(safe-area-inset-bottom))}
+
+.ver{text-align:center;font:500 .66rem ui-monospace,"SF Mono",Menlo,monospace;color:var(--ink3);opacity:.6;margin-top:-100px;padding:0 0 calc(112px + env(safe-area-inset-bottom))}
 .tk .mnav2{display:flex;align-items:center;justify-content:space-between;margin:6px 0 12px}
 .mnav2 b{font-size:1rem}.mnav2 button{width:40px;height:40px;border-radius:12px;background:var(--panel);border:1px solid var(--line);color:var(--ink);font-size:1.2rem}.mnav2 button:disabled{opacity:.25}
 .hero{background:linear-gradient(160deg,#1A241F,#121915);border:1px solid var(--line);border-radius:20px;padding:18px 18px 14px}
@@ -10425,45 +10467,92 @@ const kinName=x=>kin(x)?(x.cat==='bieu'?'Biếu':'Gia đình'):dispName(x);
 const kinNote=x=>kin(x)?'':(x.note||'');
 const noName=x=>!(x.name||'').trim()||/^\d{5,}$/.test((x.name||'').trim());
 const catGrid=sel=>`<div class="cg">${CATS.map(c=>`<button class="cgb${sel===c[0]?' on':''}" data-c="${c[0]}"><i>${c[2]}</i>${SH[c[0]]||c[1]}</button>`).join('')}</div>`;
+/* SỐ PHIÊN BẢN = giờ máy chủ phát file (Last-Modified lúc đưa lên) — nhìn là biết máy đang chạy bản nào */
+function verTxt(){const d=new Date(document.lastModified);if(isNaN(d)||location.protocol==='file:')return 'trên máy';
+  return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+' '+pad2(d.getHours())+':'+pad2(d.getMinutes());}
+/* ══ GIAO DIỆN APP (05/10) — thanh tab dưới cùng như app thu chi: Sổ · Thống kê · [Quét] · Ghi tay · Cài đặt ══ */
+const IC={
+  so:'<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
+  tk:'<svg viewBox="0 0 24 24"><path d="M5 20V11M12 20V5M19 20v-6"/></svg>',
+  qr:'<svg viewBox="0 0 24 24"><path d="M4 9V5a1 1 0 0 1 1-1h4M15 4h4a1 1 0 0 1 1 1v4M20 15v4a1 1 0 0 1-1 1h-4M9 20H5a1 1 0 0 1-1-1v-4M8 12h8"/></svg>',
+  tay:'<svg viewBox="0 0 24 24"><path d="M15.5 5.5l3 3L9 18l-4 1 1-4z"/></svg>',
+  cai:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21M5.6 5.6l1.8 1.8M16.6 16.6l1.8 1.8M5.6 18.4l1.8-1.8M16.6 7.4l1.8-1.8"/></svg>'};
+function tabbar(on){const t=(k,l)=>`<button class="tb${on===k?' on':''}" data-tab="${k}">${IC[k]}<span>${l}</span></button>`;
+  return `<nav class="tabs">${t('so','Sổ')}${t('tk','Thống kê')}<button class="tbq" data-tab="qr" aria-label="Quét QR">${IC.qr}</button>${t('tay','Ghi tay')}${t('cai','Cài đặt')}</nav>`;}
+function bindTabs(){document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{const k=b.dataset.tab;
+  if(k==='so')S={v:'home'};else if(k==='tk')S={v:'tk',m:today().slice(0,7)};else if(k==='cai')S={v:'cai'};
+  else if(k==='qr')S={v:'scan',q:null,amt:'',cat:null,name:'',tay:false};else S={v:'amt',q:null,amt:'',cat:null,name:'',tay:true};render();});}
+/* icon loại: nền tô nhạt đúng màu loại (cùng bảng màu với Thống kê) */
+const icoBg=k=>{const c=TKC[k];return c?`background:${c}26`:'';};
 function home(){
-  const s=stats(),now=new Date();
+  const s=stats(),now=new Date(),T=today();
   const L=D.tx.slice().sort((a,b)=>b.ts-a.ts).slice(0,60),dayT={},SY=syncCfg()?syncCfg().sent||{}:null;
   L.forEach(x=>{if(!notSpend(x.cat))dayT[x.d]=(dayT[x.d]||0)+mineOf(x);});
+  /* 7 ngày gần nhất cho biểu đồ nhỏ */
+  const d7=[...Array(7)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);const k=d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+    return{k,lab:['CN','T2','T3','T4','T5','T6','T7'][d.getDay()],v:D.tx.filter(x=>x.d===k&&!notSpend(x.cat)).reduce((a,x)=>a+mineOf(x),0)};});
+  const m7=Math.max(...d7.map(x=>x.v),1);
+  const pmK=mAdd(T.slice(0,7),-1),dn=+T.slice(8),pt=D.tx.filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===pmK&&+x.d.slice(8)<=dn).reduce((a,x)=>a+mineOf(x),0);
+  const dl=pt>0?(s.mo-pt)/pt*100:null;
   let last='',list='';
   L.forEach(x=>{if(x.d!==last){list+=`<div class="dh"><span>${dayLab(x.d)}</span><span>${dayT[x.d]?'−'+short(dayT[x.d]):''}</span></div>`;last=x.d;}
     const c=cat(x.cat),sub=[SH[x.cat]||c[1],kinNote(x)?esc(kinNote(x)):'',x.via&&x.via!=='mb'?viaName(x.via):''].filter(Boolean).join(' · ');
-    list+=`<button class="row" data-ed="${x.id}"><div class="ic">${c[2]}</div><div class="mid"><div class="n${noName(x)&&!kin(x)?' nn':''}">${esc(kinName(x))}</div><div class="s">${sub}</div></div>
-      <div class="r"><div class="a">−${short(mineOf(x))}</div>${x.mine!=null?`<div class="s">chuyển ${short(x.amt)}${x.nhan?' · đã nhận':''}</div>`:''}</div>${(SY?SY[x.id]===hashOf(payOf(x)):x.synced)?'':'<i class="dot"></i>'}</button>`;});
-  const pills=(s.cho?`<button class="pill" id="cho">👥 Chờ trả lại <b>${short(s.cho)}</b></button>`:'')
-    +(syncCfg()?(()=>{const n=syncPending();return `<button class="pill${syncErr?' warnp':''}" id="sy">${syncErr?'⚠ Chưa gửi '+n:n?'☁ Đang gửi '+n:'☁ Đã đồng bộ'}</button>`;})()
-     :s.moi?`<button class="pill${s.cu>=7?' warnp':''}" id="exp"><i class="dot"></i>Chép ${s.moi} sang Mac${s.cu>=7?' · '+s.cu+' ngày':''}</button><button class="pill" id="sy">☁ Tự đồng bộ</button>`:`<button class="pill" id="sy">☁ Tự đồng bộ</button>`);
-  $('app').innerHTML=`<div class="wrap hm">
-    <div class="hd"><div><div class="lab">Tháng ${now.getMonth()+1} đã chi</div>
-      <button class="tot" id="thang">${money(s.mo)}<small> đ</small><i>›</i></button>
-      <div class="sub">Hôm nay <b>${short(s.to)}</b> · ${s.toN} khoản</div></div>
-      <button class="eye" id="eye" aria-label="ẩn số">${D.hide?'🙈':'👁'}</button></div>
-    ${location.host==='quet-chi.github.io'?`<div class="warn" style="margin:12px 0 0;line-height:1.55">📍 <b>Địa chỉ cũ</b> — mạng nhà hay chặn trang này.
-      Bật <b>☁ Tự đồng bộ</b> ở đây (cùng mật khẩu) để các khoản cũ lên Mac, rồi dùng <b>quet-chi-sync.web.app</b>.</div>`:''}
+    const ns=notSpend(x.cat);
+    list+=`<button class="row" data-ed="${x.id}"><div class="ic" style="${icoBg(x.cat)}">${c[2]}</div><div class="mid"><div class="n${noName(x)&&!kin(x)?' nn':''}">${esc(kinName(x))}</div><div class="s">${sub}</div></div>
+      <div class="r"><div class="a${ns?' ns':''}">${ns?'':'−'}${short(mineOf(x))}</div>${x.mine!=null?`<div class="s">chuyển ${short(x.amt)}${x.nhan?' · đã nhận':''}</div>`:ns?'<div class="s">không tính chi</div>':''}</div>${(SY?SY[x.id]===hashOf(payOf(x)):x.synced)?'':'<i class="dot"></i>'}</button>`;});
+  const syncPill=syncCfg()?(()=>{const n=syncPending();return syncErr?`<button class="chipb warnp" data-tab="cai">⚠ Chưa gửi ${n}</button>`:n?`<button class="chipb" data-tab="cai">☁ Đang gửi ${n}</button>`:'';})()
+    :`<button class="chipb warnp" data-tab="cai">☁ Chưa bật đồng bộ</button>`;
+  $('app').innerHTML=`<div class="wrap hm2">
+    <div class="topb"><div><div class="hi">${['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'][now.getDay()]}, ${now.getDate()}/${now.getMonth()+1}</div><b>Sổ chi tiêu</b></div>
+      <button class="eye2" id="eye" aria-label="ẩn số">${D.hide?'🙈':'👁'}</button></div>
+    ${location.host==='quet-chi.github.io'?`<div class="warn" style="margin:0 0 12px;line-height:1.55">📍 <b>Địa chỉ cũ</b> — mạng nhà hay chặn trang này.
+      Bật <b>☁ Tự đồng bộ</b> ở Cài đặt (cùng mật khẩu) để các khoản cũ lên Mac, rồi dùng <b>quet-chi-sync.web.app</b>.</div>`:''}
+    <button class="hcard" data-tab="tk">
+      <div class="hcl">Tháng ${now.getMonth()+1} đã chi</div>
+      <div class="hcv">${money(s.mo)}<small> đ</small></div>
+      <div class="hcd">${dl!=null?`<span class="dchip ${dl>=0?'up':'dn'}">${dl>=0?'▲':'▼'} ${Math.abs(dl).toFixed(0)}%</span><span class="dsub">so cùng kỳ tháng trước</span>`:'<span class="dsub">chạm để xem thống kê ›</span>'}</div>
+      <div class="spark">${d7.map(x=>`<div class="sb${x.k===T?' td':''}"><i style="height:${x.v?Math.max(6,x.v/m7*100):0}%"></i><span>${x.lab}</span></div>`).join('')}</div>
+      <div class="hcs"><span>Hôm nay <b>${short(s.to)}</b></span><span>${s.toN} khoản</span><span>7 ngày <b>${short(d7.reduce((a,x)=>a+x.v,0))}</b></span></div>
+    </button>
     ${(()=>{const a=D.ask&&D.tx.find(t=>t.id===D.ask);if(!a||!noName(a)||Date.now()-a.ts>2*864e5)return'';
       return `<div class="askn"><div class="tiny">Khoản <b>${short(a.amt)}</b> vừa rồi chuyển cho ai? <span class="dim">MB vừa hiện tên — gõ một lần, lần sau tự điền</span></div>
         <div class="askr"><input id="askN" placeholder="Tên người nhận / quán" enterkeyhint="done"><button id="askOk">Lưu</button><button id="askX" aria-label="bỏ qua">×</button></div></div>`;})()}
-    ${pills?`<div class="pills">${pills}</div>`:''}
-    ${L.length?list+(s.moi||syncCfg()?'':`<button class="resend" id="exp2">⇪ Chép lại 14 ngày sang Mac</button>`):'<div class="empty">Chưa có khoản nào.<br>Lần tới trả tiền, bấm <b>Quét QR</b> thay vì mở thẳng MB.</div>'}
-  </div>
-  <div class="dock"><button class="dk2" id="tay">✎<span>Ghi tay</span></button><button class="dk1" id="scan">▣ Quét QR</button></div>`;
+    ${s.cho||syncPill?`<div class="chips2">${s.cho?`<button class="chipb" id="cho">👥 Chờ trả lại <b>${short(s.cho)}</b></button>`:''}${syncPill}</div>`:''}
+    <div class="lh"><span>Giao dịch gần đây</span></div>
+    ${L.length?list:'<div class="empty">Chưa có khoản nào.<br>Lần tới trả tiền, bấm nút <b>Quét</b> ở giữa thanh dưới.</div>'}
+  </div>${tabbar('so')}`;
+  bindTabs();
   $('eye').onclick=()=>{D.hide=!D.hide;save();render();};
-  $('scan').onclick=()=>{S={v:'scan',q:null,amt:'',cat:null,name:'',tay:false};render();};
-  $('tay').onclick=()=>{S={v:'amt',q:null,amt:'',cat:null,name:'',tay:true};render();};
-  $('thang').onclick=()=>{S={v:'tk',m:today().slice(0,7)};render();};
-  if($('exp'))$('exp').onclick=quickCopy;
-  if($('exp2'))$('exp2').onclick=quickCopy;
-  if($('sy'))$('sy').onclick=()=>{S={v:'sync'};render();};
   if($('askOk')){const done=()=>{const a=D.tx.find(t=>t.id===D.ask),n=$('askN').value.trim();
       if(a&&n){a.name=n;if(a.bin&&a.acc)D.who[a.bin+'|'+a.acc]={name:n,cat:a.cat};}delete D.ask;save();render();if(n)toast('đã nhớ tên '+esc(n));};
     $('askOk').onclick=done;$('askN').onkeydown=e=>{if(e.key==='Enter')done();};
     $('askX').onclick=()=>{delete D.ask;save();render();};}
   if($('cho'))$('cho').onclick=()=>{S={v:'cho'};render();};
   document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{S={v:'ed',id:b.dataset.ed};render();});}
+
+/* ── Cài đặt: đồng bộ, ẩn số, chép tay, phiên bản ── */
+function caiView(){const c=syncCfg(),n=syncPending(),s=stats();
+  const row=(id,ic,t,sub,right)=>`<button class="srow" id="${id}"><span class="sic">${ic}</span><span class="st"><b>${t}</b>${sub?`<small>${sub}</small>`:''}</span><span class="sr">${right||'›'}</span></button>`;
+  $('app').innerHTML=`<div class="wrap hm2">
+    <div class="topb"><div><div class="hi">Quét chi</div><b>Cài đặt</b></div></div>
+    <div class="sgrp"><div class="sgl">Dữ liệu</div>
+      ${row('s_sync','☁','Đồng bộ sang Mac',c?(syncErr?'⚠ chưa gửi được — '+esc(syncErr):n?'đang chờ gửi '+n+' khoản':'đã đồng bộ hết'):'chưa bật — bật để sổ trên Mac tự nhận',c?(syncErr||n?'<span class="bd">!</span>':'✓'):'Bật ›')}
+      ${row('s_cp','⇪','Chép sang Mac bằng tay',s.moi?s.moi+' khoản chưa chép':'dự phòng khi chưa bật đồng bộ')}
+      ${s.cho?row('s_cho','👥','Chờ mọi người trả lại',short(s.cho)+' · '+s.choN+' lần'):''}</div>
+    <div class="sgrp"><div class="sgl">Riêng tư</div>
+      ${row('s_hide',D.hide?'🙈':'👁','Ẩn số tiền','ẩn cả tên khoản Gia đình / Biếu',`<span class="sw${D.hide?' on':''}"><i></i></span>`)}</div>
+    <div class="sgrp"><div class="sgl">Ứng dụng</div>
+      ${row('s_ver','ⓘ','Phiên bản',verTxt()+' · '+location.host,'')}
+      ${row('s_up','↻','Tải lại bản mới nhất','dùng khi nghi máy đang chạy bản cũ','')}</div>
+    <div class="note">Dữ liệu nằm trên máy này; đồng bộ mã hoá trước khi gửi, chỉ sổ trên Mac mở được.</div>
+  </div>${tabbar('cai')}`;
+  bindTabs();
+  $('s_sync').onclick=()=>{S={v:'sync'};render();};
+  $('s_cp').onclick=()=>{if(s.moi||D.tx.length)quickCopy();else toast('chưa có khoản nào');};
+  if($('s_cho'))$('s_cho').onclick=()=>{S={v:'cho'};render();};
+  $('s_hide').onclick=()=>{D.hide=!D.hide;save();render();};
+  $('s_up').onclick=async()=>{try{const r=await navigator.serviceWorker.getRegistration();if(r)await r.update();
+    const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));}catch(e){}location.reload();};}
 
 /* ── sửa một khoản: tên, số tiền, loại, ghi chú, phần của mình; xoá nằm ở đây, không nằm cạnh số tiền ── */
 function edView(){
@@ -10673,8 +10762,8 @@ function tkView(){
   const big=L.slice().sort((a,b)=>mineOf(b)-mineOf(a)).slice(0,3);
   const nap=D.tx.filter(x=>notSpend(x.cat)&&x.d.slice(0,7)===m).reduce((a,x)=>a+x.amt,0);
   const once=L.filter(x=>x.once).reduce((a,x)=>a+mineOf(x),0);
-  $('app').innerHTML=`<div class="sheet"><div class="wrap tk">
-    <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Thống kê</b><span style="width:64px"></span></div>
+  $('app').innerHTML=`<div class="wrap tk hm2">
+    <div class="topb"><div><div class="hi">Chi tiêu</div><b>Thống kê</b></div></div>
     <div class="mnav2"><button id="pv" ${m<=first?'disabled':''} aria-label="tháng trước">‹</button><b>Tháng ${+m.slice(5)} · ${m.slice(0,4)}</b><button id="nx" ${isCur?'disabled':''} aria-label="tháng sau">›</button></div>
     <div class="hero">
       <div class="hl">${isCur?'Đã chi tới hôm nay':'Tổng chi tháng'}</div>
@@ -10698,9 +10787,9 @@ function tkView(){
       ${big.map(x=>{const p=x.d.split('-');return `<div class="tli"><span>${p[2]}/${p[1]}</span><span class="n">${cat(x.cat)[2]} ${esc(kinName(x))}${x.once?' <small>· 1 lần</small>':''}</span><b>${short(mineOf(x))}</b></div>`;}).join('')}</div>`
     :'<div class="empty">Tháng này chưa có khoản nào.</div>'}
     <div class="note">${[nap?'Không tính '+short(nap)+' tiền của mình chuyển đi (nạp, tiết kiệm, đầu tư).':'',L.some(x=>x.mine!=null)?'Khoản trả dùm chỉ tính phần của mình.':'',once?'Có '+short(once)+' khoản 1 lần.':''].filter(Boolean).join(' ')}</div>
-  </div></div>`;
+  </div>${tabbar('tk')}`;
+  bindTabs();
   const go=k=>{S.m=mAdd(m,k);S.fc=null;S.dsel=null;render();};
-  $('bk').onclick=()=>{S={v:'home'};render();};
   $('pv').onclick=()=>go(-1);$('nx').onclick=()=>go(1);
   document.querySelectorAll('[data-fc]').forEach(b=>b.onclick=()=>{S.fc=S.fc===b.dataset.fc?null:b.dataset.fc;render();});
   document.querySelectorAll('[data-ds]').forEach(g=>g.onclick=()=>{const d=+g.dataset.ds;S.dsel=S.dsel===d?null:d;render();});
@@ -10797,7 +10886,7 @@ function syncView(){const c=syncCfg(),n=syncPending();
     syncSet({vid:r.vid,k:r.k,sent:{}});render();syncNow();};}
 
 function render(){if(S.v!=='scan')stopCam();
-  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else if(S.v==='sync')syncView();else home();}
+  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else if(S.v==='sync')syncView();else if(S.v==='cai')caiView();else home();}
 /* ĐƯỜNG TẮT: mở link có #quet → vào thẳng camera; #tay → vào thẳng ghi tay.
    Dùng cho Phím tắt iPhone (chạm 2 lần mặt lưng / nút Tác vụ / Trung tâm điều khiển). Xoá hash ngay
    để tải lại trang không bị bật camera lần nữa. */
