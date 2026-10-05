@@ -10849,15 +10849,38 @@ function syncPending(){const c=syncCfg();if(!c)return 0;const sent=c.sent||{};le
 async function fbPut(c,id,p){const r=await fetch(fbDoc(c.vid,id),{method:'PATCH',headers:{'Content-Type':'application/json'},
   body:JSON.stringify({fields:{c:{stringValue:await sealed(c.k,p)},t:{integerValue:String(Date.now())}}})});
   if(!r.ok)throw new Error('Firebase trả '+r.status);}
+/* KÉO VỀ (05/10): mỗi icon trên màn hình chính có kho riêng — icon mới thì trống. Bật đồng bộ ở đâu thì kéo mọi khoản
+   đã có trên Firebase (cùng mật khẩu = cùng thư mục) về đó: khoản chưa có thì thêm, khoản đã bị xoá nơi khác thì xoá.
+   Khoản kéo về được đánh dấu "đã gửi" (sent) nên không bị gửi ngược lên. */
+async function unseal(k,str){const key=await crypto.subtle.importKey('raw',unb64(k),'AES-GCM',false,['decrypt']);const u=unb64(str);
+  return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:u.slice(0,12)},key,u.slice(12))));}
+async function syncPull(c,sent){
+  const base=`https://firestore.googleapis.com/v1/projects/${FB_PID}/databases/(default)/documents/v/${c.vid}/tx`;
+  let docs=[],tok='';
+  do{const r=await fetch(base+'?pageSize=300'+(tok?'&pageToken='+encodeURIComponent(tok):''));
+    if(!r.ok)throw new Error('Firebase trả '+r.status);const j=await r.json();docs=docs.concat(j.documents||[]);tok=j.nextPageToken||'';}while(tok);
+  load();const have=new Map(D.tx.map(x=>[x.id,x]));let add=0,del=0;
+  for(const doc of docs){let p;try{p=await unseal(c.k,doc.fields.c.stringValue);}catch(e){continue;}
+    if(p.del){if(have.has(p.id)){gone.add(p.id);D.tx=D.tx.filter(x=>x.id!==p.id);del++;}continue;}
+    if(have.has(p.id))continue;
+    /* đã từng đồng bộ mà nay không còn trên máy = vừa xoá ở máy NÀY → đừng kéo lại, để lệnh xoá được gửi đi */
+    if(sent[p.id]||gone.has(p.id))continue;
+    const x={id:p.id,ts:p.ts||Date.parse(p.d),d:p.d,amt:p.amt,name:p.memo||'',cat:p.cat,src:'tay',via:'mb',synced:true};
+    if(p.mine!=null){x.mine=p.mine;x.nhan=false;}if(p.once)x.once=true;
+    D.tx.push(x);sent[x.id]=hashOf(payOf(x));add++;}
+  if(add||del){localStorage.setItem('quetchi_v1',JSON.stringify(D));}
+  return{add,del};}
 async function syncNow(){const c=syncCfg();if(!c||syncBusy||FB_PID.startsWith('__'))return;syncBusy=true;
-  const sent=Object.assign({},c.sent||{});
-  try{const cur=JSON.parse(localStorage.getItem('quetchi_v1')||'{}').tx||[],seen=new Set();
+  const sent=Object.assign({},c.sent||{});let pulled=null;
+  try{pulled=await syncPull(c,sent);
+    const cur=JSON.parse(localStorage.getItem('quetchi_v1')||'{}').tx||[],seen=new Set();
     for(const x of cur){seen.add(x.id);const p=payOf(x),h=hashOf(p);if(sent[x.id]===h)continue;await fbPut(c,x.id,p);sent[x.id]=h;}
     for(const id of Object.keys(sent))if(!seen.has(id)){await fbPut(c,id,{id,del:true});delete sent[id];}
     syncErr='';}
   catch(e){syncErr=navigator.onLine===false?'mất mạng':String(e.message||e);}
   const c2=syncCfg();if(c2&&c2.vid===c.vid){c2.sent=sent;if(!syncErr)c2.last=Date.now();syncSet(c2);}
-  syncBusy=false;if(S.v==='home'||S.v==='sync')render();}
+  syncBusy=false;if(S.v==='home'||S.v==='sync'||S.v==='cai'||S.v==='tk')render();
+  if(pulled&&pulled.add)toast('☁ đã kéo về '+pulled.add+' khoản từ đồng bộ');}
 window.addEventListener('online',syncSoon);
 
 /* ── màn đồng bộ ── */
