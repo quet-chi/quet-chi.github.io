@@ -13,9 +13,11 @@ self.addEventListener('fetch',e=>{
     /* no-cache: hỏi lại máy chủ (ETag, rẻ) — không lấy bản cũ trong bộ nhớ đệm HTTP */
     const net=fetch(nav?r.url:r,{cache:'no-cache'}).then(async res=>{
       if(res.ok){
-        if(nav&&old){const [a,b]=await Promise.all([old.clone().text(),res.clone().text()]);
-          if(a!==b)(await self.clients.matchAll()).forEach(cl=>cl.postMessage('ban-moi'));}
-        await c.put(key,res.clone());}
+        let doi=false;
+        if(nav&&old){const [a,b]=await Promise.all([old.clone().text(),res.clone().text()]);doi=a!==b;}
+        /* LƯU XONG rồi mới báo — trang tự tải lại ngay khi nhận tin, báo trước khi lưu thì nó mở lại bản cũ, lặp mãi */
+        await c.put(key,res.clone());
+        if(doi)(await self.clients.matchAll()).forEach(cl=>cl.postMessage('ban-moi'));}
       return res;});
     if(old){e.waitUntil(net.catch(()=>{}));return old;}
     return net.catch(()=>Response.error());
