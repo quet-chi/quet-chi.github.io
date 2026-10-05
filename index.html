@@ -171,6 +171,22 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .pad,.pad button{touch-action:none}   /* vùng bàn phím: không phóng to, không cuộn — bấm nhanh bao nhiêu cũng chỉ là bấm */
 .am .cta{margin-top:10px;height:56px;padding:0;border-radius:16px}
 .cta.off{opacity:.4}
+.wstrip{display:flex;gap:8px;overflow-x:auto;margin:14px -16px 0;padding:0 16px;scrollbar-width:none}.wstrip::-webkit-scrollbar{display:none}
+.wcard{flex:none;min-width:118px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:10px 12px;color:var(--ink);text-align:left;display:flex;flex-direction:column;gap:4px}
+.wcard span{font-size:.72rem;color:var(--ink2)}.wcard b{font:700 .95rem ui-monospace,"SF Mono",Menlo,monospace}.wcard.add{min-width:auto;justify-content:center;color:var(--ink3);font-size:.8rem}
+.due{margin-top:12px;background:rgba(224,164,78,.08);border:1px solid rgba(224,164,78,.4);border-radius:16px;padding:10px 12px}
+.dueh{font-weight:700;font-size:.82rem;color:var(--accent);margin-bottom:4px}
+.duer{display:grid;grid-template-columns:22px 1fr auto auto auto;gap:8px;align-items:center;padding:6px 0;font-size:.86rem}
+.duer .n small{display:block;font-size:.68rem;color:var(--ink3)}.duer b{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.duer button{background:var(--accent);color:#0B100E;border-radius:9px;padding:6px 11px;font-weight:700;font-size:.76rem}.duer button.sk{background:var(--panel2);color:var(--ink3)}
+.wact{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0 0}.wact button{background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:14px;padding:11px 4px;font-size:.78rem;font-weight:600}
+.row .a.inc{color:var(--good)}
+.fsel{display:block;width:100%;margin-top:6px;background:var(--panel);border:1px solid var(--line);color:var(--ink);border-radius:12px;padding:11px 12px;font:500 16px -apple-system,system-ui,sans-serif}
+.frow2{display:flex;gap:6px;overflow-x:auto;margin:10px -16px 0;padding:0 16px;scrollbar-width:none}.frow2::-webkit-scrollbar{display:none}
+.fc{flex:none;background:var(--panel);border:1px solid var(--line);color:var(--ink2);padding:7px 11px;border-radius:99px;font-size:.76rem;font-weight:600}.fc.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.fsum{display:flex;justify-content:space-between;margin:14px 2px 4px;font-size:.84rem;color:var(--ink2)}.fsum b{color:var(--ink)}
+.topb .eye2{font-size:1rem}
+
 /* ══ giao diện app (05/10) ══ */
 .hm2{padding:calc(10px + env(safe-area-inset-top)) 16px calc(104px + env(safe-area-inset-bottom))}
 .topb{display:flex;justify-content:space-between;align-items:flex-end;margin:6px 2px 14px}
@@ -10371,7 +10387,7 @@ const BANK={"970415":"icb","970436":"vcb","970418":"bidv","970405":"vba","970448
 /* CÙNG danh sách loại với tab Chi tiêu trên máy tính — chép sang là loại đi theo, khỏi chọn lại */
 const CATS=[['an','Ăn uống','🍜'],['giaitri','Giải trí · cà phê','☕'],['dilai','Đi lại','🛵'],['muasam','Mua sắm','🛍'],
   ['nha','Nhà cửa · hoá đơn','🏠'],['con','Con cái','🧸'],['ca','Cá','🐠'],['dautu','Đầu tư','📈'],['giadinh','Gia đình','👪'],
-  ['bieu','Biếu · hỗ trợ','🎁'],['khac','Khác','•'],['nap','Của mình — nạp/tiết kiệm','↪']];
+  ['bieu','Biếu · hỗ trợ','🎁'],['khac','Khác','•'],['nap','Tiết kiệm · của mình','↪']];
 /* loại đã bỏ khỏi lưới chọn nhưng khoản cũ vẫn mang — vẫn hiện đúng tên (05/10: Sức khoẻ → thay bằng Đầu tư) */
 const CATS_CU=[['suckhoe','Sức khoẻ','💊']];
 const cat=k=>CATS.find(c=>c[0]===k)||CATS_CU.find(c=>c[0]===k)||['','chưa phân loại','?'];
@@ -10393,6 +10409,7 @@ function save(){try{
   const cur=JSON.parse(localStorage.getItem('quetchi_v1')||'{}'),have=new Set(D.tx.map(x=>x.id));
   (cur.tx||[]).forEach(x=>{if(!have.has(x.id)&&!gone.has(x.id))D.tx.push(x);});
   D.who=Object.assign({},cur.who||{},D.who);
+  if(cur.mv){D.mv=D.mv||[];const hm=new Set(D.mv.map(m=>m.id));cur.mv.forEach(m=>{if(!hm.has(m.id))D.mv.push(m);});}
   localStorage.setItem('quetchi_v1',JSON.stringify(D));}catch(e){toast('không lưu được — trình duyệt đang chặn bộ nhớ');}
   syncSoon();}
 const money=n=>D.hide?'•••':Math.round(n).toLocaleString('vi-VN');
@@ -10434,7 +10451,7 @@ let S={v:'home',q:null,amt:'',cat:null,name:'',tay:false};
 /* Danh sách chính thức VietQR (api.vietqr.io/v2/ios-app-deeplinks, 25/09): TỰ ĐIỀN chỉ có MB, VietinBank,
    BIDV, OCB, ACB. Techcombank: autofill 0 — chỉ mở app. MoMo: không có trong danh sách → link VietQR báo lỗi,
    nên mở thẳng app bằng momo:// (không điền được). */
-const VIA=[['mb','MB'],['tcb','Techcom'],['momo','Momo']];
+const VIA=[['mb','MB'],['tcb','Techcom'],['momo','Momo'],['cash','Tiền mặt']];
 const AUTOFILL={mb:1};
 const viaName=k=>(VIA.find(v=>v[0]===k)||VIA[0])[1];
 /* luôn mặc định MB (ví chính, tự điền được) — nhớ ví lần trước dễ mở nhầm Momo */
@@ -10461,7 +10478,7 @@ function dayLab(d){if(d===today())return'Hôm nay';const y=new Date();y.setDate(
   const p=d.split('-');return p[2]+'/'+p[1];}
 
 /* tên loại ngắn cho lưới chọn và dòng phụ */
-const SH={an:'Ăn uống',giaitri:'Cà phê',dilai:'Đi lại',muasam:'Mua sắm',nha:'Nhà · HĐ',con:'Con cái',suckhoe:'Sức khoẻ',ca:'Cá',dautu:'Đầu tư',giadinh:'Gia đình',bieu:'Biếu',khac:'Khác',nap:'Của mình'};
+const SH={an:'Ăn uống',giaitri:'Cà phê',dilai:'Đi lại',muasam:'Mua sắm',nha:'Nhà · HĐ',con:'Con cái',suckhoe:'Sức khoẻ',ca:'Cá',dautu:'Đầu tư',giadinh:'Gia đình',bieu:'Biếu',khac:'Khác',nap:'Tiết kiệm'};
 /* tên hiển thị: chưa gõ tên (hoặc tên là số TK) → "TPBank ··4481", không có TK → tên loại */
 const dispName=x=>{const n=(x.name||'').trim();if(n&&!/^\d{5,}$/.test(n))return n;
   if(x.acc)return (BANKNAME[x.bin]||'TK')+' ··'+String(x.acc).slice(-4);return SH[x.cat]||'Không tên';};
@@ -10509,7 +10526,7 @@ function home(){
     :`<button class="chipb warnp" data-tab="cai">☁ Chưa bật đồng bộ</button>`;
   $('app').innerHTML=`<div class="wrap hm2">
     <div class="topb"><div><div class="hi">${['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'][now.getDay()]}, ${now.getDate()}/${now.getMonth()+1}</div><b>Sổ chi tiêu</b></div>
-      <button class="eye2" id="eye" aria-label="ẩn số">${D.hide?'🙈':'👁'}</button></div>
+      <span style="display:flex;gap:8px"><button class="eye2" id="fnd" aria-label="tìm kiếm">🔍</button><button class="eye2" id="eye" aria-label="ẩn số">${D.hide?'🙈':'👁'}</button></span></div>
     ${location.host==='quet-chi.github.io'?`<div class="warn" style="margin:0 0 12px;line-height:1.55">📍 <b>Địa chỉ cũ</b> — mạng nhà hay chặn trang này.
       Bật <b>☁ Tự đồng bộ</b> ở Cài đặt (cùng mật khẩu) để các khoản cũ lên Mac, rồi dùng <b>quet-chi-sync.web.app</b>.</div>`:''}
     <button class="hcard" data-tab="tk">
@@ -10523,11 +10540,19 @@ function home(){
       return `<div class="askn"><div class="tiny">Khoản <b>${short(a.amt)}</b> vừa rồi chuyển cho ai? <span class="dim">MB vừa hiện tên — gõ một lần, lần sau tự điền</span></div>
         <div class="askr"><input id="askN" placeholder="Tên người nhận / quán" enterkeyhint="done"><button id="askOk">Lưu</button><button id="askX" aria-label="bỏ qua">×</button></div></div>`;})()}
     ${s.cho||syncPill?`<div class="chips2">${s.cho?`<button class="chipb" id="cho">👥 Chờ trả lại <b>${short(s.cho)}</b></button>`:''}${syncPill}</div>`:''}
+    ${(()=>{const due=recDue();return due.length?`<div class="due"><div class="dueh">⏰ Đến hạn</div>${due.map(r=>`<div class="duer"><span>${cat(r.cat)[2]}</span><span class="n">${esc(D.hide&&(r.cat==='giadinh'||r.cat==='bieu')?SH[r.cat]:r.name)}<small>ngày ${r.day} · ${wName(r.via||'mb')}</small></span><b>${short(r.amt)}</b><button data-rw="${r.id}">Ghi</button><button class="sk" data-rs="${r.id}">Bỏ</button></div>`).join('')}</div>`:'';})()}
+    ${(()=>{const ws=WALLETS.map(([k,n,ic])=>({k,n,ic,i:wInfo(k)})).filter(w=>w.i);
+      return `<div class="wstrip">${ws.map(w=>`<button class="wcard" data-wv="${w.k}"><span>${w.ic} ${w.n}</span><b>${money(w.i.bal)}</b></button>`).join('')}<button class="wcard add" data-wv="">${ws.length?'＋':'💼 Thêm số dư ví'}</button></div>`;})()}
     <div class="lh"><span>Giao dịch gần đây</span></div>
     ${L.length?list:'<div class="empty">Chưa có khoản nào.<br>Lần tới trả tiền, bấm nút <b>Quét</b> ở giữa thanh dưới.</div>'}
   </div>${tabbar('so')}`;
   bindTabs();
   $('eye').onclick=()=>{D.hide=!D.hide;save();render();};
+  $('fnd').onclick=()=>{S={v:'find'};render();};
+  document.querySelectorAll('[data-wv]').forEach(b=>b.onclick=()=>{S=b.dataset.wv?{v:'vi',w:b.dataset.wv}:{v:'vi'};render();});
+  document.querySelectorAll('[data-rw]').forEach(b=>b.onclick=()=>{const r=D.rec.find(x=>x.id===b.dataset.rw);const x=recWrite(r);render();
+    toast('đã ghi '+short(x.amt)+' · '+esc(kinName(x)),()=>{gone.add(x.id);D.tx=D.tx.filter(t=>t.id!==x.id);r.last=null;save();render();});});
+  document.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>{const r=D.rec.find(x=>x.id===b.dataset.rs);r.last=today().slice(0,7);save();render();toast('bỏ qua tháng này');});
   if($('askOk')){const done=()=>{const a=D.tx.find(t=>t.id===D.ask),n=$('askN').value.trim();
       if(a&&n){a.name=n;if(a.bin&&a.acc)D.who[a.bin+'|'+a.acc]={name:n,cat:a.cat};}delete D.ask;save();render();if(n)toast('đã nhớ tên '+esc(n));};
     $('askOk').onclick=done;$('askN').onkeydown=e=>{if(e.key==='Enter')done();};
@@ -10542,6 +10567,8 @@ function caiView(){const c=syncCfg(),n=syncPending(),s=stats();
     <div class="topb"><div><div class="hi">Quét chi</div><b>Cài đặt</b></div></div>
     <div class="sgrp"><div class="sgl">Dữ liệu</div>
       ${row('s_sync','☁','Đồng bộ sang Mac',c?(syncErr?'⚠ chưa gửi được — '+esc(syncErr):n?'đang chờ gửi '+n+' khoản':'đã đồng bộ hết'):'chưa bật — bật để sổ trên Mac tự nhận',c?(syncErr||n?'<span class="bd">!</span>':'✓'):'Bật ›')}
+      ${row('s_vi','💼','Ví & số dư',WALLETS.filter(([k])=>wInfo(k)).length?WALLETS.filter(([k])=>wInfo(k)).map(([k,n])=>n).join(' · '):'chưa đặt — để biết còn bao nhiêu trong từng ví')}
+      ${row('s_rec','↻','Khoản định kỳ',(D.rec||[]).length?(D.rec.length+' khoản · tới ngày tự nhắc'):'tiền nhà, gia đình, gói đăng ký…')}
       ${row('s_cp','⇪','Chép sang Mac bằng tay',s.moi?s.moi+' khoản chưa chép':'dự phòng khi chưa bật đồng bộ')}
       ${s.cho?row('s_cho','👥','Chờ mọi người trả lại',short(s.cho)+' · '+s.choN+' lần'):''}</div>
     <div class="sgrp"><div class="sgl">Riêng tư</div>
@@ -10553,6 +10580,7 @@ function caiView(){const c=syncCfg(),n=syncPending(),s=stats();
   </div>${tabbar('cai')}`;
   bindTabs();
   $('s_sync').onclick=()=>{S={v:'sync'};render();};
+  $('s_vi').onclick=()=>{S={v:'vi'};render();};$('s_rec').onclick=()=>{S={v:'rec'};render();};
   $('s_cp').onclick=()=>{if(s.moi||D.tx.length)quickCopy();else toast('chưa có khoản nào');};
   if($('s_cho'))$('s_cho').onclick=()=>{S={v:'cho'};render();};
   $('s_hide').onclick=()=>{D.hide=!D.hide;save();render();};
@@ -10572,6 +10600,7 @@ function edView(){
     <div class="fl">Loại</div>${catGrid(x.cat)}
     <div class="meta">${p[2]}/${p[1]}/${p[0]} · ${x.src==='qr'?'quét QR':'ghi tay'} · ${viaName(x.via||'mb')}${x.synced?' · đã chép sang máy tính':''}</div>
     ${x.synced?'<div class="note">Khoản này đã chép sang máy tính — sửa ở đây không tự sửa bên đó.</div>':''}
+    <button class="cta ghost" id="e_rec">↻ Lặp lại hằng tháng</button>
     <button class="del" id="e_x">Xoá khoản này</button>
   </div></div>`;
   const num=v=>+String(v).replace(/\D/g,'')||0;
@@ -10582,8 +10611,11 @@ function edView(){
   ['e_n','e_a','e_m','e_t'].forEach(id=>{if($(id))$(id).onchange=put;});
   document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{x.cat=b.dataset.c;if(x.synced)x.edited=true;save();
     document.querySelectorAll('[data-c]').forEach(y=>y.classList.toggle('on',y===b));});
-  $('bk').onclick=()=>{put();S={v:'home'};render();};
-  $('e_x').onclick=()=>{gone.add(x.id);D.tx=D.tx.filter(t=>t.id!==x.id);save();S={v:'home'};render();
+  const back=()=>S.back==='find'?{v:'find',f:S.f}:{v:'home'};
+  $('bk').onclick=()=>{put();S=back();render();};
+  $('e_rec').onclick=()=>{put();D.rec=D.rec||[];D.rec.push({id:'r'+Date.now(),name:x.name||dispName(x),amt:Math.round(x.amt),day:Math.min(28,+x.d.slice(8)),cat:x.cat,via:x.via||'mb',last:today().slice(0,7)});
+    save();toast('đã đặt lặp lại ngày '+Math.min(28,+x.d.slice(8))+' hằng tháng');};
+  $('e_x').onclick=()=>{gone.add(x.id);D.tx=D.tx.filter(t=>t.id!==x.id);save();S=back();render();
     toast('đã xoá '+esc(kinName(x)),()=>{gone.delete(x.id);D.tx.push(x);save();render();});};}
 
 /* ── quét: camera trực tiếp; không mở được camera thì chụp ảnh rồi đọc ── */
@@ -10620,7 +10652,7 @@ function scan(){
   .catch(()=>{$('hint').textContent='Chưa được phép dùng camera — bấm "Chọn ảnh QR" hoặc cho phép camera trong Cài đặt';});}
 
 /* ── nhập tiền ── */
-function goLabel(){return S.tay?'Ghi vào sổ':S.q&&!S.q.napas?'Ghi sổ · mở '+viaName(S.via)+' để quét':AUTOFILL[S.via]?'Chuyển qua '+viaName(S.via):'Ghi sổ · mở '+viaName(S.via);}
+function goLabel(){return S.tay||S.via==='cash'?'Ghi vào sổ':S.q&&!S.q.napas?'Ghi sổ · mở '+viaName(S.via)+' để quét':AUTOFILL[S.via]?'Chuyển qua '+viaName(S.via):'Ghi sổ · mở '+viaName(S.via);}
 function hintTxt(){return S.tay?'Chỉ ghi sổ, không mở ngân hàng.':S.via==='mb'?'Trong MB, nhìn <b>tên người nhận</b> trước khi xác nhận.'
   :viaName(S.via)+' không cho điền sẵn — app sẽ mở, quét lại QR trong đó. Khoản đã được ghi.';}
 /* phần của mình khi trả dùm: không nhập → coi như cả khoản là của mình */
@@ -10693,7 +10725,7 @@ function amtView(){
     D.tx.push(x);save();
     const undo=()=>{gone.add(x.id);D.tx=D.tx.filter(t=>t.id!==x.id);save();render();};
     S={v:'home'};render();
-    if(x.src==='tay'){toast('đã ghi '+short(mineOf(x))+' · '+esc(kinName(x)),undo);return;}
+    if(x.src==='tay'||x.via==='cash'){toast('đã ghi '+short(mineOf(x))+' · '+esc(kinName(x)),undo);return;}
     /* QR cửa hàng: không có link điền sẵn hợp lệ → mở thẳng app ngân hàng, quét lại mã ở quầy bằng app đó */
     const plain={mb:'mbbank://',momo:'momo://'};
     pendingUndo={x,undo};location.href=x.via==='momo'?'momo://':q&&!q.napas?(plain[x.via]||'https://dl.vietqr.io/pay?app='+x.via):mbLink(q,x.amt,x.via);};}
@@ -10922,8 +10954,119 @@ function syncView(){const c=syncCfg(),n=syncPending();
     $('on').textContent='Đang tạo khoá…';const r=await deriveSync(a);$('p1').value=$('p2').value='';
     syncSet({vid:r.vid,k:r.k,sent:{}});render();syncNow();};}
 
+/* ══ VÍ · CHUYỂN GIỮA VÍ · KHOẢN ĐỊNH KỲ · TÌM KIẾM (05/10) — học từ Cashew / Ivy Wallet ══
+   Tiền vào / chuyển giữa ví / điều chỉnh số dư nằm ở D.mv (KHÔNG trộn vào D.tx) → thống kê chi, đồng bộ, chép sang Mac
+   không đổi. Số dư ví = số dư lần cập nhật gần nhất − mọi khoản chi qua ví đó sau mốc + tiền vào ± chuyển. */
+const WALLETS=[['mb','MB','🏦'],['tcb','Techcom','💳'],['momo','Momo','📱'],['cash','Tiền mặt','💵']];
+const wName=k=>(WALLETS.find(w=>w[0]===k)||['',k,'•'])[1],wIc=k=>(WALLETS.find(w=>w[0]===k)||['','','•'])[2];
+function wInfo(k){const w=(D.wallets||{})[k];if(!w||w.base==null)return null;
+  const after=x=>x.ts>w.at;let b=w.base;
+  D.tx.forEach(x=>{if((x.via||'mb')===k&&after(x))b-=x.amt;});
+  (D.mv||[]).forEach(m=>{if(!after(m))return;if(m.kind==='thu'&&m.w===k)b+=m.amt;if(m.kind==='chuyen'){if(m.from===k)b-=m.amt;if(m.to===k)b+=m.amt;}});
+  return{bal:b,at:w.at};}
+function mvAdd(m){D.mv=D.mv||[];m.id='m'+Date.now();m.ts=Date.now();m.d=today();D.mv.push(m);save();}
+/* khoản định kỳ đến hạn: tới ngày trong tháng mà tháng này chưa ghi/bỏ */
+function recDue(){const cm=today().slice(0,7),dn=+today().slice(8);return (D.rec||[]).filter(r=>r.day<=dn&&r.last!==cm);}
+function recWrite(r){const x={id:'p'+Date.now(),ts:Date.now(),d:today(),amt:r.amt,name:r.name,cat:r.cat,src:'tay',via:r.via||'mb',synced:false,rec:r.id};
+  if(r.note)x.note=r.note;D.tx.push(x);r.last=today().slice(0,7);save();return x;}
+
+/* ── ví: danh sách + chi tiết ── */
+function viView(){const k=S.w;
+  if(!k){$('app').innerHTML=`<div class="sheet"><div class="wrap">
+      <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Ví &amp; số dư</b><span style="width:64px"></span></div>
+      <div class="note" style="text-align:left;margin:6px 2px 12px">Gõ <b>số dư thật</b> đang thấy trong app ngân hàng — từ đó app tự trừ các khoản chi qua ví đó. Lâu lâu cập nhật lại cho khớp.</div>
+      ${WALLETS.map(([id,nm,ic])=>{const i=wInfo(id);return `<button class="srow" data-w="${id}"><span class="sic">${ic}</span><span class="st"><b>${nm}</b><small>${i?'cập nhật '+dayLab(new Date(i.at).toISOString().slice(0,10)).toLowerCase():'chưa đặt số dư'}</small></span><span class="sr mono">${i?money(i.bal)+' đ':'Đặt ›'}</span></button>`;}).join('')}
+      <button class="cta ghost" id="mvc">⇄ Chuyển giữa ví</button></div></div>`;
+    $('bk').onclick=()=>{S={v:'home'};render();};$('mvc').onclick=()=>{S={v:'mvf',kind:'chuyen'};render();};
+    document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{S={v:'vi',w:b.dataset.w};render();});return;}
+  const i=wInfo(k),cut=i?i.at:0;
+  const rows=[...D.tx.filter(x=>(x.via||'mb')===k).map(x=>({ts:x.ts,d:x.d,t:kinName(x),s:SH[x.cat]||cat(x.cat)[1],v:-x.amt,ic:cat(x.cat)[2]})),
+    ...(D.mv||[]).filter(m=>m.w===k||m.from===k||m.to===k).map(m=>({ts:m.ts,d:m.d,ic:m.kind==='thu'?'⬇':m.kind==='dc'?'✎':'⇄',
+      t:m.kind==='thu'?(m.note||'Tiền vào'):m.kind==='dc'?'Cập nhật số dư':(m.from===k?'Chuyển sang '+wName(m.to):'Nhận từ '+wName(m.from)),
+      s:m.kind==='chuyen'?'chuyển giữa ví · không tính chi':m.kind==='dc'?'đặt lại mốc':'tiền vào',v:m.kind==='dc'?null:m.kind==='thu'||m.to===k?m.amt:-m.amt}))]
+    .sort((a,b)=>b.ts-a.ts).slice(0,40);
+  $('app').innerHTML=`<div class="sheet"><div class="wrap">
+    <div class="bar1"><button class="back bk2" id="bk">‹ Ví</button><b>${wIc(k)} ${wName(k)}</b><span style="width:64px"></span></div>
+    <div class="hcard" style="margin-top:6px"><div class="hcl">Số dư</div><div class="hcv">${i?money(i.bal):'—'}<small> đ</small></div>
+      <div class="dsub">${i?'tính từ lần cập nhật '+new Date(i.at).toLocaleString('vi-VN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'chưa đặt số dư — bấm Cập nhật số dư'}</div></div>
+    <div class="wact"><button id="w_set">✎ Cập nhật số dư</button><button id="w_in">⬇ Tiền vào</button><button id="w_mv">⇄ Chuyển</button></div>
+    <div class="lh"><span>Giao dịch của ví</span></div>
+    ${rows.length?rows.map(r=>`<div class="row" style="cursor:default"><div class="ic">${r.ic}</div><div class="mid"><div class="n">${esc(r.t)}</div><div class="s">${dayLab(r.d)} · ${r.s}${r.ts<=cut?' · trước mốc':''}</div></div>
+      <div class="r"><div class="a${r.v>0?' inc':''}">${r.v==null?'':(r.v>0?'+':'−')+short(Math.abs(r.v))}</div></div></div>`).join(''):'<div class="empty">Chưa có giao dịch nào qua ví này.</div>'}
+  </div></div>`;
+  $('bk').onclick=()=>{S={v:'vi'};render();};
+  $('w_set').onclick=()=>{S={v:'mvf',kind:'dc',w:k};render();};$('w_in').onclick=()=>{S={v:'mvf',kind:'thu',w:k};render();};
+  $('w_mv').onclick=()=>{S={v:'mvf',kind:'chuyen',from:k};render();};}
+/* ── form: cập nhật số dư / tiền vào / chuyển ── */
+function mvfView(){const kind=S.kind,T={dc:'Cập nhật số dư',thu:'Tiền vào',chuyen:'Chuyển giữa ví'}[kind];
+  const sel=(id,v)=>`<select id="${id}" class="fsel">${WALLETS.map(([k,n])=>`<option value="${k}"${v===k?' selected':''}>${n}</option>`).join('')}</select>`;
+  $('app').innerHTML=`<div class="sheet"><div class="wrap">
+    <div class="bar1"><button class="back bk2" id="bk">‹ Huỷ</button><b>${T}</b><span style="width:64px"></span></div>
+    ${kind==='chuyen'?`<div class="f2"><label class="fl">Từ ví${sel('f_from',S.from||'mb')}</label><label class="fl">Sang ví${sel('f_to',S.from==='cash'?'mb':'cash')}</label></div>`
+      :`<label class="fl">Ví${sel('f_w',S.w||'mb')}</label>`}
+    <label class="fl">${kind==='dc'?'Số dư thật đang có':'Số tiền'}<input id="f_amt" inputmode="numeric" placeholder="0"></label>
+    ${kind==='thu'?'<label class="fl">Ghi chú<input id="f_note" placeholder="vd: lương, được trả lại"></label>':''}
+    <div class="note" style="text-align:left">${kind==='dc'?'Mở app ngân hàng, gõ đúng số dư đang thấy. Từ giờ app tự trừ các khoản chi qua ví này.'
+      :kind==='chuyen'?'Rút tiền mặt, nạp ví Momo… — tiền vẫn là của mình nên không tính là chi.':'Tiền vào chỉ để số dư ví đúng — không tính vào thống kê chi.'}</div>
+    <button class="cta" id="f_ok">Lưu</button></div></div>`;
+  const num=v=>+String(v).replace(/\D/g,'')||0;
+  $('f_amt').oninput=e=>{const n=num(e.target.value);e.target.value=n?n.toLocaleString('vi-VN'):'';};
+  $('bk').onclick=()=>{S=S.w?{v:'vi',w:S.w}:{v:'vi'};render();};
+  $('f_ok').onclick=()=>{const a=num($('f_amt').value);
+    if(kind==='dc'){const w=$('f_w').value;D.wallets=D.wallets||{};D.wallets[w]={base:a,at:Date.now()};mvAdd({kind:'dc',w,amt:a});toast('đã đặt số dư '+wName(w));S={v:'vi',w};render();return;}
+    if(!a){toast('chưa gõ số tiền');return;}
+    if(kind==='thu'){const w=$('f_w').value;mvAdd({kind:'thu',w,amt:a,note:$('f_note').value.trim()});toast('đã ghi tiền vào '+wName(w));S={v:'vi',w};render();return;}
+    const f=$('f_from').value,t=$('f_to').value;if(f===t){toast('hai ví giống nhau');return;}
+    mvAdd({kind:'chuyen',from:f,to:t,amt:a});toast('đã chuyển '+short(a)+' '+wName(f)+' → '+wName(t));S={v:'vi',w:f};render();};}
+
+/* ── khoản định kỳ ── */
+function recView(){const L=D.rec||[];
+  $('app').innerHTML=`<div class="sheet"><div class="wrap">
+    <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Khoản định kỳ</b><span style="width:64px"></span></div>
+    <div class="note" style="text-align:left;margin:6px 2px 10px">Tiền nhà, đưa gia đình, gói đăng ký… Tới ngày, màn Sổ hiện thẻ <b>Đến hạn</b> — chạm <b>Ghi</b> là xong.</div>
+    ${L.map(r=>`<div class="srow" style="cursor:default"><span class="sic">${cat(r.cat)[2]}</span><span class="st"><b>${esc(r.name)}</b><small>ngày ${r.day} hằng tháng · ${wName(r.via||'mb')}${r.last===today().slice(0,7)?' · tháng này đã ghi':''}</small></span>
+      <span class="sr"><b class="mono">${short(r.amt)}</b> <button class="x" data-rx="${r.id}">xoá</button></span></div>`).join('')||'<div class="empty">Chưa có khoản định kỳ.</div>'}
+    <div class="lh"><span>Thêm khoản</span></div>
+    <label class="fl">Tên<input id="r_n" placeholder="vd: Tiền nhà, GĐ"></label>
+    <div class="f2"><label class="fl">Số tiền<input id="r_a" inputmode="numeric"></label><label class="fl">Ngày trong tháng<input id="r_d" inputmode="numeric" placeholder="1–28"></label></div>
+    <label class="fl">Trả bằng<select id="r_w" class="fsel">${WALLETS.map(([k,n])=>`<option value="${k}">${n}</option>`).join('')}</select></label>
+    <div class="fl">Loại</div>${catGrid(S.rc||'nha')}
+    <button class="cta" id="r_ok">Thêm</button></div></div>`;
+  const num=v=>+String(v).replace(/\D/g,'')||0;
+  $('r_a').oninput=e=>{const n=num(e.target.value);e.target.value=n?n.toLocaleString('vi-VN'):'';};
+  document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{S.rc=b.dataset.c;document.querySelectorAll('[data-c]').forEach(y=>y.classList.toggle('on',y===b));});
+  $('bk').onclick=()=>{S={v:'cai'};render();};
+  document.querySelectorAll('[data-rx]').forEach(b=>b.onclick=()=>{const r=D.rec.find(x=>x.id===b.dataset.rx);D.rec=D.rec.filter(x=>x!==r);save();render();toast('đã xoá '+esc(r.name),()=>{D.rec.push(r);save();render();});});
+  $('r_ok').onclick=()=>{const n=$('r_n').value.trim(),a=num($('r_a').value),d=Math.min(28,Math.max(1,num($('r_d').value)||1));
+    if(!n||!a){toast('cần tên và số tiền');return;}
+    D.rec=D.rec||[];D.rec.push({id:'r'+Date.now(),name:n,amt:a,day:d,cat:S.rc||'nha',via:$('r_w').value,
+      last:d<=+today().slice(8)?today().slice(0,7):null});   /* đã qua ngày tháng này thì bắt đầu từ tháng sau */
+    save();S={v:'rec'};render();toast('đã thêm — tới ngày '+d+' sẽ nhắc');};}
+
+/* ── tìm kiếm & lọc ── */
+function findView(){const f=S.f||(S.f={q:'',c:'',w:'',m:''});
+  const months=[...new Set(D.tx.map(x=>x.d.slice(0,7)))].sort().reverse();
+  const qn=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/đ/g,'d').toLowerCase();
+  const R=D.tx.filter(x=>(!f.q||qn(x.name+' '+(x.note||'')+' '+(SH[x.cat]||'')).includes(qn(f.q)))&&(!f.c||x.cat===f.c)&&(!f.w||(x.via||'mb')===f.w)&&(!f.m||x.d.slice(0,7)===f.m))
+    .sort((a,b)=>b.ts-a.ts);
+  const tot=R.filter(x=>!notSpend(x.cat)).reduce((a,x)=>a+mineOf(x),0);
+  const chip=(k,v,l,cur)=>`<button class="fc${cur===v?' on':''}" data-f="${k}" data-v="${v}">${l}</button>`;
+  $('app').innerHTML=`<div class="sheet"><div class="wrap">
+    <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Tìm khoản chi</b><span style="width:64px"></span></div>
+    <input id="f_q" class="nt" value="${esc(f.q)}" placeholder="🔍 Tên quán, ghi chú…" enterkeyhint="search">
+    <div class="frow2">${chip('m','','Mọi tháng',f.m)}${months.slice(0,6).map(m=>chip('m',m,'T'+(+m.slice(5))+'/'+m.slice(2,4),f.m)).join('')}</div>
+    <div class="frow2">${chip('w','','Mọi ví',f.w)}${WALLETS.map(([k,n])=>chip('w',k,n,f.w)).join('')}</div>
+    <div class="frow2">${chip('c','','Mọi loại',f.c)}${CATS.map(c=>chip('c',c[0],c[2]+' '+(SH[c[0]]||c[1]),f.c)).join('')}</div>
+    <div class="fsum"><span>${R.length} khoản</span><b class="mono">${money(tot)} đ</b></div>
+    ${R.slice(0,100).map(x=>`<button class="row" data-ed="${x.id}"><div class="ic" style="${icoBg(x.cat)}">${cat(x.cat)[2]}</div><div class="mid"><div class="n">${esc(kinName(x))}</div><div class="s">${dayLab(x.d)} · ${SH[x.cat]||cat(x.cat)[1]}${kinNote(x)?' · '+esc(kinNote(x)):''}</div></div><div class="r"><div class="a">−${short(mineOf(x))}</div></div></button>`).join('')||'<div class="empty">Không có khoản nào khớp.</div>'}
+  </div></div>`;
+  $('bk').onclick=()=>{S={v:'home'};render();};
+  const q=$('f_q');q.oninput=()=>{f.q=q.value;clearTimeout(window.__fq);window.__fq=setTimeout(()=>{const p=q.selectionStart;render();const n=$('f_q');n.focus();n.setSelectionRange(p,p);},250);};
+  document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{f[b.dataset.f]=b.dataset.v;render();});
+  document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{S={v:'ed',id:b.dataset.ed,back:'find',f};render();});}
+
 function render(){if(S.v!=='scan')stopCam();
-  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else if(S.v==='sync')syncView();else if(S.v==='cai')caiView();else home();}
+  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else if(S.v==='sync')syncView();else if(S.v==='cai')caiView();else if(S.v==='vi')viView();else if(S.v==='mvf')mvfView();else if(S.v==='rec')recView();else if(S.v==='find')findView();else home();}
 /* ĐƯỜNG TẮT: mở link có #quet → vào thẳng camera; #tay → vào thẳng ghi tay.
    Dùng cho Phím tắt iPhone (chạm 2 lần mặt lưng / nút Tác vụ / Trung tâm điều khiển). Xoá hash ngay
    để tải lại trang không bị bật camera lần nữa. */
