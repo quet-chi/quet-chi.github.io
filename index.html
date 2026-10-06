@@ -269,6 +269,11 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .tup{color:var(--bad)}.tdn{color:var(--good)}.tpc{font:600 .74rem ui-monospace,"SF Mono",Menlo,monospace;color:var(--ink3)}
 .tv{font:700 .9rem ui-monospace,"SF Mono",Menlo,monospace;text-align:right}
 .tkl{padding:2px 4px 8px 40px}
+.tcl{display:grid;grid-template-columns:10px 1fr auto 14px;gap:10px;align-items:center;width:100%;padding:12px 0;background:none;border:0;border-top:1px solid var(--line);color:var(--ink);font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.tcl:first-of-type{border-top:0}.tcl>i{width:10px;height:10px;border-radius:50%}.tcl span{font-weight:600;font-size:.9rem}.tcl small{display:block;font-weight:400;font-size:.7rem;color:var(--ink3);margin-top:2px}
+.tcl b{font:600 .92rem ui-monospace,"SF Mono",Menlo,monospace}.tcl em{font-style:normal;color:var(--ink3);transition:transform .2s}.tcl.on em{transform:rotate(90deg)}
+.tcd{margin:0 0 6px 20px;border-left:1px solid var(--line);padding-left:12px}.tci{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed var(--line)}.tci:first-child{border-top:0}
+.tci b{font-weight:600;font-size:.84rem}.tci small{display:block;font-size:.7rem;color:var(--ink3);margin-top:2px}.tci .r{text-align:right;white-space:nowrap}.tci .r b{font:600 .84rem ui-monospace,"SF Mono",Menlo,monospace}.dnc{color:var(--bad)!important}.upc{color:var(--good)!important}
 .tli{display:grid;grid-template-columns:44px 1fr auto;gap:8px;align-items:baseline;padding:6px 0;font-size:.8rem;border-top:1px dashed var(--line)}
 .tli span:first-child{color:var(--ink3);font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:.72rem}.tli .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tli small{color:var(--ink3)}
 .tli b{font:600 .82rem ui-monospace,"SF Mono",Menlo,monospace}
@@ -11115,7 +11120,7 @@ async function tsPull(){const c=syncCfg();if(!c||tsBusy||FB_PID.startsWith('__')
   tsBusy=false;if(S.v==='ts')render();}
 /* KHOÁ TAB TÀI SẢN (06/10): phải gõ MẬT KHẨU ĐỒNG BỘ mới xem — sinh lại khoá từ mật khẩu gõ vào, so với khoá đang lưu
    (không lưu mật khẩu ở đâu). Mở được 5 phút; app chuyển ra nền là khoá lại ngay. */
-let tsOpenUntil=0,tsPin='',tsWrong=false,tsChecking=false;
+let tsCls=null,tsOpenUntil=0,tsPin='',tsWrong=false,tsChecking=false;
 const tsOpen=()=>Date.now()<tsOpenUntil;
 document.addEventListener('visibilitychange',()=>{if(document.hidden){tsOpenUntil=0;tsPin='';}});
 function tsLockView(){const c=syncCfg();
@@ -11150,7 +11155,9 @@ function tsFake(a){const td=new Date(),doy=Math.floor((td-new Date(td.getFullYea
   return{v:1,ts:Date.now(),total,crypto,gold,savings,cost:total-260000,spend,lim,runSave:savings/spend,runAll:total/spend,
     fire:{target:T,base:B,pct:B/T*100,years:mo<1200?mo/12:null,contrib:C},sv:{n:3,dang:41000,y12:310000,lai:186000},
     soon:[{d:ds(12),v:2050000,name:'Sổ 3 tháng',ef:true},{d:ds(47),v:1610000,name:'Sổ 6 tháng',ef:false},{d:ds(95),v:1720000,name:'Sổ 12 tháng',ef:false}],
-    hist,fake:true};}
+    hist,items:[{c:'savings',n:'Sổ 3 tháng',v:2000000,k:2000000,r:4.2,t:3,m:ds(12),ef:true},{c:'savings',n:'Sổ 6 tháng',v:1550000,k:1550000,r:5.1,t:6,m:ds(47)},
+      {c:'savings',n:'Sổ 12 tháng',v:savings-3550000,k:savings-3550000,r:5.6,t:12,m:ds(95)},{c:'gold',n:'Vàng nhẫn',v:gold,k:gold-140000,q:0.08,g:'nhẫn'},
+      {c:'crypto',n:'Bitcoin',v:Math.round(crypto*0.7),k:Math.round(crypto*0.7)-90000,q:0.0007},{c:'crypto',n:'Ethereum',v:crypto-Math.round(crypto*0.7),k:crypto-Math.round(crypto*0.7)-30000,q:0.009}],fake:true};}
 function tsView(){const real=tsOpen(),a0=tsGet(),a=a0&&!real?tsFake(a0):a0,H=D.hide,c=syncCfg();
   const M=n=>H?'•••':money(n),Sh=n=>H?'•••':short(n),N=(v,d)=>H?'•••':(Math.round(v*10)/10).toFixed(d==null?1:d).replace('.',',');
   const toDate=m=>{const d=new Date();d.setMonth(d.getMonth()+Math.floor(m));return pad2(d.getMonth()+1)+'/'+d.getFullYear();};
@@ -11158,7 +11165,7 @@ function tsView(){const real=tsOpen(),a0=tsGet(),a=a0&&!real?tsFake(a0):a0,H=D.h
   if(!c)body=`<div class="empty">Bật <b>đồng bộ</b> ở Cài đặt (cùng mật khẩu với sổ trên Mac) để xem tài sản ở đây.</div>`;
   else if(!a)body=`<div class="empty">${tsBusy?'Đang tải…':esc(tsErr||'Chưa có dữ liệu tài sản.')}</div>`;
   else{
-    const parts=[['Tiết kiệm',a.savings,'#199e70'],['Vàng',a.gold,'#c98500'],['Crypto',a.crypto,'#d95926']].filter(x=>x[1]>0);
+    const parts=[['Tiết kiệm',a.savings,'#199e70','savings'],['Vàng',a.gold,'#c98500','gold'],['Crypto',a.crypto,'#d95926','crypto']].filter(x=>x[1]>0);
     const st=a.runSave>=a.lim?['g','đủ luật '+a.lim+' tháng']:a.runSave>=3?['w','dưới luật '+a.lim+' tháng']:['b','mỏng'];
     const scale=Math.max(a.runAll,a.lim*1.25,6);
     const hist=a.hist||[],hv=hist.map(x=>x[1]),mn=Math.min(...hv),mx=Math.max(...hv);
@@ -11171,7 +11178,16 @@ function tsView(){const real=tsOpen(),a0=tsGet(),a=a0&&!real?tsFake(a0):a0,H=D.h
       <div class="hcd">${hv.length>1?`<span class="dchip ${d30>=0?'dn':'up'}">${d30>=0?'▲':'▼'} ${Sh(Math.abs(d30))}</span><span class="dsub">${hist.length} ngày gần nhất</span>`:''}</div>
       ${hv.length>1&&!H?`<svg class="tspark" viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none"><path d="M${pts.map(p=>p.join(' ')).join(' L')}" fill="none" stroke="#3987e5" stroke-width="2" stroke-linejoin="round"/></svg>`:''}
       <div class="segbar" style="margin-top:12px">${parts.map(x=>`<i style="flex:${x[1]};background:${x[2]}"></i>`).join('')}</div>
-      <div class="tsleg">${parts.map(x=>`<span><i style="background:${x[2]}"></i>${x[0]} <b>${H?'•••':Math.round(x[1]/a.total*100)+'%'}</b></span>`).join('')}</div>
+    </div>
+    <div class="tkc"><div class="tkh"><span>Danh mục</span><small>chạm để xem từng khoản</small></div>
+      ${parts.map(x=>{const its=(a.items||[]).filter(i=>i.c===x[3]).sort((p,q)=>q.v-p.v),op=tsCls===x[3];
+        return `<button class="tcl${op?' on':''}" data-c="${x[3]}"><i style="background:${x[2]}"></i><span>${x[0]}<small>${H?'•••':Math.round(x[1]/a.total*100)+'%'}${its.length?' · '+its.length+' khoản':''}</small></span><b>${Sh(x[1])}</b><em>›</em></button>
+        ${op?`<div class="tcd">${its.length?its.map(i=>{const pl=i.v-i.k,pp=i.k?pl/i.k*100:0;
+          const sub=i.c==='savings'?(i.r?String(i.r).replace('.',',')+'%/năm':'')+(i.m?' · đáo hạn '+i.m.slice(8)+'/'+i.m.slice(5,7)+'/'+i.m.slice(2,4):'')+(i.ef?' · KC':'')
+            :(H?'•••':String(i.q).replace('.',','))+(i.g?' · '+i.g:'');
+          const right=i.c==='savings'?'':`<small class="${pl>=0?'upc':'dnc'}">${H?'•••':(pl>=0?'+':'−')+short(Math.abs(pl))+' · '+Math.abs(pp).toFixed(1).replace('.',',')+'%'}</small>`;
+          return `<div class="tci"><span><b>${esc(i.n)}</b><small>${esc(sub)}</small></span><span class="r"><b>${M(i.v)}</b>${right}</span></div>`;}).join('')
+          :'<div class="dsub" style="padding:8px 0">Mở sổ trên Mac một lần để gửi chi tiết từng khoản sang đây.</div>'}</div>`:''}`;}).join('')}
     </div>
     <div class="tkc"><div class="tkh"><span>🧭 Nếu mất việc hôm nay</span><small>chi ${Sh(a.spend)}/tháng</small></div>
       <div class="lbv">${N(a.runSave)}<small> tháng</small> ${H?'':`<span class="chip2 ${st[0]}">${st[1]}</span>`}</div>
@@ -11197,7 +11213,8 @@ function tsView(){const real=tsOpen(),a0=tsGet(),a=a0&&!real?tsFake(a0):a0,H=D.h
   const hv=document.querySelector('.hcv');if(hv){let tm=null;const go=()=>{clearTimeout(tm);tm=null;};
     hv.addEventListener('pointerdown',()=>{go();tm=setTimeout(()=>{tm=null;if(!tsOpen()){S={v:'tsk'};render();}else{tsOpenUntil=0;render();}},800);});
     ['pointerup','pointerleave','pointercancel'].forEach(ev=>hv.addEventListener(ev,go));hv.style.webkitUserSelect='none';hv.style.userSelect='none';}
-  $('tsr').onclick=()=>{tsPull();toast('đang tải…');};}
+  $('tsr').onclick=()=>{tsPull();toast('đang tải…');};
+  document.querySelectorAll('.tcl').forEach(b=>b.onclick=()=>{tsCls=tsCls===b.dataset.c?null:b.dataset.c;render();});}
 
 function render(){if(S.v!=='scan')stopCam();
   if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else if(S.v==='sync')syncView();else if(S.v==='cai')caiView();else if(S.v==='vi')viView();else if(S.v==='mvf')mvfView();else if(S.v==='rec')recView();else if(S.v==='find')findView();else if(S.v==='ts')tsView();else if(S.v==='tsk')tsLockView();else home();}
