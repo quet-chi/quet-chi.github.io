@@ -11139,15 +11139,18 @@ function tsLockView(){const c=syncCfg();
     render();if(tsPin.length===8&&k!=='⌫')tryOpen();});}
 /* SỐ MỒI (06/10, giống sổ trên Mac): chưa gõ mật khẩu → TÀI SẢN × k (÷100, và tổng luôn < 10tr để đem demo),
    MỨC CHI giữ nguyên → số tháng, % tự do cũng là số giả nhưng khớp nhau, như một người cùng lối sống ít tiền hơn. */
-/* KHÔNG ĐỂ AI NGHI (06/10): mức chi và đích cũng thu nhỏ, nhưng theo hệ số KHÁC tài sản (×k×2,5) → số tháng, % ra con số
-   bình thường (không phải 0,1 tháng) mà vẫn không phải số thật. Năm chạm đích tính lại cho khớp. */
-function tsFake(a){const k=Math.min(0.01,a.total>0?9.5e6/a.total:0.01),m=v=>Math.round(v*k),ks=k*2.5,sp=(a.spend||1)*ks;
-  const T=a.fire.target*ks,B=a.fire.base*k,C=a.fire.contrib*ks*0.6,pct=T?Math.min(100,B/T*100):0;
-  let yrs=null;if(C>0){const r=0.04/12;let v=B,mo=0;while(v<T&&mo<1200){v=v*(1+r)+C;mo++;}yrs=mo<1200?mo/12:null;}
-  return Object.assign({},a,{total:m(a.total),crypto:m(a.crypto),gold:m(a.gold),savings:m(a.savings),cost:m(a.cost),spend:Math.round(sp),
-    runSave:a.savings*k/sp,runAll:a.total*k/sp,fire:Object.assign({},a.fire,{target:Math.round(T),base:Math.round(B),pct,years:yrs,contrib:Math.round(C)}),
-    sv:{n:a.sv.n,dang:m(a.sv.dang),y12:m(a.sv.y12),lai:m(a.sv.lai)},soon:(a.soon||[]).map(x=>Object.assign({},x,{v:m(x.v)})),
-    hist:(a.hist||[]).map(x=>[x[0],m(x[1])]),fake:true});}
+/* HỒ SƠ DEMO (06/10): khi chưa nhập mã, tab Tài sản hiện một hồ sơ BỊA HOÀN TOÀN — không lấy con số thật nào
+   (kể cả tỷ lệ, số sổ, tên ngân hàng, ngày đáo hạn) → không ai suy ngược được. Nhích nhẹ theo ngày cho tự nhiên. */
+function tsFake(a){const td=new Date(),doy=Math.floor((td-new Date(td.getFullYear(),0,0))/864e5),w=n=>((doy*9301+n*49297)%233280)/233280;
+  const savings=5200000+Math.round(w(1)*6)*25000,gold=1150000+Math.round(w(2)*4)*10000,crypto=Math.round(2070000*(0.95+w(3)*0.1)/1000)*1000;
+  const total=savings+gold+crypto,spend=1420000,lim=12,T=1800000*12/0.04,RD=Math.min(savings,3*spend),B=Math.max(0,total-RD),C=500000;
+  let v=B,mo=0;const r=0.04/12;while(v<T&&mo<1200){v=v*(1+r)+C;mo++;}
+  const ds=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());};
+  const hist=[...Array(30)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-29+i);return[d.toISOString().slice(0,10),Math.round(total*(0.955+i*0.0015+Math.sin(i*1.7)*0.004))];});
+  return{v:1,ts:Date.now(),total,crypto,gold,savings,cost:total-260000,spend,lim,runSave:savings/spend,runAll:total/spend,
+    fire:{target:T,base:B,pct:B/T*100,years:mo<1200?mo/12:null,contrib:C},sv:{n:3,dang:41000,y12:310000,lai:186000},
+    soon:[{d:ds(12),v:2050000,name:'Sổ 3 tháng',ef:true},{d:ds(47),v:1610000,name:'Sổ 6 tháng',ef:false},{d:ds(95),v:1720000,name:'Sổ 12 tháng',ef:false}],
+    hist,fake:true};}
 function tsView(){const real=tsOpen(),a0=tsGet(),a=a0&&!real?tsFake(a0):a0,H=D.hide,c=syncCfg();
   const M=n=>H?'•••':money(n),Sh=n=>H?'•••':short(n),N=(v,d)=>H?'•••':(Math.round(v*10)/10).toFixed(d==null?1:d).replace('.',',');
   const toDate=m=>{const d=new Date();d.setMonth(d.getMonth()+Math.floor(m));return pad2(d.getMonth()+1)+'/'+d.getFullYear();};
@@ -11184,7 +11187,7 @@ function tsView(){const real=tsOpen(),a0=tsGet(),a=a0&&!real?tsFake(a0):a0,H=D.h
       <div class="dsub" style="margin:8px 0 4px">Sắp nhận</div>
       ${a.soon.map(x=>{const dd=Math.round((new Date(x.d)-new Date(today()))/864e5);return `<div class="tli"><span>${x.d.slice(8)}/${x.d.slice(5,7)}</span><span class="n">${esc(x.name)}${x.ef?' <small>· KC</small>':''}<small> · còn ${dd} ngày</small></span><b>${Sh(x.v)}</b></div>`;}).join('')}
     </div>
-    <div class="note">Cập nhật từ sổ trên Mac ${ago<60?ago+' phút':ago<1440?Math.round(ago/60)+' giờ':Math.round(ago/1440)+' ngày'} trước${tsErr?' · '+esc(tsErr):''}. Muốn mới hơn: mở khoá sổ trên Mac.</div>`;}
+    <div class="note">${a.fake?'Cập nhật lúc '+new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'Cập nhật từ sổ trên Mac '+(ago<60?ago+' phút':ago<1440?Math.round(ago/60)+' giờ':Math.round(ago/1440)+' ngày')+' trước'+(tsErr?' · '+esc(tsErr):'')+'. Muốn mới hơn: mở khoá sổ trên Mac.'}</div>`;}
   $('app').innerHTML=`<div class="wrap hm2">
     <div class="topb"><div><div class="hi">Tiền riêng</div><b>Tài sản</b></div>
       <span style="display:flex;gap:8px;align-items:center"><button class="eye2" id="tsr" aria-label="tải lại">↻</button></span></div>
