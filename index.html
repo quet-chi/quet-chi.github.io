@@ -10563,11 +10563,13 @@ function home(){
     ${(()=>{const ws=WALLETS.map(([k,n,ic])=>({k,n,ic,i:wInfo(k)})).filter(w=>w.i);
       return `<div class="wstrip">${ws.map(w=>`<button class="wcard" data-wv="${w.k}"><span>${w.ic} ${w.n}</span><b>${money(w.i.bal)}</b></button>`).join('')}<button class="wcard add" data-wv="">${ws.length?'＋':'💼 Thêm số dư ví'}</button></div>`;})()}
     <div class="lh"><span>Giao dịch gần đây</span></div>
-    ${L.length?list:'<div class="empty">Chưa có khoản nào.<br>Lần tới trả tiền, bấm nút <b>Quét</b> ở giữa thanh dưới.</div>'}
+    ${L.length?list:syncCfg()?'<div class="empty">Chưa có khoản nào.<br>Lần tới trả tiền, bấm nút <b>Quét</b> ở giữa thanh dưới.</div>'
+      :`<div class="empty">Sổ ở chỗ này đang trống.<br>Đã dùng app ở chỗ khác (icon khác, Safari)?<br><button class="cta" id="pullsy" style="margin-top:14px">☁ Bật đồng bộ để kéo dữ liệu về</button></div>`}
   </div>${tabbar('so')}`;
   bindTabs();
   $('eye').onclick=()=>{D.hide=!D.hide;save();render();};
   $('fnd').onclick=()=>{S={v:'find'};render();};
+  if($('pullsy'))$('pullsy').onclick=()=>{S={v:'sync'};render();};
   document.querySelectorAll('[data-wv]').forEach(b=>b.onclick=()=>{S=b.dataset.wv?{v:'vi',w:b.dataset.wv}:{v:'vi'};render();});
   document.querySelectorAll('[data-rw]').forEach(b=>b.onclick=()=>{const r=D.rec.find(x=>x.id===b.dataset.rw);const x=recWrite(r);render();
     toast('đã ghi '+short(x.amt)+' · '+esc(kinName(x)),()=>{gone.add(x.id);D.tx=D.tx.filter(t=>t.id!==x.id);r.last=null;save();render();});});
