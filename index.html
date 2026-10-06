@@ -10416,7 +10416,11 @@ const gone=new Set();   /* id đã xoá ở tab này — để save() không ké
    vẽ danh sách thì sập, app không mở được. Mọi khoản thiếu mã / ngày / số tiền bị bỏ ngay khi đọc sổ. */
 const txOk=x=>x&&typeof x.id==='string'&&x.id!=='undefined'&&typeof x.d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x.d)&&isFinite(x.amt)&&x.amt>0;
 function load(){try{const v=JSON.parse(localStorage.getItem('quetchi_v1')||'{}');D=Object.assign({tx:[],who:{},hide:false},v);
-  if(!Array.isArray(D.tx))D.tx=[];D.tx=D.tx.filter(txOk);}catch(e){D={tx:[],who:{},hide:false};}}
+  if(!Array.isArray(D.tx))D.tx=[];D.tx=D.tx.filter(txOk);
+  ['rec','mv'].forEach(k=>{if(D[k]!=null&&!Array.isArray(D[k]))delete D[k];});
+  ['who','wallets'].forEach(k=>{if(D[k]!=null&&(typeof D[k]!=='object'||Array.isArray(D[k])))D[k]=k==='who'?{}:undefined;});
+  if(D.rec)D.rec=D.rec.filter(r=>r&&r.id&&isFinite(r.amt)&&isFinite(r.day));if(D.mv)D.mv=D.mv.filter(m=>m&&m.id&&isFinite(m.amt));}
+  catch(e){D={tx:[],who:{},hide:false};}}
 load();
 function save(){try{
   /* gộp với bản đang lưu: khoản nào tab khác đã ghi mà D chưa có thì giữ lại (trừ khoản chính tab này vừa xoá) */
@@ -11156,6 +11160,28 @@ if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.service
   navigator.serviceWorker.addEventListener('message',e=>{if(e.data!=='ban-moi')return;
     /* đang ở màn chính (không gõ dở gì) → tự tải lại luôn; đang nhập/sửa thì chỉ báo, khỏi mất số đang gõ */
     if(S.v==='home'||S.v==='tk')location.reload();else toast('Có bản mới',()=>location.reload(),'Tải lại');});}
-if(!fromHash())render();
+/* ══ MÀN CỨU HỘ (06/10): lỗi bất kỳ → không bao giờ trắng trơn. Hiện đúng dòng lỗi + nút tự cứu. ══ */
+function showCrash(e){try{stopCam();}catch(_){}
+  const msg=String(e&&(e.message||e)||'lỗi lạ'),at=String(e&&e.stack||'').split('\n').slice(0,2).join(' ← ');
+  document.getElementById('app').innerHTML=`<div class="wrap" style="padding-top:calc(30px + env(safe-area-inset-top))">
+    <div style="font-size:2rem">🛟</div><h2 style="margin:8px 0 4px">App gặp lỗi</h2>
+    <div class="note" style="text-align:left">Dữ liệu vẫn còn nguyên trong máy. Chụp màn hình này gửi Claude, rồi thử các nút dưới.</div>
+    <div class="warn" style="font:500 .74rem ui-monospace,Menlo,monospace;word-break:break-word;margin-top:10px">${esc(msg)}<br><span style="opacity:.7">${esc(at)}</span><br>bản ${esc(verTxt())}</div>
+    <button class="cta" id="c_up">↻ Tải lại bản mới nhất</button>
+    <button class="cta ghost" id="c_fix">🧹 Sửa dữ liệu hỏng rồi mở lại</button>
+    <button class="cta ghost" id="c_home">Về màn Sổ</button></div>`;
+  document.getElementById('c_up').onclick=async()=>{try{const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()));
+    const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));}catch(_){}location.replace(location.pathname+'?moi='+Date.now());};
+  document.getElementById('c_fix').onclick=()=>{try{const v=JSON.parse(localStorage.getItem('quetchi_v1')||'{}');
+      v.tx=(Array.isArray(v.tx)?v.tx:[]).filter(txOk).map(x=>Object.assign(x,{name:String(x.name||''),cat:CATS.find(c=>c[0]===x.cat)||CATS_CU.find(c=>c[0]===x.cat)?x.cat:'khac'}));
+      ['who','wallets'].forEach(k=>{if(v[k]&&typeof v[k]!=='object')delete v[k];});['rec','mv'].forEach(k=>{if(v[k]&&!Array.isArray(v[k]))delete v[k];});
+      localStorage.setItem('quetchi_v1',JSON.stringify(v));localStorage.removeItem('quetchi_taisan');}catch(_){localStorage.removeItem('quetchi_taisan');}
+    location.reload();};
+  document.getElementById('c_home').onclick=()=>{S={v:'home'};render();};}
+const _render=render;render=function(){try{_render();}catch(e){showCrash(e);}};
+window.addEventListener('error',e=>{if(!document.querySelector('.tabs')&&!document.querySelector('.sheet'))showCrash(e.error||e.message);});
+window.addEventListener('unhandledrejection',e=>{const m=String(e.reason&&e.reason.message||e.reason||'');if(/Firebase|fetch|network|Load failed/i.test(m))return;
+  if(!document.querySelector('.tabs')&&!document.querySelector('.sheet'))showCrash(e.reason);});
+try{if(!fromHash())render();}catch(e){showCrash(e);}
 syncSoon();
 </script></body></html>
