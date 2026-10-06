@@ -10412,12 +10412,16 @@ let D={tx:[],who:{},hide:false};
    mất khoản tab mới vừa ghi (Mau gặp 28/09). Nên: đọc lại sổ mỗi khi tab hiện ra / tab khác vừa lưu,
    và đọc lại ngay trước mỗi lần lưu rồi chỉ ghi phần mình đổi. */
 const gone=new Set();   /* id đã xoá ở tab này — để save() không kéo lại từ bản lưu */
-function load(){try{const v=JSON.parse(localStorage.getItem('quetchi_v1')||'{}');D=Object.assign({tx:[],who:{},hide:false},v);}catch(e){}}
+/* KHOẢN HỎNG (06/10): bản app cũ từng kéo nhầm bản tóm tắt tài sản thành một "khoản" không ngày, không tiền →
+   vẽ danh sách thì sập, app không mở được. Mọi khoản thiếu mã / ngày / số tiền bị bỏ ngay khi đọc sổ. */
+const txOk=x=>x&&typeof x.id==='string'&&x.id!=='undefined'&&typeof x.d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(x.d)&&isFinite(x.amt)&&x.amt>0;
+function load(){try{const v=JSON.parse(localStorage.getItem('quetchi_v1')||'{}');D=Object.assign({tx:[],who:{},hide:false},v);
+  if(!Array.isArray(D.tx))D.tx=[];D.tx=D.tx.filter(txOk);}catch(e){D={tx:[],who:{},hide:false};}}
 load();
 function save(){try{
   /* gộp với bản đang lưu: khoản nào tab khác đã ghi mà D chưa có thì giữ lại (trừ khoản chính tab này vừa xoá) */
   const cur=JSON.parse(localStorage.getItem('quetchi_v1')||'{}'),have=new Set(D.tx.map(x=>x.id));
-  (cur.tx||[]).forEach(x=>{if(!have.has(x.id)&&!gone.has(x.id))D.tx.push(x);});
+  (cur.tx||[]).forEach(x=>{if(txOk(x)&&!have.has(x.id)&&!gone.has(x.id))D.tx.push(x);});
   D.who=Object.assign({},cur.who||{},D.who);
   if(cur.mv){D.mv=D.mv||[];const hm=new Set(D.mv.map(m=>m.id));cur.mv.forEach(m=>{if(!hm.has(m.id))D.mv.push(m);});}
   localStorage.setItem('quetchi_v1',JSON.stringify(D));}catch(e){toast('không lưu được — trình duyệt đang chặn bộ nhớ');}
@@ -10902,7 +10906,7 @@ function syncSoon(){if(syncCfg()){clearTimeout(syncT);syncT=setTimeout(syncNow,6
 /* khoản chưa gửi = nội dung khác bản đã gửi. Đọc sổ từ bộ nhớ (không từ D) — tab cũ không làm gửi nhầm "đã xoá" */
 function syncPending(){const c=syncCfg();if(!c)return 0;const sent=c.sent||{};let n=0;
   let cur=[];try{cur=JSON.parse(localStorage.getItem('quetchi_v1')||'{}').tx||[];}catch(e){}
-  cur.forEach(x=>{if(sent[x.id]!==hashOf(payOf(x)))n++;});return n;}
+  cur.forEach(x=>{if(txOk(x)&&sent[x.id]!==hashOf(payOf(x)))n++;});return n;}
 async function fbPut(c,id,p){const r=await fetch(fbDoc(c.vid,id),{method:'PATCH',headers:{'Content-Type':'application/json'},
   body:JSON.stringify({fields:{c:{stringValue:await sealed(c.k,p)},t:{integerValue:String(Date.now())}}})});
   if(!r.ok)throw new Error('Firebase trả '+r.status);}
@@ -10919,7 +10923,7 @@ async function syncPull(c,sent){
   load();const have=new Map(D.tx.map(x=>[x.id,x]));let add=0,del=0;
   for(const doc of docs){if(/\/z-taisan$/.test(doc.name))continue;   /* bản tóm tắt tài sản từ Mac — không phải khoản chi */
     let p;try{p=await unseal(c.k,doc.fields.c.stringValue);}catch(e){continue;}
-    if(!p||!p.id)continue;
+    if(!p||!p.id||p.id==='undefined'||(!p.del&&!(typeof p.d==='string'&&isFinite(p.amt)&&p.amt>0)))continue;
     if(p.del){if(have.has(p.id)){gone.add(p.id);D.tx=D.tx.filter(x=>x.id!==p.id);del++;}continue;}
     if(have.has(p.id))continue;
     /* đã từng đồng bộ mà nay không còn trên máy = vừa xoá ở máy NÀY → đừng kéo lại, để lệnh xoá được gửi đi */
@@ -10933,7 +10937,7 @@ async function syncNow(){const c=syncCfg();if(!c||syncBusy||FB_PID.startsWith('_
   const sent=Object.assign({},c.sent||{});let pulled=null;
   try{pulled=await syncPull(c,sent);
     const cur=JSON.parse(localStorage.getItem('quetchi_v1')||'{}').tx||[],seen=new Set();
-    for(const x of cur){seen.add(x.id);const p=payOf(x),h=hashOf(p);if(sent[x.id]===h)continue;await fbPut(c,x.id,p);sent[x.id]=h;}
+    for(const x of cur){if(!txOk(x))continue;seen.add(x.id);const p=payOf(x),h=hashOf(p);if(sent[x.id]===h)continue;await fbPut(c,x.id,p);sent[x.id]=h;}
     for(const id of Object.keys(sent))if(!seen.has(id)){await fbPut(c,id,{id,del:true});delete sent[id];}
     syncErr='';}
   catch(e){syncErr=navigator.onLine===false?'mất mạng':String(e.message||e);}
