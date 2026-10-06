@@ -1,24 +1,16 @@
-/* Quét chi — MỞ NGAY: có bản đã lưu thì trả luôn (0 giây chờ mạng), đồng thời tải bản mới ở nền và lưu cho lần sau.
-   Bản mới khác bản đang chạy → báo trang hiện "có bản mới". Chưa có bản lưu (lần đầu) → lấy từ mạng.
-   Chỉ lưu file của chính trang — không đụng dữ liệu chi tiêu (localStorage). */
-const C='quetchi-v3';
+/* Quét chi — LẤY BẢN MỚI TRƯỚC (06/10): trang chính hỏi mạng trước, đợi tối đa 3 giây; mất mạng / chậm thì mở bản đã lưu.
+   Trước đây mở bản lưu trước cho nhanh → một bản lỗi bị kẹt trên máy, app không vào được. Chỉ lưu file của chính trang. */
+const C='quetchi-v4';
 self.addEventListener('install',()=>self.skipWaiting());
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener('fetch',e=>{
   const r=e.request,u=new URL(r.url);
   if(r.method!=='GET'||u.origin!==location.origin)return;
   const nav=r.mode==='navigate',key=nav?'./':r;
-  e.respondWith(caches.open(C).then(async c=>{
-    const old=await c.match(key,{ignoreSearch:true});
-    /* no-cache: hỏi lại máy chủ (ETag, rẻ) — không lấy bản cũ trong bộ nhớ đệm HTTP */
-    const net=fetch(nav?r.url:r,{cache:'no-cache'}).then(async res=>{
-      if(res.ok){
-        let doi=false;
-        if(nav&&old){const [a,b]=await Promise.all([old.clone().text(),res.clone().text()]);doi=a!==b;}
-        /* LƯU XONG rồi mới báo — trang tự tải lại ngay khi nhận tin, báo trước khi lưu thì nó mở lại bản cũ, lặp mãi */
-        await c.put(key,res.clone());
-        if(doi)(await self.clients.matchAll()).forEach(cl=>cl.postMessage('ban-moi'));}
-      return res;});
-    if(old){e.waitUntil(net.catch(()=>{}));return old;}
-    return net.catch(()=>Response.error());
-  }));});
+  e.respondWith(caches.open(C).then(c=>new Promise(done=>{
+    let xong=false;const fin=x=>{if(!xong&&x){xong=true;done(x);}};
+    const fromCache=()=>c.match(key,{ignoreSearch:true});
+    const t=setTimeout(()=>fromCache().then(fin),3000);
+    fetch(nav?r.url:r,{cache:'no-cache'}).then(res=>{clearTimeout(t);if(res.ok)c.put(key,res.clone());fin(res);})
+      .catch(()=>{clearTimeout(t);fromCache().then(m=>fin(m||Response.error()));});
+  })));});
