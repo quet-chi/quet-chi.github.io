@@ -10425,7 +10425,8 @@ const CATS=[['an','Ăn uống','🍜'],['giaitri','Giải trí · cà phê','☕
 const CATS_CU=[['suckhoe','Sức khoẻ','💊']];
 const cat=k=>CATS.find(c=>c[0]===k)||CATS_CU.find(c=>c[0]===k)||['','chưa phân loại','?'];
 /* KHÔNG TÍNH LÀ CHI: tiền của mình chuyển đi chỗ khác — nạp/tiết kiệm và đầu tư (mua crypto, vàng…) là đổi chỗ để tiền */
-const notSpend=c=>c==='nap'||c==='dautu';
+/* 07/10: 'Đầu tư' chỉ là NHÃN để che tên một khoản chi riêng — VẪN TÍNH CHI. Chỉ Tiết kiệm (nạp) là không tính. */
+const notSpend=c=>c==='nap';
 const pad2=n=>n<10?'0'+n:''+n;
 const today=()=>{const d=new Date();return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -10442,6 +10443,9 @@ function load(){try{const v=JSON.parse(localStorage.getItem('quetchi_v1')||'{}')
   if(!Array.isArray(D.tx))D.tx=[];D.tx=D.tx.filter(txOk);
   ['rec','mv'].forEach(k=>{if(D[k]!=null&&!Array.isArray(D[k]))delete D[k];});
   ['who','wallets'].forEach(k=>{if(D[k]!=null&&(typeof D[k]!=='object'||Array.isArray(D[k])))D[k]=k==='who'?{}:undefined;});
+  /* 07/10: bỏ loại Sức khoẻ — khoản cũ, tên đã nhớ, khoản định kỳ đều chuyển sang Đầu tư (đồng bộ tự gửi bản sửa sang Mac) */
+  D.tx.forEach(x=>{if(x.cat==='suckhoe')x.cat='dautu';});(D.rec||[]).forEach(r=>{if(r&&r.cat==='suckhoe')r.cat='dautu';});
+  if(D.who&&typeof D.who==='object')Object.values(D.who).forEach(w=>{if(w&&w.cat==='suckhoe')w.cat='dautu';});
   if(D.rec)D.rec=D.rec.filter(r=>r&&r.id&&isFinite(r.amt)&&isFinite(r.day));if(D.no!=null&&!Array.isArray(D.no))delete D.no;if(D.no)D.no=D.no.filter(x=>x&&typeof x.id==='string'&&isFinite(x.amt)&&x.amt>0&&typeof x.d==='string');if(D.mv)D.mv=D.mv.filter(m=>m&&m.id&&isFinite(m.amt));}
   catch(e){D={tx:[],who:{},hide:false};}}
 load();
@@ -10526,8 +10530,8 @@ const dispName=x=>{const n=(x.name||'').trim();if(n&&!/^\d{5,}$/.test(n))return 
   if(x.acc)return (BANKNAME[x.bin]||'TK')+' ··'+String(x.acc).slice(-4);return SH[x.cat]||'Không tên';};
 /* KÍN: đang bấm 👁 (ẩn số) thì khoản loại Gia đình cũng ẩn tên người nhận + ghi chú — người đứng cạnh chỉ thấy
    "Gia đình", không biết chi cho ai. Chép/đồng bộ sang Mac vẫn giữ tên thật. */
-const kin=x=>D.hide&&(x.cat==='giadinh'||x.cat==='bieu');
-const kinName=x=>kin(x)?(x.cat==='bieu'?'Biếu':'Gia đình'):dispName(x);
+const kin=x=>D.hide&&(x.cat==='giadinh'||x.cat==='bieu'||x.cat==='dautu');
+const kinName=x=>kin(x)?(x.cat==='bieu'?'Biếu':x.cat==='dautu'?'Đầu tư':'Gia đình'):dispName(x);
 const kinNote=x=>kin(x)?'':(x.note||'');
 const noName=x=>!(x.name||'').trim()||/^\d{5,}$/.test((x.name||'').trim());
 const catGrid=sel=>`<div class="cg">${CATS.map(c=>`<button class="cgb${sel===c[0]?' on':''}" data-c="${c[0]}"><i>${c[2]}</i>${SH[c[0]]||c[1]}</button>`).join('')}</div>`;
@@ -10884,7 +10888,7 @@ function tkView(){
     <div class="tkc"><div class="tkh"><span>Khoản lớn nhất</span></div>
       ${big.map(x=>{const p=x.d.split('-');return `<div class="tli"><span>${p[2]}/${p[1]}</span><span class="n">${cat(x.cat)[2]} ${esc(kinName(x))}${x.once?' <small>· 1 lần</small>':''}</span><b>${short(mineOf(x))}</b></div>`;}).join('')}</div>`
     :'<div class="empty">Tháng này chưa có khoản nào.</div>'}
-    <div class="note">${[nap?'Không tính '+short(nap)+' tiền của mình chuyển đi (nạp, tiết kiệm, đầu tư).':'',L.some(x=>x.mine!=null)?'Khoản trả dùm chỉ tính phần của mình.':'',once?'Có '+short(once)+' khoản 1 lần.':''].filter(Boolean).join(' ')}</div>
+    <div class="note">${[nap?'Không tính '+short(nap)+' tiền của mình chuyển vào tiết kiệm.':'',L.some(x=>x.mine!=null)?'Khoản trả dùm chỉ tính phần của mình.':'',once?'Có '+short(once)+' khoản 1 lần.':''].filter(Boolean).join(' ')}</div>
   </div>${tabbar('tk')}`;
   bindTabs();
   const go=k=>{S.m=mAdd(m,k);S.fc=null;S.dsel=null;render();};
