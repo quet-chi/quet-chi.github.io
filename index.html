@@ -10744,7 +10744,7 @@ const budOf=m=>{const B=D.bud;if(!B)return 0;return (B.m&&B.m[m]!=null)?B.m[m]:(
    D.bud.jars=[{id,n,amt,cats:[...]}] — giữ qua các tháng. Phần chưa chia = lọ "Chi khác" cho mọi loại còn lại. */
 const jarsOf=()=>((D.bud&&D.bud.jars)||[]).filter(j=>j&&j.id);
 const jarIdOf=x=>{const J=jarsOf();if(x.jar==='_k')return'_k';if(x.jar&&J.some(j=>j.id===x.jar))return x.jar;const j=J.find(j=>(j.cats||[]).includes(x.cat));return j?j.id:'_k';};
-const jarInfo=x=>{const id=jarIdOf(x),j=jarsOf().find(j=>j.id===id);return j?{id,n:j.n,ic:j.ic||'◎',col:j.col||'#8B919A'}:{id:'_k',n:'Chi khác',ic:'…',col:'#8B919A'};};
+const jarInfo=x=>{const id=jarIdOf(x),j=jarsOf().find(j=>j.id===id);return j?{id,n:j.n,ic:j.ic||'◎',col:j.col||'#8B919A'}:{id:'_k',n:'Quỹ chung',ic:'💰',col:'#8B919A'};};
 /* ── MÀN SỔ BẢN VỢ (08/10, rà UI): MỘT thẻ hồng = còn bao nhiêu tháng này + các lọ ngay dưới. Bỏ thẻ "đã chi" trùng, bỏ cảnh báo nhịp báo nhầm. ── */
 function voHero(s){const m=today().slice(0,7),A=budOf(m),sp=s.mo,left=A-sp,now=new Date(),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),dl=dim-now.getDate()+1;
   const pool=A-jarsOf().reduce((a,j)=>a+(j.amt||0),0),J=jarStats(m),pct=A?Math.min(100,sp/A*100):0,H=D.hide;
@@ -10755,7 +10755,7 @@ function voHero(s){const m=today().slice(0,7),A=budOf(m),sp=s.mo,left=A-sp,now=n
       <div class="vh-s"><span>Có <b>${short(A)}</b></span><span>Đã xài <b>${short(sp)}</b></span>${left<0?'<span><b>Đã lố '+short(-left)+'</b></span>':''}</div>
       ${pool>0&&!H?`<div class="vh-pool">💰 ${short(pool)} chưa chia vào lọ <span>Chia ›</span></div>`:''}</button>
     <div class="tkc vjars"><div class="tkh"><span>Các lọ</span><small id="vchia">chia tiền ›</small></div><div class="jvs">${jr}<button class="jv add" id="jaradd"><span>＋</span><b>Lọ mới</b><small>&nbsp;</small></button></div></div>`;}
-function jarStats(m){const A=budOf(m),J=jarsOf().map(j=>Object.assign({},j,{sp:0})),other={id:'_k',n:'Chi khác',ic:'…',col:'#8B919A',amt:Math.max(0,A-J.reduce((a,j)=>a+(j.amt||0),0)),sp:0,cats:null,auto:true};
+function jarStats(m){const A=budOf(m),J=jarsOf().map(j=>Object.assign({},j,{sp:0})),other={id:'_k',n:'Quỹ chung',ic:'💰',col:'#8B919A',amt:Math.max(0,A-J.reduce((a,j)=>a+(j.amt||0),0)),sp:0,cats:null,auto:true};
   D.tx.filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===m).forEach(x=>{const j=x.jar==='_k'?null:x.jar?(J.find(j=>j.id===x.jar)||J.find(j=>(j.cats||[]).includes(x.cat))):J.find(j=>(j.cats||[]).includes(x.cat));(j||other).sp+=mineOf(x);});
   return J.length?[...J,other]:[];}
 const jarOfCat=c=>jarsOf().find(j=>(j.cats||[]).includes(c));
@@ -10790,7 +10790,7 @@ function budCard(s){const m=today().slice(0,7),A=budOf(m);
   const jr2=J.map(j=>{const no=!j.amt&&!j.auto,l=j.amt-j.sp;return `<button class="jv${l<0&&j.amt?' over':''}" data-jar="${j.id}">${jarSvg(j,58)}<b>${esc(j.n)}</b><small>${D.hide?'•••':no?'chưa nạp':l<0?'lố '+short(-l):'còn '+short(l)}</small></button>`;}).join('');
   const jr=J.map(j=>{const no=!j.amt&&!j.auto,l=j.amt-j.sp,p=j.amt?Math.min(100,j.sp/j.amt*100):0,c=no?'n':l<0?'b':j.sp>j.amt*dn/dim*1.1?'w':'g';
     return `<button class="jar ${c}" ${j.auto?'':`data-jar="${j.id}"`} style="--jk:${j.col||'#8B919A'}"><div class="jar-t"><span><i>${j.ic||'…'}</i>${esc(j.n)}</span><b>${D.hide?'•••':no?'':(l<0?'lố '+short(-l):'còn '+short(l))}</b></div>
-      <div class="jar-b"><i style="width:${p.toFixed(1)}%"></i></div><small>${D.hide?'':no?(j.sp?'đã xài '+short(j.sp)+' · ':'')+'chạm để nạp tiền':short(j.sp)+' / '+short(j.amt)}${j.auto?' · loại chưa gán lọ':''}</small></button>`;}).join('');
+      <div class="jar-b"><i style="width:${p.toFixed(1)}%"></i></div><small>${D.hide?'':no?(j.sp?'đã xài '+short(j.sp)+' · ':'')+'chạm để nạp tiền':short(j.sp)+' / '+short(j.amt)}${j.auto?' · tiền chưa chia vào lọ':''}</small></button>`;}).join('');
   return `<div class="bud ${st}"><button class="bud-hd" id="budset"><div class="bud-t"><span>Tiền tháng ${+m.slice(5)}</span><small>chia tiền ›</small></div>
     <div class="bud-n"><div><small>Còn lại</small><b>${left<0?'−':''}${money(Math.abs(left))}<i> đ</i></b></div><div class="bud-r"><small>Có ${short(A)}</small><small>Đã xài ${short(sp)}</small></div></div>
     <div class="bud-bar"><i style="width:${pct.toFixed(1)}%"></i><b style="left:${Math.min(100,dn/dim*100).toFixed(1)}%"></b></div>
@@ -10802,10 +10802,10 @@ function budView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduc
     <button class="cta" id="b_ok" style="margin-top:10px">Lưu số tiền</button>
     <div class="lh"><span>Chia lọ</span><small class="lhh">mỗi lọ gắn vài loại chi — ghi khoản là tự trừ đúng lọ</small></div>
     ${J.map(j=>{const st=JS.find(x=>x.id===j.id)||{sp:0};return `<button class="srow" data-jx="${j.id}"><span class="sic">◎</span><span class="st"><b>${esc(j.n)}</b><small>${(j.cats||[]).map(c=>SH[c]||cat(c)[1]).join(' · ')||'chưa gán loại'}</small></span><span class="sr mono">${short(j.amt)}<br><small class="dim">đã xài ${short(st.sp)}</small></span></button>`;}).join('')}
-    ${J.length&&A?`<div class="srow" style="cursor:default"><span class="sic">…</span><span class="st"><b>Chi khác</b><small>mọi loại chưa gán lọ — tự tính = tổng − các lọ</small></span><span class="sr mono" style="${A-sumJ<0?'color:var(--bad)':''}">${A-sumJ<0?'−':''}${short(Math.abs(A-sumJ))}</span></div>`:''}
+    ${J.length&&A?`<div class="srow" style="cursor:default"><span class="sic">💰</span><span class="st"><b>Quỹ chung</b><small>tiền chưa chia vào lọ — tự tính = tổng − các lọ</small></span><span class="sr mono" style="${A-sumJ<0?'color:var(--bad)':''}">${A-sumJ<0?'−':''}${short(Math.abs(A-sumJ))}</span></div>`:''}
     ${A&&sumJ>A?`<div class="warn">Các lọ cộng lại ${short(sumJ)} — nhiều hơn tiền tháng ${short(A)}. Bớt lọ hoặc tăng tiền tháng.</div>`:''}
     <button class="cta ghost" id="b_jar">＋ Thêm lọ</button>
-    ${!J.length?`<div class="note" style="text-align:left">Ví dụ: <b>Ăn uống 15tr</b> (Ăn uống, Cà phê) · <b>Con cái 10tr</b> (Con cái). Phần còn lại tự vào <b>Chi khác</b>.</div>`:''}
+    ${!J.length?`<div class="note" style="text-align:left">Ví dụ: <b>Ăn uống 15tr</b> (Ăn uống, Cà phê) · <b>Con cái 10tr</b> (Con cái). Phần còn lại tự vào <b>Quỹ chung</b>.</div>`:''}
     ${A?'<button class="del" id="b_x">Bỏ theo dõi tiền tháng</button>':''}</div></div>`;
   const num=v=>+String(v).replace(/\D/g,'')||0;
   $('b_a').oninput=e=>{const n=num(e.target.value);e.target.value=n?n.toLocaleString('vi-VN'):'';};
@@ -10875,7 +10875,7 @@ function jardView(){const m=S.m||today().slice(0,7),JS=jarStats(m),j=JS.find(x=>
     <div class="jdh" style="--jk:${j.col||'#8B919A'}">${jarSvg(j,88)}<div class="jdn">
       <small>${l<0&&j.amt?'Đã lố':'Còn trong lọ'}</small><b class="${l<0&&j.amt?'dnc':''}">${D.hide?'•••':(l<0?'−':'')+money(Math.abs(l))}<i> đ</i></b>
       <div class="jds"><span>Nạp <b>${short(j.amt)}</b></span><span>Đã xài <b>${short(j.sp)}</b></span><span>${L.length} khoản</span></div>
-      ${j.auto?'<small>các loại chi chưa gán vào lọ nào</small>':`<small>${(j.cats||[]).map(c=>SH[c]||cat(c)[1]).join(' · ')}</small>`}</div></div>
+      ${j.auto?'<small>tiền tháng chưa chia vào lọ — chi gì không thuộc lọ riêng thì trừ ở đây</small>':`<small>${(j.cats||[]).map(c=>SH[c]||cat(c)[1]).join(' · ')}</small>`}</div></div>
     ${j.auto||m!==cur?'':`<div class="jc-a" style="margin-top:12px;--jk:${j.col||'#8B919A'}"><button data-jin="${j.id}">＋ Nạp</button><button class="out" data-jout="${j.id}"${j.amt?'':' disabled'}>− Rút</button></div>`}
     <div class="lh"><span>Đã chi từ lọ</span><small class="lhh">chạm để sửa · đổi lọ</small></div>
     ${list||'<div class="empty">Tháng này chưa có khoản nào trừ vào lọ này.</div>'}
@@ -11065,7 +11065,7 @@ function amtView(){
     <div class="ntr"><label class="dpk${S.d&&S.d!==today()?' on':''}" id="dpkl"><span id="dpkt">📅 ${(S.d&&S.d!==today())?dayLab(S.d):'Hôm nay'}</span><input type="date" id="dpk" value="${S.d||today()}" max="${today()}"></label>
     <input id="nt" class="nt" value="${esc(S.note||'')}" placeholder="${jarOnly()?'✎ Mua gì, cho ai… (không bắt buộc)':'✎ Mua gì? (không bắt buộc)'}" enterkeyhint="done"></div>
     ${jarOnly()?'':catGrid(S.cat)}
-    ${jarRow(jarOnly()?S.jar:(S.jar||jarAuto(S.cat)))}
+    ${jarRow(jarOnly()?(S.jar||(S.cat?jarAuto(S.cat):'_k')):(S.jar||jarAuto(S.cat)))}
     ${khongNapas?'<div class="warn">🏪 <b>QR thanh toán cửa hàng</b> — ngân hàng không cho tự điền loại này. Bấm nút: khoản được ghi, MB mở ra → <b>quét lại mã ở quầy bằng MB</b>.</div>':''}
     <div class="padw"><div class="pad">${['1','2','3','4','5','6','7','8','9','000','0','⌫'].map(k=>`<button data-k="${k}">${k}</button>`).join('')}</div>
       <button class="cta" id="go">${goLabel()}</button><div class="hint" id="hint">${hintTxt()}</div></div>
@@ -11079,7 +11079,7 @@ function amtView(){
   /* bấm số / chọn loại: sửa tại chỗ, không vẽ lại cả màn — vẽ lại làm trang nhảy về đầu */
   const f=n=>n?n.toLocaleString('vi-VN'):'0';
   const sync=()=>{const n=+S.amt||0,m=+S.mine||0;
-    if(jarOnly()){if(!S.jar&&S.cat){S.jar=jarAuto(S.cat);}}else if(!S.jarTay)S.jar=jarAuto(S.cat);if(jarOnly()&&!S.jar){const h=$('jarh');if(h)h.innerHTML='Chạm một lọ để ghi';}document.querySelectorAll('[data-jsel]').forEach(b=>b.classList.toggle('on',b.dataset.jsel===S.jar));if(S.jar)jarHint(S.jar,S.dum?m:n);
+    if(jarOnly()){if(!S.jar){S.jar=S.cat?jarAuto(S.cat):'_k';}if(!S.cat)S.cat=catOfJar(S.jar);}else if(!S.jarTay)S.jar=jarAuto(S.cat);if(jarOnly()&&!S.jar){const h=$('jarh');if(h)h.innerHTML='Chạm một lọ để ghi';}document.querySelectorAll('[data-jsel]').forEach(b=>b.classList.toggle('on',b.dataset.jsel===S.jar));if(S.jar)jarHint(S.jar,S.dum?m:n);
     if(S.dum){$('amtT').innerHTML=`<span class="cap">Tổng chuyển</span>${f(n)}`;$('mineT').innerHTML=`<span class="cap">Phần của mình</span>${f(m)}`;
       $('amtT').classList.toggle('tgt',S.tgt==='amt');$('mineT').classList.toggle('tgt',S.tgt==='mine');
       $('wl').innerHTML=n>m?`Chờ mọi người trả lại <b>${f(n-m)} đ</b>`:'&nbsp;';}
