@@ -10427,9 +10427,9 @@ const BANK={"970415":"icb","970436":"vcb","970418":"bidv","970405":"vba","970448
 /* CÙNG danh sách loại với tab Chi tiêu trên máy tính — chép sang là loại đi theo, khỏi chọn lại */
 const CATS=[['an','Ăn uống','🍜'],['giaitri','Giải trí · cà phê','☕'],['dilai','Đi lại','🛵'],['muasam','Mua sắm','🛍'],
   ['nha','Nhà cửa · hoá đơn','🏠'],['con','Con cái','🧸'],['ca','Cá','🐠'],['dautu','Đầu tư','📈'],['giadinh','Gia đình','👪'],
-  ['bieu','Biếu · hỗ trợ','🎁'],['khac','Khác','•'],['nap','Tiết kiệm · của mình','↪']];
+  ['suckhoe','Sức khoẻ','💊'],['khac','Khác','•'],['nap','Tiết kiệm · của mình','↪']];
 /* loại đã bỏ khỏi lưới chọn nhưng khoản cũ vẫn mang — vẫn hiện đúng tên (05/10: Sức khoẻ → thay bằng Đầu tư) */
-const CATS_CU=[['suckhoe','Sức khoẻ','💊']];
+const CATS_CU=[['bieu','Biếu · hỗ trợ','🎁']];   /* 08/10: Biếu rời lưới, Sức khoẻ quay lại */
 const cat=k=>CATS.find(c=>c[0]===k)||CATS_CU.find(c=>c[0]===k)||['','chưa phân loại','?'];
 /* KHÔNG TÍNH LÀ CHI: tiền của mình chuyển đi chỗ khác — nạp/tiết kiệm và đầu tư (mua crypto, vàng…) là đổi chỗ để tiền */
 /* 07/10: 'Đầu tư' chỉ là NHÃN để che tên một khoản chi riêng — VẪN TÍNH CHI. Chỉ Tiết kiệm (nạp) là không tính. */
@@ -10451,8 +10451,10 @@ function load(){try{const v=JSON.parse(localStorage.getItem('quetchi_v1')||'{}')
   ['rec','mv'].forEach(k=>{if(D[k]!=null&&!Array.isArray(D[k]))delete D[k];});
   ['who','wallets'].forEach(k=>{if(D[k]!=null&&(typeof D[k]!=='object'||Array.isArray(D[k])))D[k]=k==='who'?{}:undefined;});
   /* 07/10: bỏ loại Sức khoẻ — khoản cũ, tên đã nhớ, khoản định kỳ đều chuyển sang Đầu tư (đồng bộ tự gửi bản sửa sang Mac) */
-  D.tx.forEach(x=>{if(x.cat==='suckhoe')x.cat='dautu';});(D.rec||[]).forEach(r=>{if(r&&r.cat==='suckhoe')r.cat='dautu';});
-  if(D.who&&typeof D.who==='object')Object.values(D.who).forEach(w=>{if(w&&w.cat==='suckhoe')w.cat='dautu';});
+  /* 08/10: Sức khoẻ quay lại lưới (thay Biếu) → chỉ chuyển khoản TRƯỚC 08/10; tên đã nhớ / định kỳ chuyển một lần */
+  D.tx.forEach(x=>{if(x.cat==='suckhoe'&&x.d<'2026-10-08')x.cat='dautu';});
+  if(!D.migSK){(D.rec||[]).forEach(r=>{if(r&&r.cat==='suckhoe')r.cat='dautu';});
+    if(D.who&&typeof D.who==='object')Object.values(D.who).forEach(w=>{if(w&&w.cat==='suckhoe')w.cat='dautu';});D.migSK=1;}
   if(D.rec)D.rec=D.rec.filter(r=>r&&r.id&&isFinite(r.amt)&&isFinite(r.day));if(D.no!=null&&!Array.isArray(D.no))delete D.no;if(D.no)D.no=D.no.filter(x=>x&&typeof x.id==='string'&&isFinite(x.amt)&&x.amt>0&&typeof x.d==='string');if(D.mv)D.mv=D.mv.filter(m=>m&&m.id&&isFinite(m.amt));}
   catch(e){D={tx:[],who:{},hide:false};}}
 load();
@@ -10720,9 +10722,12 @@ function stopCam(){if(raf)cancelAnimationFrame(raf);raf=null;if(stream){stream.g
 function gotQR(txt){stopCam();const q=readQR(txt);const k=q.napas?q.bin+'|'+q.acc:q.mid?'m|'+q.mid:null,mem=k?D.who[k]:null;
   S={v:'amt',q,amt:q.amt?String(q.amt):'',cat:mem?mem.cat:null,name:mem&&mem.name&&!/^\d{5,}$/.test(mem.name)?mem.name:(q.name||''),tay:false};
   if(navigator.vibrate)navigator.vibrate(30);render();}
+/* LỖI 08/10: jsQR với 'onlyInvert' không tạo ảnh đảo màu mà vẫn đọc → "matrix.height" → app sập sau ~3 khung hình
+   (mã cửa hàng khó đọc nên gần như lần nào cũng dính). Đổi sang 'invertFirst' + bọc mọi lần đọc: thư viện lỗi = coi như chưa thấy mã. */
+function qrRead(d,w,h,o){try{return jsQR(d,w,h,o);}catch(e){return null;}}
 function decodeImage(img){const c=document.createElement('canvas'),w=Math.min(1000,img.width),h=Math.round(img.height*w/img.width);
   c.width=w;c.height=h;const x=c.getContext('2d');x.drawImage(img,0,0,w,h);const d=x.getImageData(0,0,w,h);
-  return jsQR(d.data,w,h,{inversionAttempts:'attemptBoth'});}
+  return qrRead(d.data,w,h,{inversionAttempts:'attemptBoth'});}
 function scan(){
   $('app').innerHTML=`<div class="cam"><video id="vid" playsinline muted></video><div class="frame"></div>
     <div class="hint" id="hint">Đưa mã QR của quán vào khung</div>
@@ -10739,12 +10744,12 @@ function scan(){
     /* ĐỌC QR KHÓ (05/10): QR cửa hàng dày, in trên mica loá, nhiều quầy dùng mã TRẮNG trên nền TỐI → xoay vòng 3 cách đọc:
        vùng giữa khung ngắm ở độ phân giải cao (mã nhỏ/xa) · cả khung · đảo màu. */
     let fr=0;
-    const tick=()=>{if(!stream)return;if(v.readyState===v.HAVE_ENOUGH_DATA){const vw=v.videoWidth,vh=v.videoHeight,m=fr++%3;let r=null;
+    const tick=()=>{if(!stream)return;try{if(v.readyState===v.HAVE_ENOUGH_DATA){const vw=v.videoWidth,vh=v.videoHeight,m=fr++%3;let r=null;
       if(m===0){const s=Math.round(Math.min(vw,vh)*0.7),sx=(vw-s)/2,sy=(vh-s)/2,o=Math.min(720,s);
-        c.width=o;c.height=o;x.drawImage(v,sx,sy,s,s,0,0,o,o);r=jsQR(x.getImageData(0,0,o,o).data,o,o,{inversionAttempts:'dontInvert'});}
+        c.width=o;c.height=o;x.drawImage(v,sx,sy,s,s,0,0,o,o);r=qrRead(x.getImageData(0,0,o,o).data,o,o,{inversionAttempts:'dontInvert'});}
       else{const w=640,h=Math.round(vh*w/vw);c.width=w;c.height=h;x.drawImage(v,0,0,w,h);
-        r=jsQR(x.getImageData(0,0,w,h).data,w,h,{inversionAttempts:m===1?'dontInvert':'onlyInvert'});}
-      if(r&&r.data){gotQR(r.data);return;}}raf=requestAnimationFrame(tick);};tick();})
+        r=qrRead(x.getImageData(0,0,w,h).data,w,h,{inversionAttempts:m===1?'dontInvert':'invertFirst'});}
+      if(r&&r.data){gotQR(r.data);return;}}}catch(e){if(!stream)return;}raf=requestAnimationFrame(tick);};tick();})
   .catch(()=>{$('hint').textContent='Chưa được phép dùng camera — bấm "Chọn ảnh QR" hoặc cho phép camera trong Cài đặt';});}
 
 /* ── nhập tiền ── */
