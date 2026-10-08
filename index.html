@@ -10749,7 +10749,7 @@ function voHero(s){const m=today().slice(0,7),A=budOf(m),sp=s.mo,left=A-sp,now=n
   return `<button class="hcard vh" id="vhero"><div class="hcl">Tháng ${now.getMonth()+1} còn lại</div>
       <div class="hcv">${H?'•••':(left<0?'−':'')+money(Math.abs(left))}<small> đ</small></div>
       <div class="vh-bar"><i style="width:${pct.toFixed(1)}%"></i></div>
-      <div class="vh-s"><span>Có <b>${short(A)}</b></span><span>Đã xài <b>${short(sp)}</b></span><span>${left<0?'<b>Đã lố '+short(-left)+'</b>':'~<b>'+short(left/dl)+'</b>/ngày · '+dl+' ngày'}</span></div>
+      <div class="vh-s"><span>Có <b>${short(A)}</b></span><span>Đã xài <b>${short(sp)}</b></span>${left<0?'<span><b>Đã lố '+short(-left)+'</b></span>':''}</div>
       ${pool>0&&!H?`<div class="vh-pool">💰 ${short(pool)} chưa chia vào lọ <span>Chia ›</span></div>`:''}</button>
     <div class="tkc vjars"><div class="tkh"><span>Các lọ</span><small id="vchia">chia tiền ›</small></div><div class="jvs">${jr}<button class="jv add" id="jaradd"><span>＋</span><b>Lọ mới</b><small>&nbsp;</small></button></div></div>`;}
 function jarStats(m){const A=budOf(m),J=jarsOf().map(j=>Object.assign({},j,{sp:0})),other={id:'_k',n:'Chi khác',ic:'…',col:'#8B919A',amt:Math.max(0,A-J.reduce((a,j)=>a+(j.amt||0),0)),sp:0,cats:null,auto:true};
@@ -11169,7 +11169,7 @@ function tkView(){
   const out=D.tx.filter(x=>!notSpend(x.cat)),L=out.filter(x=>x.d.slice(0,7)===m),tot=L.reduce((a,x)=>a+mineOf(x),0);
   const dim=new Date(+m.slice(0,4),+m.slice(5),0).getDate(),dayN=isCur?+today().slice(8):dim;
   const pm=mAdd(m,-1),P=out.filter(x=>x.d.slice(0,7)===pm&&+x.d.slice(8)<=dayN),ptot=P.reduce((a,x)=>a+mineOf(x),0);
-  const avg=dayN?tot/dayN:0,proj=isCur&&dayN>=3?avg*dim:null;
+  const avg=dayN?tot/dayN:0,proj=!VO&&isCur&&dayN>=3?avg*dim:null;   /* bản vợ: bỏ 'dự kiến cả tháng' (08/10) */
   let delta='';if(ptot>0){const r=(tot-ptot)/ptot*100,up=r>=0;
     delta=`<span class="dchip ${up?'up':'dn'}">${up?'▲':'▼'} ${Math.abs(r).toFixed(0)}%</span><span class="dsub">so với cùng kỳ tháng ${+pm.slice(5)}</span>`;}
   /* theo loại */
