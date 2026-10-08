@@ -345,6 +345,9 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .jv.add span{width:58px;height:68px;display:grid;place-items:center;border:1.5px dashed var(--line);border-radius:14px;font-size:1.4rem;color:var(--accent2)}.jv.add b{color:var(--ink3)}
 .jwave{animation:wave 3.2s linear infinite}@keyframes wave{to{transform:translateX(50%)}}
 @media(prefers-reduced-motion:reduce){.jwave{animation:none}}
+.ntr{display:flex;gap:8px;align-items:stretch;margin-top:10px}.ntr .nt{margin-top:0;flex:1;min-width:0}
+.dpk{position:relative;flex:none;display:flex;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:0 12px;font-size:.84rem;font-weight:600;color:var(--ink2);white-space:nowrap}
+.dpk.on{border-color:var(--accent);color:var(--accent2)}.dpk input{position:absolute;inset:0;opacity:0;width:100%;height:100%;font-size:16px}
 .jsel{margin-top:8px}.jsel.big .jsc{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;overflow:visible;margin:0;padding:0}
 .jsel.big .jch{align-items:center;text-align:center;padding:10px 4px 8px;border-radius:16px;font-size:.8rem}.jsel.big .jch i{font-size:1.5rem;line-height:1.2}.jsel.big .jsl{font-size:.78rem;color:var(--ink2);margin:4px 0 6px}.jsl{display:block;font-size:.68rem;color:var(--ink3);font-weight:600;margin-bottom:4px}
 .jsc{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}.jsc::-webkit-scrollbar{display:none}
@@ -11059,7 +11062,8 @@ function amtView(){
       :`<button class="amt" id="amtT"></button>`}
     <div class="opts"><div class="seg">${VIA.map(v=>`<button data-via="${v[0]}" class="${S.via===v[0]?'on':''}">${v[1]}</button>`).join('')}</div>
       ${VO?'':`<button class="op${S.dum?' on':''}" id="dumT">👥 Trả dùm</button>`}<button class="op${S.once?' on':''}" id="onceT" title="Khoản lớn một lần — học phí, bảo hiểm năm…">1 lần</button></div>
-    <input id="nt" class="nt" value="${esc(S.note||'')}" placeholder="${jarOnly()?'✎ Mua gì, cho ai… (không bắt buộc)':'✎ Mua gì? (không bắt buộc)'}" enterkeyhint="done">
+    <div class="ntr"><label class="dpk${S.d&&S.d!==today()?' on':''}" id="dpkl"><span id="dpkt">📅 ${(S.d&&S.d!==today())?dayLab(S.d):'Hôm nay'}</span><input type="date" id="dpk" value="${S.d||today()}" max="${today()}"></label>
+    <input id="nt" class="nt" value="${esc(S.note||'')}" placeholder="${jarOnly()?'✎ Mua gì, cho ai… (không bắt buộc)':'✎ Mua gì? (không bắt buộc)'}" enterkeyhint="done"></div>
     ${jarOnly()?'':catGrid(S.cat)}
     ${jarRow(jarOnly()?S.jar:(S.jar||jarAuto(S.cat)))}
     ${khongNapas?'<div class="warn">🏪 <b>QR thanh toán cửa hàng</b> — ngân hàng không cho tự điền loại này. Bấm nút: khoản được ghi, MB mở ra → <b>quét lại mã ở quầy bằng MB</b>.</div>':''}
@@ -11069,6 +11073,7 @@ function amtView(){
   $('bk').onclick=()=>{S.v='home';render();};
   $('nm').oninput=e=>{S.name=e.target.value;};
   $('nt').oninput=e=>{S.note=e.target.value;};
+  $('dpk').onchange=e=>{const v=e.target.value;S.d=/^\d{4}-\d{2}-\d{2}$/.test(v)&&v<=today()?v:today();$('dpkt').textContent='📅 '+(S.d!==today()?dayLab(S.d):'Hôm nay');$('dpkl').classList.toggle('on',S.d!==today());};
   $('nt').onkeydown=e=>{if(e.key==='Enter')e.target.blur();};
   document.querySelectorAll('[data-qp]').forEach(b=>b.onclick=()=>{S.name=b.dataset.qp;S.cat=b.dataset.qc;render();});
   /* bấm số / chọn loại: sửa tại chỗ, không vẽ lại cả màn — vẽ lại làm trang nhảy về đầu */
@@ -11099,7 +11104,8 @@ function amtView(){
     if(!(amt>0)){toast('chưa gõ số tiền');return;}
     if(!S.cat){toast(jarOnly()?'chạm một lọ':'chọn một loại');return;}
     if(S.dum&&mine>amt){toast('phần của mình lớn hơn tổng chuyển');return;}
-    const x={id:'p'+Date.now(),ts:Date.now(),d:today(),amt,name:(S.name||'').trim(),cat:S.cat,src:S.tay?'tay':'qr',via:S.via||'mb',synced:false};
+    const dd=S.d&&S.d<today()?S.d:today(),tsx=dd===today()?Date.now():new Date(dd+'T12:00:00').getTime()+(Date.now()%60000);
+    const x={id:'p'+Date.now(),ts:tsx,d:dd,amt,name:(S.name||'').trim(),cat:S.cat,src:S.tay?'tay':'qr',via:S.via||'mb',synced:false};
     const nt=(S.note||'').trim();if(nt)x.note=nt;
     if(S.dum&&mine<amt){x.mine=mine;x.nhan=false;}
     if(S.once)x.once=true;
