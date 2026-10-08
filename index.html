@@ -335,6 +335,19 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .jdn{flex:1;min-width:0}.jdn small{display:block;font-size:.72rem;color:var(--ink3)}.jdn b{font:700 1.8rem ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:-.03em}.jdn b i{font-style:normal;font-size:.4em;color:var(--ink3)}
 .jds{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0;font-size:.76rem;color:var(--ink2)}.jds b{font:600 .8rem ui-monospace,"SF Mono",Menlo,monospace;color:var(--ink)}
 .jc-v{cursor:pointer}
+.fam{display:flex;align-items:center;gap:10px;margin:6px 2px 14px}.famt{flex:1;min-width:0}.famb{display:flex;gap:6px;align-self:flex-start}.famb .eye2{width:38px;height:38px}.fam .hi{font-size:.78rem;color:var(--ink3)}.fam b{font-size:1.5rem;letter-spacing:-.02em}
+.love{font-size:.74rem;color:var(--accent2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fav{display:flex;flex-direction:column;background:none;padding:0;align-items:center}.fav{display:grid!important;grid-template-columns:auto auto;grid-template-rows:auto auto;width:62px}.fav i{font-style:normal;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:1.1rem;background:var(--b);border:2.5px solid var(--bg);margin:0 0 -8px -6px;box-shadow:0 2px 6px rgba(194,37,92,.15);animation:bob 3.4s ease-in-out infinite}
+.fav i:first-child{margin-left:0}.fav i:nth-child(2){animation-delay:.4s}.fav i:nth-child(3){animation-delay:.8s;grid-column:1/3;justify-self:center;width:30px;height:30px;font-size:1rem;margin:0}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.vtop{margin-top:0}.vtop b{font-size:1rem;color:var(--ink2)}
+.heart{position:fixed;z-index:200;pointer-events:none;transform:translate(-50%,-50%);animation:fly 1.6s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes fly{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}15%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) rotate(var(--r)) scale(1.1)}}
+.hcard.vh{position:relative;overflow:hidden}.flt{position:absolute;inset:0;pointer-events:none}.flt i{position:absolute;bottom:-20px;font-style:normal;color:rgba(255,255,255,.22);animation:rise2 9s linear infinite}
+.flt i:nth-child(1){left:12%;font-size:14px}.flt i:nth-child(2){left:38%;font-size:22px;animation-delay:2.5s;animation-duration:11s}.flt i:nth-child(3){left:63%;font-size:12px;animation-delay:5s}.flt i:nth-child(4){left:82%;font-size:18px;animation-delay:1.2s;animation-duration:12s}.flt i:nth-child(5){left:92%;font-size:10px;animation-delay:6.5s}
+@keyframes rise2{0%{transform:translateY(0) rotate(0);opacity:0}10%{opacity:1}100%{transform:translateY(-240px) rotate(25deg);opacity:0}}
+.hcard.vh>*:not(.flt){position:relative}
+@media(prefers-reduced-motion:reduce){.fav i,.flt i,.heart{animation:none!important}.flt{display:none}}
 .vh{cursor:pointer}.vh-bar{height:10px;border-radius:6px;background:rgba(255,255,255,.28);overflow:hidden;margin:8px 0 10px}.vh-bar i{display:block;height:100%;border-radius:6px;background:#fff}
 .vh-s{display:flex;justify-content:space-between;gap:8px;font-size:.78rem;color:rgba(255,255,255,.85)}.vh-s b{color:#fff;font-family:ui-monospace,"SF Mono",Menlo,monospace}
 .vh-pool{margin-top:12px;padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.18);font-size:.8rem;display:flex;align-items:center}.vh-pool span{margin-left:auto;font-weight:700}
@@ -10693,8 +10706,8 @@ function home(){
   const syncPill=syncCfg()?(()=>{const n=syncPending();if(VO)return syncErr&&n?`<button class="chipb warnp" data-tab="cai">⚠ Chưa sao lưu được ${n} khoản</button>`:'';return syncErr?`<button class="chipb warnp" data-tab="cai">⚠ Chưa gửi ${n}</button>`:n?`<button class="chipb" data-tab="cai">☁ Đang gửi ${n}</button>`:'';})()
     :`<button class="chipb warnp" data-tab="cai">☁ Chưa bật đồng bộ</button>`;
   $('app').innerHTML=`<div class="wrap hm2">
-    <div class="topb"><div><div class="hi">${['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'][now.getDay()]}, ${now.getDate()}/${now.getMonth()+1}</div><b>Sổ chi tiêu</b></div>
-      <span style="display:flex;gap:8px"><button class="eye2 add" data-tab="tay" aria-label="ghi tay">＋</button><button class="eye2" id="fnd" aria-label="tìm kiếm">🔍</button><button class="eye2" id="eye" aria-label="ẩn số">${D.hide?'🙈':'👁'}</button></span></div>
+    ${VO?famHead():`<div class="topb"><div>${VO?'':`<div class="hi">${['Chủ nhật','Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy'][now.getDay()]}, ${now.getDate()}/${now.getMonth()+1}</div>`}<b>${VO?'Sổ chi tiêu':'Sổ chi tiêu'}</b></div>
+      <span style="display:flex;gap:8px"><button class="eye2 add" data-tab="tay" aria-label="ghi tay">＋</button><button class="eye2" id="fnd" aria-label="tìm kiếm">🔍</button><button class="eye2" id="eye" aria-label="ẩn số">${D.hide?'🙈':'👁'}</button></span></div>`}
     ${location.host==='quet-chi.github.io'?`<div class="warn" style="margin:0 0 12px;line-height:1.55">📍 <b>Địa chỉ cũ</b> — mạng nhà hay chặn trang này.
       Bật <b>☁ Tự đồng bộ</b> ở Cài đặt (cùng mật khẩu) để các khoản cũ lên Mac, rồi dùng <b>quet-chi-sync.web.app</b>.</div>`:''}
     ${jarOnly()?voHero(s):`<button class="hcard" data-tab="tk">
@@ -10731,6 +10744,7 @@ function home(){
     $('askOk').onclick=done;$('askN').onkeydown=e=>{if(e.key==='Enter')done();};
     $('askX').onclick=()=>{delete D.ask;save();render();};}
   if($('cho'))$('cho').onclick=()=>{S={v:'cho'};render();};
+  if($('fam'))$('fam').onclick=e=>{const r=e.currentTarget.getBoundingClientRect();hearts(16,r.left+r.width/2,r.top+r.height/2);toast(LOVE[Math.floor(Math.random()*LOVE.length)]);};
   if($('vhero'))$('vhero').onclick=()=>{S={v:'chia'};render();};if($('vchia'))$('vchia').onclick=e=>{e.stopPropagation();S={v:'chia'};render();};
   if($('budset'))$('budset').onclick=()=>{S={v:budOf(today().slice(0,7))?'chia':'bud'};render();};
   document.querySelectorAll('[data-jar]').forEach(b=>b.onclick=()=>{S={v:'jard',id:b.dataset.jar,back:'home'};render();});
@@ -10756,7 +10770,7 @@ function voHero(s){const m=today().slice(0,7),A=budOf(m),H=D.hide,J=jarStats(m),
   /* TIỀN TỔNG (08/10, Mau: "tách lọ rồi thì số tổng trừ hẳn ra"): ví tổng = tiền tháng − đã nạp vào lọ − chi không chọn lọ. Lọ tự lo phần lọ. */
   const pct=A?Math.min(100,(sumJ+T.sp)/A*100):0,LJ=J.filter(j=>!j.auto);
   const jr=LJ.map(j=>{const no=!j.amt,l=j.amt-j.sp;return `<button class="jv${l<0&&j.amt?' over':''}" data-jar="${j.id}">${jarSvg(j,58)}<b>${esc(j.n)}</b><small>${H?'•••':no?'chưa nạp':l<0?'lố '+short(-l):'còn '+short(l)}</small></button>`;}).join('');
-  return `<button class="hcard vh" id="vhero"><div class="hcl">💰 Tiền tổng còn</div>
+  return `<button class="hcard vh" id="vhero"><span class="flt" aria-hidden="true"><i>♥</i><i>♥</i><i>♥</i><i>♥</i><i>♥</i></span><div class="hcl">💰 Tiền tổng còn</div>
       <div class="hcv">${H?'•••':(left<0?'−':'')+money(Math.abs(left))}<small> đ</small></div>
       <div class="vh-bar"><i style="width:${pct.toFixed(1)}%"></i></div>
       <div class="vh-s"><span>Tháng ${+m.slice(5)} <b>${short(A)}</b></span><span>Vào lọ <b>${short(sumJ)}</b></span><span>Chi từ tổng <b>${short(T.sp)}</b></span></div>
@@ -10779,6 +10793,16 @@ function jarSvg(j,size){const W=size||64,H=Math.round(W*1.18),l=(j.amt||0)-j.sp,
 /* CHỈ CHỌN LỌ (08/10, Mau: "dùng note là được"): bản vợ có lọ → bỏ lưới loại, chọn lọ + ghi chú. Loại tự gán = loại đầu của lọ (Chi khác → Khác) để Thống kê vẫn chạy. */
 const jarOnly=()=>VO&&jarsOf().length>0&&budOf(today().slice(0,7))>0;
 const catOfJar=id=>{const j=jarsOf().find(x=>x.id===id);return j&&j.cats&&j.cats[0]||'khac';};
+/* GIA ĐÌNH (08/10, bản vợ): nhà 3 người — Ba, Mẹ, Bé. Tim bay khi ghi / nạp lọ / đặt tiền tháng / chạm cả nhà. Tắt nếu máy bật giảm chuyển động. */
+const LOVE=['Cả nhà khoẻ là vui nhất 💕','Mẹ quản tiền giỏi ghê ✨','Tiết kiệm hôm nay, đi chơi cuối tuần 🎈','Ba thương mẹ, mẹ thương bé 🌷','Bé ngoan, nhà mình hạnh phúc 🏡','Từng đồng nhỏ, góp thành nhà to 🪴','Hôm nay cũng là một ngày đẹp 🌤','Có mẹ lo, cả nhà yên tâm 🤍'];
+function hearts(n,x,y){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const E=['💖','💕','🌸','✨','💗','🎀'],W=innerWidth;x=x==null?W/2:x;y=y==null?innerHeight*.4:y;
+  for(let i=0;i<(n||14);i++){const e=document.createElement('span');e.className='heart';e.textContent=E[i%E.length];
+    const dx=(Math.random()-.5)*W*.7,dy=-(140+Math.random()*220),r=(Math.random()-.5)*80;e.style.cssText=`left:${x}px;top:${y}px;--dx:${dx}px;--dy:${dy}px;--r:${r}deg;animation-delay:${i*25}ms;font-size:${16+Math.random()*14}px`;
+    document.body.appendChild(e);setTimeout(()=>e.remove(),1700+i*25);}}
+const famHead=()=>{const h=new Date().getHours(),g=h<11?'Chào buổi sáng ☀️':h<14?'Chào buổi trưa 🌤':h<18?'Chào buổi chiều 🌷':'Chào buổi tối 🌙',d=Math.floor(Date.now()/864e5);
+  return `<div class="fam"><button class="fav" id="fam" aria-label="cả nhà"><i style="--b:#DBEAFE">👨🏻</i><i style="--b:#FCE7F3">👩🏻</i><i style="--b:#FEF3C7">👧🏻</i></button>
+    <div class="famt"><div class="hi">${g}</div><b>Nhà mình</b><div class="love">${LOVE[d%LOVE.length]}</div></div>
+    <span class="famb"><button class="eye2 add" data-tab="tay" aria-label="ghi tay">＋</button><button class="eye2" id="fnd" aria-label="tìm kiếm">🔍</button><button class="eye2" id="eye" aria-label="ẩn số">${D.hide?'🙈':'👁'}</button></span></div>`;};
 const jarAuto=c=>{const j=c&&jarOfCat(c);return j?j.id:'_k';};
 function jarRow(sel,amtNow,exceptId){const m=today().slice(0,7);if(!jarsOf().length||!budOf(m))return'';const JS=jarStats(m),big=jarOnly();
   return `<div class="jsel${big?' big':''}"><span class="jsl">${big?'Chi từ lọ nào?':'Trừ vào lọ'}</span><div class="jsc">${JS.map(j=>{const l=j.amt-j.sp;return `<button type="button" class="jch${sel===j.id?' on':''}" data-jsel="${j.id}" style="--jk:${j.col||'#8B919A'}"><i>${j.ic||'…'}</i>${esc(j.n)}<small>${D.hide?'':j.amt||j.auto?(l<0?'lố '+short(-l):'còn '+short(l)):'chưa nạp'}</small></button>`;}).join('')}</div>
@@ -10817,7 +10841,7 @@ function budView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduc
   const num=v=>+String(v).replace(/\D/g,'')||0;
   $('b_a').oninput=e=>{const n=num(e.target.value);e.target.value=n?n.toLocaleString('vi-VN'):'';};
   $('bk').onclick=()=>{const a=num($('b_a').value);if(a&&a!==A){D.bud=D.bud||{m:{}};D.bud.m=D.bud.m||{};D.bud.m[m]=a;D.bud.def=a;D.bud.u=Date.now();save();}S={v:'home'};render();};
-  $('b_ok').onclick=()=>{const a=num($('b_a').value);if(!a){toast('gõ số tiền');return;}D.bud=D.bud||{m:{}};D.bud.m=D.bud.m||{};D.bud.m[m]=a;D.bud.def=a;D.bud.u=Date.now();save();S={v:'chia'};render();toast('đã lưu tiền tháng '+(+m.slice(5))+' — giờ nạp vào từng lọ');};
+  $('b_ok').onclick=()=>{const a=num($('b_a').value);if(!a){toast('gõ số tiền');return;}D.bud=D.bud||{m:{}};D.bud.m=D.bud.m||{};D.bud.m[m]=a;D.bud.def=a;D.bud.u=Date.now();save();S={v:'chia'};render();if(VO)hearts(18);toast('đã lưu tiền tháng '+(+m.slice(5))+' — giờ nạp vào từng lọ');};
   $('b_jar').onclick=()=>{S={v:'jarf'};render();};
   document.querySelectorAll('[data-jx]').forEach(b=>b.onclick=()=>{S={v:'jarf',id:b.dataset.jx};render();});
   if($('b_x'))$('b_x').onclick=()=>{const old=D.bud;D.bud={m:{},def:0,jars:old.jars,u:Date.now()};save();S={v:'home'};render();toast('đã bỏ',()=>{D.bud=Object.assign(old,{u:Date.now()});save();render();});};}
@@ -10869,7 +10893,7 @@ function chiaView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.redu
     const close=()=>{S={v:'chia'};render();};$('tcx').onclick=close;$('tsh').onclick=e=>{if(e.target.id==='tsh')close();};
     $('tok').onclick=()=>{const a=num(inp.value);if(!a){toast('gõ số tiền');return;}if(S.dir==='out'&&a>(P.amt||0)){toast('lọ chỉ có '+short(P.amt||0));return;}
       chiaAnim={id:P.id,amt:P.amt||0,pool,pct};P.amt=(P.amt||0)+(S.dir==='out'?-a:a);D.bud.u=Date.now();save();
-      if(navigator.vibrate)navigator.vibrate(12);const d=S.dir;S={v:'chia'};render();toast((d==='out'?'đã rút ':'đã nạp ')+short(a)+(d==='out'?' từ lọ ':' vào lọ ')+esc(P.n));};}}
+      if(VO&&S.dir!=='out')setTimeout(()=>hearts(12),120);if(navigator.vibrate)navigator.vibrate(12);const d=S.dir;S={v:'chia'};render();toast((d==='out'?'đã rút ':'đã nạp ')+short(a)+(d==='out'?' từ lọ ':' vào lọ ')+esc(P.n));};}}
 /* CHI TIẾT LỌ (08/10, "muốn xem lọ của con chi gì"): hình lọ + nạp/xài/còn + mọi khoản tháng này trừ vào lọ. Chạm khoản → sửa / đổi lọ. */
 function jardView(){const m=S.m||today().slice(0,7),JS=jarStats(m),j=JS.find(x=>x.id===S.id);if(!j){S={v:'home'};render();return;}
   const L=D.tx.filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===m&&jarIdOf(x)===j.id).sort((a,b)=>b.ts-a.ts),l=j.amt-j.sp;
@@ -11130,6 +11154,7 @@ function amtView(){
     D.tx.push(x);save();
     const undo=()=>{gone.add(x.id);D.tx=D.tx.filter(t=>t.id!==x.id);save();render();};
     S={v:'home'};render();
+    if(VO)setTimeout(()=>hearts(10),60);
     if(x.src==='tay'||x.via==='cash'){toast('đã ghi '+short(mineOf(x))+' · '+esc(kinName(x)),undo);return;}
     /* QR cửa hàng: không có link điền sẵn hợp lệ → mở thẳng app ngân hàng, quét lại mã ở quầy bằng app đó */
     const plain={mb:'mbbank://',momo:'momo://'};
