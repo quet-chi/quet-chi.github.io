@@ -317,6 +317,17 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .f2:has(.fl:only-child){grid-template-columns:1fr}
 .meta{font-size:.74rem;color:var(--ink3);margin-top:16px}
 .del{display:block;width:100%;margin-top:22px;height:50px;border-radius:14px;background:rgba(200,62,62,.08);border:1px solid rgba(200,62,62,.3);color:var(--bad);font-weight:600}
+.bud{display:block;width:100%;text-align:left;margin-top:12px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px 16px;color:var(--ink);font:inherit;box-shadow:0 1px 2px rgba(20,22,24,.04),0 2px 8px rgba(20,22,24,.03);--bc:var(--good)}
+.bud.w{--bc:var(--warn)}.bud.b{--bc:var(--bad);border-color:rgba(200,62,62,.4)}
+.bud.set{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;border-style:dashed}.bud.set b{display:block;font-size:.95rem}.bud.set small{display:block;font-size:.74rem;color:var(--ink3);margin-top:2px}.bud.set em{font-style:normal;color:var(--ink3)}
+.bud-ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(15,157,138,.12);color:var(--accent)}.bud-ic svg{width:22px;height:22px}
+.bud-t{display:flex;justify-content:space-between;align-items:baseline}.bud-t span{font-weight:700;font-size:.9rem}.bud-t small{font-size:.72rem;color:var(--ink3)}
+.bud-n{display:flex;justify-content:space-between;align-items:flex-end;margin:6px 0 10px}.bud-n small{display:block;font-size:.72rem;color:var(--ink3)}
+.bud-n b{font:700 1.9rem ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:-.03em;color:var(--bc)}.bud-n b i{font-style:normal;font-size:.4em;color:var(--ink3)}.bud.g .bud-n b{color:var(--ink)}
+.bud-r{text-align:right}.bud-r small{font:600 .78rem ui-monospace,"SF Mono",Menlo,monospace;color:var(--ink2);margin-top:2px}
+.bud-bar{position:relative;height:10px;border-radius:5px;background:var(--panel2)}.bud-bar i{display:block;height:100%;border-radius:5px;background:var(--bc)}.bud-bar b{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.5;border-radius:1px}
+.bud-m{font-size:.8rem;color:var(--ink2);margin-top:8px}.bud-m b{font-family:ui-monospace,"SF Mono",Menlo,monospace;color:var(--ink)}.bud.b .bud-m,.bud.b .bud-m b{color:var(--bad)}.bud.w .bud-m{color:var(--warn)}
+#app.anim .bud-bar i{transform-origin:left;animation:grow .7s cubic-bezier(.2,.7,.2,1) both .2s}
 @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 #app.anim .wrap>*{animation:rise .4s cubic-bezier(.2,.7,.2,1) both}#app.anim .wrap>*:nth-child(2){animation-delay:.04s}#app.anim .wrap>*:nth-child(3){animation-delay:.08s}#app.anim .wrap>*:nth-child(4){animation-delay:.12s}#app.anim .wrap>*:nth-child(5){animation-delay:.16s}#app.anim .wrap>*:nth-child(n+6){animation-delay:.2s}
 #app.anim .segbar i,#app.anim .lbt i,#app.anim .nobar i,#app.anim .brow .bt i,#app.anim .tw .wb i{transform-origin:left;animation:grow .7s cubic-bezier(.2,.7,.2,1) both .2s}
@@ -10475,7 +10486,7 @@ function load(){try{const v=JSON.parse(localStorage.getItem(LK)||'{}');D=Object.
   D.tx.forEach(x=>{if(x.cat==='suckhoe'&&x.d<'2026-10-08')x.cat='dautu';});
   if(!D.migSK){(D.rec||[]).forEach(r=>{if(r&&r.cat==='suckhoe')r.cat='dautu';});
     if(D.who&&typeof D.who==='object')Object.values(D.who).forEach(w=>{if(w&&w.cat==='suckhoe')w.cat='dautu';});D.migSK=1;}
-  if(D.rec)D.rec=D.rec.filter(r=>r&&r.id&&isFinite(r.amt)&&isFinite(r.day));if(D.no!=null&&!Array.isArray(D.no))delete D.no;if(D.no)D.no=D.no.filter(x=>x&&typeof x.id==='string'&&isFinite(x.amt)&&x.amt>0&&typeof x.d==='string');if(D.mv)D.mv=D.mv.filter(m=>m&&m.id&&isFinite(m.amt));}
+  if(D.rec)D.rec=D.rec.filter(r=>r&&r.id&&isFinite(r.amt)&&isFinite(r.day));if(D.no!=null&&!Array.isArray(D.no))delete D.no;if(D.bud!=null&&(typeof D.bud!=='object'||Array.isArray(D.bud)))delete D.bud;if(D.no)D.no=D.no.filter(x=>x&&typeof x.id==='string'&&isFinite(x.amt)&&x.amt>0&&typeof x.d==='string');if(D.mv)D.mv=D.mv.filter(m=>m&&m.id&&isFinite(m.amt));}
   catch(e){D={tx:[],who:{},hide:false};}}
 load();
 function save(){try{
@@ -10484,6 +10495,7 @@ function save(){try{
   (cur.tx||[]).forEach(x=>{if(txOk(x)&&!have.has(x.id)&&!gone.has(x.id))D.tx.push(x);});
   D.who=Object.assign({},cur.who||{},D.who);
   if(cur.as&&typeof cur.as==='object'&&(!D.as||(cur.as.u||0)>(D.as.u||0)))D.as=cur.as;
+  if(cur.bud&&typeof cur.bud==='object'&&(!D.bud||(cur.bud.u||0)>(D.bud.u||0)))D.bud=cur.bud;
   if(Array.isArray(cur.no)){D.no=D.no||[];cur.no.forEach(y=>{if(!y||!y.id)return;const i=D.no.findIndex(x=>x.id===y.id);if(i<0)D.no.push(y);else if((y.u||0)>(D.no[i].u||0))D.no[i]=y;});if(cur.noSeed)D.noSeed=1;}
   if(cur.mv){D.mv=D.mv||[];const hm=new Set(D.mv.map(m=>m.id));cur.mv.forEach(m=>{if(!hm.has(m.id))D.mv.push(m);});}
   localStorage.setItem(LK,JSON.stringify(D));}catch(e){toast('không lưu được — trình duyệt đang chặn bộ nhớ');}
@@ -10613,6 +10625,7 @@ function home(){
       <div class="spark">${d7.map(x=>`<div class="sb${x.k===T?' td':''}"><i style="height:${x.v?Math.max(6,x.v/m7*100):0}%"></i><span>${x.lab}</span></div>`).join('')}</div>
       <div class="hcs"><span>Hôm nay <b>${short(s.to)}</b></span><span>${s.toN} khoản</span><span>7 ngày <b>${short(d7.reduce((a,x)=>a+x.v,0))}</b></span></div>
     </button>
+    ${budCard(s)}
     ${(()=>{const a=D.ask&&D.tx.find(t=>t.id===D.ask);if(!a||!noName(a)||Date.now()-a.ts>2*864e5)return'';
       return `<div class="askn"><div class="tiny">Khoản <b>${short(a.amt)}</b> vừa rồi chuyển cho ai? <span class="dim">MB vừa hiện tên — gõ một lần, lần sau tự điền</span></div>
         <div class="askr"><input id="askN" placeholder="Tên người nhận / quán" enterkeyhint="done"><button id="askOk">Lưu</button><button id="askX" aria-label="bỏ qua">×</button></div></div>`;})()}
@@ -10639,12 +10652,40 @@ function home(){
     $('askOk').onclick=done;$('askN').onkeydown=e=>{if(e.key==='Enter')done();};
     $('askX').onclick=()=>{delete D.ask;save();render();};}
   if($('cho'))$('cho').onclick=()=>{S={v:'cho'};render();};
+  if($('budset'))$('budset').onclick=()=>{S={v:'bud'};render();};
   if($('nob'))$('nob').onclick=()=>{S={v:'no',back:'home'};render();};
   document.querySelectorAll('[data-nol]').forEach(b=>b.onclick=()=>{const x=D.no.find(y=>y.id===b.dataset.nol);S={v:'nod',id:x.id,k:x.k,back:'home'};render();});
   document.querySelectorAll('[data-nm]').forEach(b=>b.onclick=()=>{const x=D.no.find(y=>y.id===b.dataset.nm);if(x.k==='thu')noCopy(x);else{S={v:'nod',id:x.id,k:x.k,back:'home'};render();}});
   document.querySelectorAll('[data-ns]').forEach(b=>b.onclick=()=>{const x=D.no.find(y=>y.id===b.dataset.ns),d=new Date();d.setDate(d.getDate()+7);x.snz=d.toISOString().slice(0,10);noTouch(x);render();
     toast('nhắc lại '+ddmm(x.snz),()=>{delete x.snz;noTouch(x);render();});});
   document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{S={v:'ed',id:b.dataset.ed};render();});}
+
+/* ══ TIỀN THÁNG NÀY (08/10) — cho vợ Mau: "có bao nhiêu, xài bao nhiêu, lố hông". Một hạn mức tổng, mỗi tháng tính lại từ đầu.
+   D.bud={def:số mặc định, m:{'YYYY-MM':số}, u}. Tháng chưa gõ thì lấy số mặc định (số gần nhất đã gõ). Đồng bộ qua doc "z-bud". ══ */
+const budOf=m=>{const B=D.bud;if(!B)return 0;return (B.m&&B.m[m]!=null)?B.m[m]:(B.def||0);};
+function budCard(s){const m=today().slice(0,7),A=budOf(m);
+  if(!A)return VO?`<button class="bud set" id="budset"><span class="bud-ic">${ICO.wallet}</span><span><b>Đặt tiền tháng này</b><small>gõ số tiền đang có để xài trong tháng — app báo còn bao nhiêu, có lố không</small></span><em>›</em></button>`:'';
+  const sp=s.mo,left=A-sp,now=new Date(),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),dn=now.getDate(),dl=dim-dn+1;
+  const pct=Math.min(100,sp/A*100),plan=A*dn/dim,st=left<0?'b':sp>plan*1.1?'w':'g';
+  const msg=left<0?`Đã <b>lố ${short(-left)}</b> so với tiền tháng này`
+    :st==='w'?`Đang xài nhanh hơn kế hoạch — tới hôm nay lẽ ra khoảng ${short(plan)}`
+    :`Còn ${dl} ngày · mỗi ngày tiêu được <b>~${short(left/dl)}</b>`;
+  return `<button class="bud ${st}" id="budset"><div class="bud-t"><span>Tiền tháng ${+m.slice(5)}</span><small>sửa ›</small></div>
+    <div class="bud-n"><div><small>Còn lại</small><b>${left<0?'−':''}${money(Math.abs(left))}<i> đ</i></b></div><div class="bud-r"><small>Có ${short(A)}</small><small>Đã xài ${short(sp)}</small></div></div>
+    <div class="bud-bar"><i style="width:${pct.toFixed(1)}%"></i><b style="left:${Math.min(100,dn/dim*100).toFixed(1)}%"></b></div>
+    <div class="bud-m">${D.hide?'đang ẩn số':msg}</div></button>`;}
+function budView(){const m=today().slice(0,7),A=budOf(m);
+  $('app').innerHTML=`<div class="sheet"><div class="wrap">
+    <div class="bar1"><button class="back bk2" id="bk">‹ Huỷ</button><b>Tiền tháng ${+m.slice(5)}</b><span style="width:64px"></span></div>
+    <label class="fl">Tháng này có bao nhiêu tiền để xài?<input id="b_a" inputmode="numeric" value="${A?Math.round(A).toLocaleString('vi-VN'):''}" placeholder="vd: 40.000.000"></label>
+    <div class="note" style="text-align:left">Gõ số tiền đang có cho tháng này (tiền chồng đưa, lương…). App lấy tổng chi trong tháng trừ ra để biết <b>còn bao nhiêu</b> và báo khi <b>lố</b>.
+      Sang tháng mới tính lại từ đầu, số này được đề sẵn — khác thì sửa.</div>
+    <button class="cta" id="b_ok">Lưu</button>${A?'<button class="del" id="b_x">Bỏ theo dõi tiền tháng</button>':''}</div></div>`;
+  const num=v=>+String(v).replace(/\D/g,'')||0;
+  $('b_a').oninput=e=>{const n=num(e.target.value);e.target.value=n?n.toLocaleString('vi-VN'):'';};
+  $('bk').onclick=()=>{S={v:'home'};render();};
+  $('b_ok').onclick=()=>{const a=num($('b_a').value);if(!a){toast('gõ số tiền');return;}D.bud=D.bud||{m:{}};D.bud.m=D.bud.m||{};D.bud.m[m]=a;D.bud.def=a;D.bud.u=Date.now();save();S={v:'home'};render();toast('đã lưu tiền tháng '+(+m.slice(5)));};
+  if($('b_x'))$('b_x').onclick=()=>{const old=D.bud;D.bud={m:{},def:0,u:Date.now()};save();S={v:'home'};render();toast('đã bỏ',()=>{D.bud=Object.assign(old,{u:Date.now()});save();render();});};}
 
 /* ── Cài đặt: đồng bộ, ẩn số, chép tay, phiên bản ── */
 function caiView(){const c=syncCfg(),n=syncPending(),s=stats();
@@ -10654,6 +10695,7 @@ function caiView(){const c=syncCfg(),n=syncPending(),s=stats();
     <div class="sgrp"><div class="sgl">Dữ liệu</div>
       ${row('s_sync','☁',VO?'Sao lưu':'Đồng bộ sang Mac',c?(syncErr?'⚠ chưa gửi được — '+esc(syncErr):n?'đang chờ gửi '+n+' khoản':'đã đồng bộ hết'):(VO?'chưa kết nối — mở lại đúng đường link':'chưa bật — bật để sổ trên Mac tự nhận'),c?(syncErr||n?'<span class="bd">!</span>':'✓'):'Bật ›')}
       ${row('s_vi','💼','Ví & số dư',WALLETS.filter(([k])=>wInfo(k)).length?WALLETS.filter(([k])=>wInfo(k)).map(([k,n])=>n).join(' · '):'chưa đặt — để biết còn bao nhiêu trong từng ví')}
+      ${row('s_bud','◎','Tiền tháng này',budOf(today().slice(0,7))?short(budOf(today().slice(0,7)))+' · biết còn bao nhiêu, có lố không':'chưa đặt — để biết còn bao nhiêu')}
       ${row('s_rec','↻','Khoản định kỳ',(D.rec||[]).length?(D.rec.length+' khoản · tới ngày tự nhắc'):'tiền nhà, gia đình, gói đăng ký…')}
       ${(()=>{const ns=noSum();return row('s_no','🤝','Sổ nợ',ns.nThu+ns.nTra?[ns.thu?'cần thu '+short(ns.thu):'',ns.tra?'cần trả '+short(ns.tra):''].filter(Boolean).join(' · '):'ai nợ mình, mình nợ ai');})()}
       ${VO?'':row('s_cp','⇪','Chép sang Mac bằng tay',s.moi?s.moi+' khoản chưa chép':'dự phòng khi chưa bật đồng bộ')}
@@ -10667,7 +10709,7 @@ function caiView(){const c=syncCfg(),n=syncPending(),s=stats();
   </div>${tabbar('cai')}`;
   bindTabs();
   $('s_sync').onclick=()=>{S={v:'sync'};render();};
-  $('s_vi').onclick=()=>{S={v:'vi'};render();};if($('s_no'))$('s_no').onclick=()=>{S={v:'no',back:'cai'};render();};$('s_rec').onclick=()=>{S={v:'rec'};render();};
+  $('s_vi').onclick=()=>{S={v:'vi'};render();};if($('s_no'))$('s_no').onclick=()=>{S={v:'no',back:'cai'};render();};$('s_bud').onclick=()=>{S={v:'bud'};render();};$('s_rec').onclick=()=>{S={v:'rec'};render();};
   if($('s_cp'))$('s_cp').onclick=()=>{if(s.moi||D.tx.length)quickCopy();else toast('chưa có khoản nào');};
   if($('s_cho'))$('s_cho').onclick=()=>{S={v:'cho'};render();};
   $('s_hide').onclick=()=>{D.hide=!D.hide;save();render();};
@@ -11037,6 +11079,8 @@ async function syncPull(c,sent,nsent,ast){nsent=nsent||{};ast=ast||{};
       const cur=D.no.find(x=>x.id===y.id);if(hashOf(cur)===hashOf(y))nsent[y.id]=hashOf(y);continue;}
     if(/\/z-as$/.test(doc.name)){let q;try{q=await unseal(c.k,doc.fields.c.stringValue);}catch(e){continue;}   /* tài sản (chế độ gọn) */
       const y=q&&q.as;if(!y||typeof y!=='object')continue;if(!D.as||(y.u||0)>(D.as.u||0)){D.as=y;noChg++;}if(hashOf(D.as)===hashOf(y))ast.h=hashOf(y);continue;}
+    if(/\/z-bud$/.test(doc.name)){let q;try{q=await unseal(c.k,doc.fields.c.stringValue);}catch(e){continue;}   /* tiền tháng */
+      const y=q&&q.bud;if(!y||typeof y!=='object')continue;if(!D.bud||(y.u||0)>(D.bud.u||0)){D.bud=y;noChg++;}if(hashOf(D.bud)===hashOf(y))ast.b=hashOf(y);continue;}
     if(/\/z-[^/]+$/.test(doc.name))continue;   /* z-taisan (tóm tắt tài sản từ Mac) và mọi doc z- khác — không phải khoản chi */
     let p;try{p=await unseal(c.k,doc.fields.c.stringValue);}catch(e){continue;}
     if(!p||!p.id||p.id==='undefined'||(!p.del&&!(typeof p.d==='string'&&isFinite(p.amt)&&p.amt>0)))continue;
@@ -11050,16 +11094,17 @@ async function syncPull(c,sent,nsent,ast){nsent=nsent||{};ast=ast||{};
   if(add||del||noChg){localStorage.setItem(LK,JSON.stringify(D));}
   return{add,del,noChg};}
 async function syncNow(){const c=syncCfg();if(!c||syncBusy||FB_PID.startsWith('__'))return;syncBusy=true;
-  const sent=Object.assign({},c.sent||{}),nsent=Object.assign({},c.nsent||{}),ast={h:c.asent};let pulled=null;
+  const sent=Object.assign({},c.sent||{}),nsent=Object.assign({},c.nsent||{}),ast={h:c.asent,b:c.bsent};let pulled=null;
   try{pulled=await syncPull(c,sent,nsent,ast);
     const cur=JSON.parse(localStorage.getItem(LK)||'{}').tx||[],seen=new Set();
     for(const x of cur){if(!txOk(x))continue;seen.add(x.id);const p=payOf(x),h=hashOf(p);if(sent[x.id]===h)continue;await fbPut(c,x.id,p);sent[x.id]=h;}
     for(const id of Object.keys(sent))if(!seen.has(id)){await fbPut(c,id,{id,del:true});delete sent[id];}
     for(const y of (JSON.parse(localStorage.getItem(LK)||'{}').no||[])){if(!y||!y.id)continue;const h=hashOf(y);if(nsent[y.id]===h)continue;await fbPut(c,'z-no-'+y.id,{no:y});nsent[y.id]=h;}
     {const A=JSON.parse(localStorage.getItem(LK)||'{}').as;if(A&&typeof A==='object'){const h=hashOf(A);if(ast.h!==h){await fbPut(c,'z-as',{as:A});ast.h=h;}}}
+    {const B=JSON.parse(localStorage.getItem(LK)||'{}').bud;if(B&&typeof B==='object'){const h=hashOf(B);if(ast.b!==h){await fbPut(c,'z-bud',{bud:B});ast.b=h;}}}
     syncErr='';}
   catch(e){syncErr=navigator.onLine===false?'mất mạng':String(e.message||e);}
-  const c2=syncCfg();if(c2&&c2.vid===c.vid){c2.sent=sent;c2.nsent=nsent;c2.asent=ast.h;if(!syncErr)c2.last=Date.now();syncSet(c2);}
+  const c2=syncCfg();if(c2&&c2.vid===c.vid){c2.sent=sent;c2.nsent=nsent;c2.asent=ast.h;c2.bsent=ast.b;if(!syncErr)c2.last=Date.now();syncSet(c2);}
   syncBusy=false;if(S.v==='home'||S.v==='sync'||S.v==='cai'||S.v==='tk'||(VO&&S.v==='ts'))render();
   if(pulled&&pulled.add)toast('☁ đã kéo về '+pulled.add+' khoản từ đồng bộ');}
 window.addEventListener('online',syncSoon);
@@ -11521,7 +11566,7 @@ function tsView(){const real=VO||tsOpen(),a0=VO?voSummary():tsLive(tsGet()),a=a0
   document.querySelectorAll('.tcl').forEach(b=>b.onclick=()=>{tsCls=tsCls===b.dataset.c?null:b.dataset.c;render();});}
 
 function render(){if(S.v!=='scan')stopCam();
-  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else if(S.v==='sync')syncView();else if(S.v==='cai')caiView();else if(S.v==='vi')viView();else if(S.v==='mvf')mvfView();else if(S.v==='rec')recView();else if(S.v==='find')findView();else if(S.v==='ts')tsView();else if(S.v==='tsk')tsLockView();else if(S.v==='asf')asfView();else if(S.v==='no')noView();else if(S.v==='nod')nodView();else if(S.v==='nof')nofView();else home();}
+  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else if(S.v==='sync')syncView();else if(S.v==='cai')caiView();else if(S.v==='vi')viView();else if(S.v==='mvf')mvfView();else if(S.v==='rec')recView();else if(S.v==='find')findView();else if(S.v==='ts')tsView();else if(S.v==='tsk')tsLockView();else if(S.v==='asf')asfView();else if(S.v==='bud')budView();else if(S.v==='no')noView();else if(S.v==='nod')nodView();else if(S.v==='nof')nofView();else home();}
 /* ĐƯỜNG TẮT: mở link có #quet → vào thẳng camera; #tay → vào thẳng ghi tay.
    Dùng cho Phím tắt iPhone (chạm 2 lần mặt lưng / nút Tác vụ / Trung tâm điều khiển). Xoá hash ngay
    để tải lại trang không bị bật camera lần nữa. */
