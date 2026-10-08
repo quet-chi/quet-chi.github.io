@@ -128,6 +128,13 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .dh{display:flex;justify-content:space-between;margin:20px 2px 4px;font:600 .66rem ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
 .row{position:relative;display:grid;grid-template-columns:38px 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;background:none;color:var(--ink);padding:10px 2px;border-bottom:1px solid var(--line);min-height:60px}
 .row:active{background:var(--panel)}
+[data-ed],[data-ed2]{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}.tli[data-ed2]{cursor:pointer}.tli[data-ed2]:active{background:var(--panel2)}
+.lhh{font-size:.68rem;color:var(--ink3);font-weight:400}
+.ash{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,0);transition:background .2s;display:flex;align-items:flex-end}
+.ash.on{background:rgba(0,0,0,.5)}.ashb{width:100%;padding:10px 12px calc(12px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .2s}
+.ash.on .ashb{transform:none}.ashb>*{display:block;width:100%;background:var(--panel);color:var(--ink);border:0;border-top:1px solid var(--line);padding:16px;font:600 1rem -apple-system,system-ui,sans-serif;text-align:center}
+.ashb .asht{border-radius:14px 14px 0 0;border:0;padding:12px}.asht b{display:block;font-size:.86rem}.asht span{font-size:.74rem;color:var(--ink3);font-weight:400}
+.ashb .d{color:var(--bad);border-radius:0 0 14px 14px}.ashb .c{margin-top:8px;border-radius:14px;border:0}
 .row .ic{width:38px;height:38px;border-radius:12px;font-size:1.1rem}
 .row .mid{min-width:0}.row .n{font-weight:600;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .row .s{font-size:.74rem;color:var(--ink3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -10591,7 +10598,7 @@ function home(){
     ${(()=>{const due=recDue();return due.length?`<div class="due"><div class="dueh">⏰ Đến hạn</div>${due.map(r=>`<div class="duer"><span>${cat(r.cat)[2]}</span><span class="n">${esc(D.hide&&(r.cat==='giadinh'||r.cat==='bieu')?SH[r.cat]:r.name)}<small>ngày ${r.day} · ${wName(r.via||'mb')}</small></span><b>${short(r.amt)}</b><button data-rw="${r.id}">Ghi</button><button class="sk" data-rs="${r.id}">Bỏ</button></div>`).join('')}</div>`:'';})()}
     ${(()=>{const ws=WALLETS.map(([k,n,ic])=>({k,n,ic,i:wInfo(k)})).filter(w=>w.i);
       return `<div class="wstrip">${ws.map(w=>`<button class="wcard" data-wv="${w.k}"><span>${w.ic} ${w.n}</span><b>${money(w.i.bal)}</b></button>`).join('')}<button class="wcard add" data-wv="">${ws.length?'＋':'💼 Thêm số dư ví'}</button></div>`;})()}
-    <div class="lh"><span>Giao dịch gần đây</span></div>
+    <div class="lh"><span>Giao dịch gần đây</span>${L.length?'<small class="lhh">chạm để sửa · vuốt trái để xoá</small>':''}</div>
     ${L.length?list:syncCfg()?'<div class="empty">Chưa có khoản nào.<br>Lần tới trả tiền, bấm nút <b>Quét</b> ở giữa thanh dưới.</div>'
       :`<div class="empty">Sổ ở chỗ này đang trống.<br>Đã dùng app ở chỗ khác (icon khác, Safari)?<br><button class="cta" id="pullsy" style="margin-top:14px">☁ Bật đồng bộ để kéo dữ liệu về</button></div>`}
   </div>${tabbar('so')}`;
@@ -10653,8 +10660,11 @@ function edView(){
     <div class="f2"><label class="fl">Số tiền đã chuyển<input id="e_a" inputmode="numeric" value="${Math.round(x.amt)}"></label>
       ${x.mine!=null?`<label class="fl">Phần của mình<input id="e_m" inputmode="numeric" value="${Math.round(x.mine)}"></label>`:''}</div>
     <label class="fl">Ghi chú<input id="e_t" value="${esc(x.note||'')}" placeholder="không bắt buộc"></label>
+    <div class="f2"><label class="fl">Ngày<input id="e_d" type="date" value="${x.d}" max="${today()}"></label>
+      <label class="fl">Trả bằng<select id="e_v" class="fsel">${VIA.map(v=>`<option value="${v[0]}"${(x.via||'mb')===v[0]?' selected':''}>${v[1]}</option>`).join('')}</select></label></div>
     <div class="fl">Loại</div>${catGrid(x.cat)}
-    <div class="meta">${p[2]}/${p[1]}/${p[0]} · ${x.src==='qr'?'quét QR':'ghi tay'} · ${viaName(x.via||'mb')}${x.synced?' · đã chép sang máy tính':''}</div>
+    <div class="meta">${x.src==='qr'?'quét QR':'ghi tay'} lúc ${new Date(x.ts).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}</div>
+    <button class="cta" id="e_ok" style="margin-top:14px">Lưu</button>
     ${x.synced?'<div class="note">Khoản này đã chép sang máy tính — sửa ở đây không tự sửa bên đó.</div>':''}
     <button class="cta ghost" id="e_rec">↻ Lặp lại hằng tháng</button>
     <button class="del" id="e_x">Xoá khoản này</button>
@@ -10663,16 +10673,46 @@ function edView(){
   const put=()=>{const nn=$('e_n').value.trim();if(x.synced)x.edited=true;x.name=nn;
     if(nn&&x.bin&&x.acc)D.who[x.bin+'|'+x.acc]={name:nn,cat:x.cat};const a=num($('e_a').value);if(a>0)x.amt=a;
     if($('e_m')){const m=num($('e_m').value);x.mine=Math.min(m,x.amt);}
-    const t=$('e_t').value.trim();if(t)x.note=t;else delete x.note;save();};
-  ['e_n','e_a','e_m','e_t'].forEach(id=>{if($(id))$(id).onchange=put;});
+    const t=$('e_t').value.trim();if(t)x.note=t;else delete x.note;
+    const nd=$('e_d').value;if(/^\d{4}-\d{2}-\d{2}$/.test(nd)&&nd!==x.d){const o=new Date(x.ts),n=new Date(nd+'T00:00:00');n.setHours(o.getHours(),o.getMinutes());x.d=nd;x.ts=n.getTime();}
+    x.via=$('e_v').value;save();};
+  ['e_n','e_a','e_m','e_t','e_d','e_v'].forEach(id=>{if($(id))$(id).onchange=put;});
   document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{x.cat=b.dataset.c;if(x.synced)x.edited=true;save();
     document.querySelectorAll('[data-c]').forEach(y=>y.classList.toggle('on',y===b));});
-  const back=()=>S.back==='find'?{v:'find',f:S.f}:{v:'home'};
+  const back=()=>S.prev?S.prev:S.back==='find'?{v:'find',f:S.f}:{v:'home'};
   $('bk').onclick=()=>{put();S=back();render();};
+  $('e_ok').onclick=()=>{put();S=back();render();toast('đã lưu');};
   $('e_rec').onclick=()=>{put();D.rec=D.rec||[];D.rec.push({id:'r'+Date.now(),name:x.name||dispName(x),amt:Math.round(x.amt),day:Math.min(28,+x.d.slice(8)),cat:x.cat,via:x.via||'mb',last:today().slice(0,7)});
     save();toast('đã đặt lặp lại ngày '+Math.min(28,+x.d.slice(8))+' hằng tháng');};
-  $('e_x').onclick=()=>{gone.add(x.id);D.tx=D.tx.filter(t=>t.id!==x.id);save();S=back();render();
-    toast('đã xoá '+esc(kinName(x)),()=>{gone.delete(x.id);D.tx.push(x);save();render();});};}
+  $('e_x').onclick=()=>{S=back();txDel(x);};}
+/* xoá một khoản — có Hoàn tác. Đồng bộ tự gửi "đã xoá" sang Mac */
+function txDel(x){gone.add(x.id);D.tx=D.tx.filter(t=>t.id!==x.id);save();render();
+  toast('đã xoá '+esc(kinName(x))+' · '+short(x.amt),()=>{gone.delete(x.id);D.tx.push(x);save();render();});}
+/* SỬA / XOÁ NHANH (08/10) — học từ app ngân hàng: VUỐT TRÁI hoặc GIỮ LÂU trên một khoản → bảng Sửa / Xoá.
+   Chạm thường vẫn mở màn sửa. Áp cho mọi danh sách có data-ed / data-ed2 (Sổ, Tìm, Thống kê, Ví). */
+function txSheet(id){const x=D.tx.find(t=>t.id===id);if(!x)return;const prev=S;
+  const w=document.createElement('div');w.className='ash';
+  w.innerHTML=`<div class="ashb"><div class="asht"><b>${esc(kinName(x))}</b><span>${dayLab(x.d)} · ${short(x.amt)} đ</span></div>
+    <button data-a="ed">✎ Sửa khoản này</button><button data-a="x" class="d">🗑 Xoá</button><button data-a="no" class="c">Huỷ</button></div>`;
+  document.body.appendChild(w);w.offsetHeight;setTimeout(()=>w.classList.add('on'),10);
+  const close=()=>{w.classList.remove('on');setTimeout(()=>w.remove(),200);};
+  w.onclick=e=>{const a=e.target.closest('[data-a]');if(!a&&e.target!==w)return;close();
+    if(!a)return;if(a.dataset.a==='ed'){S={v:'ed',id,prev};render();}else if(a.dataset.a==='x')txDel(x);};
+  if(navigator.vibrate)navigator.vibrate(15);}
+(()=>{let st=null,lp=null,eat=false;const row=e=>e.target.closest&&e.target.closest('[data-ed],[data-ed2]');
+  const idOf=r=>r.dataset.ed||r.dataset.ed2;
+  document.addEventListener('touchstart',e=>{const r=row(e);if(!r)return;const t=e.touches[0];st={r,x:t.clientX,y:t.clientY};
+    clearTimeout(lp);lp=setTimeout(()=>{if(st&&st.r===r){eat=true;setTimeout(()=>eat=false,700);st=null;txSheet(idOf(r));}},550);},{passive:true});
+  document.addEventListener('touchmove',e=>{if(!st)return;const t=e.touches[0],dx=t.clientX-st.x,dy=t.clientY-st.y;
+    if(Math.abs(dy)>12&&Math.abs(dy)>Math.abs(dx)){clearTimeout(lp);st.r.style.transform='';st=null;return;}
+    if(dx<-8){clearTimeout(lp);st.r.style.transition='none';st.r.style.transform='translateX('+Math.max(dx,-90)+'px)';}
+    if(dx<-70){const r=st.r;st=null;eat=true;setTimeout(()=>eat=false,700);r.style.transition='transform .2s';r.style.transform='';txSheet(idOf(r));}},{passive:true});
+  document.addEventListener('touchend',()=>{clearTimeout(lp);if(st){st.r.style.transition='transform .2s';st.r.style.transform='';}st=null;},{passive:true});
+  /* chạm thường: data-ed đã có onclick riêng ở Sổ / Tìm; data-ed2 (Thống kê, Ví) mở màn sửa và quay lại đúng chỗ */
+  /* chỉ nuốt cú chạm rơi vào CHÍNH dòng vừa vuốt/giữ (iOS bắn click sau khi nhấc tay) — không đụng nút trong bảng */
+  document.addEventListener('click',e=>{if(eat){eat=false;if(row(e)){e.stopPropagation();e.preventDefault();return;}}
+    const r=e.target.closest&&e.target.closest('[data-ed2]');if(r){S={v:'ed',id:r.dataset.ed2,prev:S};render();}},true);
+  document.addEventListener('contextmenu',e=>{if(row(e))e.preventDefault();});})();
 
 /* ── quét: camera trực tiếp; không mở được camera thì chụp ảnh rồi đọc ── */
 let stream=null,raf=null;
@@ -10850,7 +10890,7 @@ function tkView(){
     const d=pv?`<span class="${v>=pv?'tup':'tdn'}">${v>=pv?'▲':'▼'}${Math.abs((v-pv)/pv*100).toFixed(0)}%</span>`:'';
     return `<button class="tkr${on?' on':''}" data-fc="${k}"><span class="tdot" style="background:${tkCol(k)}"></span><span class="tic">${c[2]}</span>
       <span class="tnm">${SH[k]||c[1]}<small>${n} khoản${d?' · ':''}${d}</small></span><span class="tpc">${tot?Math.round(v/tot*100):0}%</span><span class="tv">${short(v)}</span></button>
-      ${on?`<div class="tkl">${L.filter(x=>x.cat===k).sort((a,b)=>b.ts-a.ts).map(x=>{const p=x.d.split('-');return `<div class="tli"><span>${p[2]}/${p[1]}</span><span class="n">${esc(kinName(x))}${kinNote(x)?' <small>· '+esc(kinNote(x))+'</small>':''}</span><b>${short(mineOf(x))}</b></div>`;}).join('')}</div>`:''}`;}).join('');
+      ${on?`<div class="tkl">${L.filter(x=>x.cat===k).sort((a,b)=>b.ts-a.ts).map(x=>{const p=x.d.split('-');return `<div class="tli" data-ed2="${x.id}"><span>${p[2]}/${p[1]}</span><span class="n">${esc(kinName(x))}${kinNote(x)?' <small>· '+esc(kinNote(x))+'</small>':''}</span><b>${short(mineOf(x))}</b></div>`;}).join('')}</div>`:''}`;}).join('');
   /* theo ngày */
   const per=Array.from({length:dim},()=>0);L.forEach(x=>{per[+x.d.slice(8)-1]+=mineOf(x);});
   const mx=Math.max(...per,avg,1),W=345,H=110,bw=(W-(dim-1)*2)/dim,td=isCur?+today().slice(8):0,sd=S.dsel;
@@ -10881,12 +10921,12 @@ function tkView(){
         <line x1="0" x2="${W}" y1="${ay}" y2="${ay}" stroke="var(--ink3)" stroke-width="1" stroke-dasharray="4 3"/>
         ${[1,Math.ceil(dim/2),dim].map(d=>`<text x="${((d-1)*(bw+2)+bw/2).toFixed(1)}" y="${H+12}" text-anchor="middle">${d}</text>`).join('')}</svg>
       ${sd?`<div class="dsel"><div class="dsh"><b>${pad2(sd)}/${m.slice(5)}</b><span>${sdL.length?short(per[sd-1])+' · '+sdL.length+' khoản':'không chi gì'}</span></div>
-        ${sdL.map(x=>`<div class="tli"><span>${cat(x.cat)[2]}</span><span class="n">${esc(kinName(x))}</span><b>${short(mineOf(x))}</b></div>`).join('')}</div>`
+        ${sdL.map(x=>`<div class="tli" data-ed2="${x.id}"><span>${cat(x.cat)[2]}</span><span class="n">${esc(kinName(x))}</span><b>${short(mineOf(x))}</b></div>`).join('')}</div>`
         :'<div class="dhint">Chạm vào một cột để xem ngày đó chi gì</div>'}</div>
     <div class="tkc"><div class="tkh"><span>Chi cho ai nhiều nhất</span></div>
       ${top.map((w,i)=>`<div class="tw"><span class="rk">${i+1}</span><span class="n">${esc(w.n)}<small>${w.c} lần</small></span><span class="wb"><i style="width:${(w.v/tmx*100).toFixed(1)}%"></i></span><b>${short(w.v)}</b></div>`).join('')}</div>
     <div class="tkc"><div class="tkh"><span>Khoản lớn nhất</span></div>
-      ${big.map(x=>{const p=x.d.split('-');return `<div class="tli"><span>${p[2]}/${p[1]}</span><span class="n">${cat(x.cat)[2]} ${esc(kinName(x))}${x.once?' <small>· 1 lần</small>':''}</span><b>${short(mineOf(x))}</b></div>`;}).join('')}</div>`
+      ${big.map(x=>{const p=x.d.split('-');return `<div class="tli" data-ed2="${x.id}"><span>${p[2]}/${p[1]}</span><span class="n">${cat(x.cat)[2]} ${esc(kinName(x))}${x.once?' <small>· 1 lần</small>':''}</span><b>${short(mineOf(x))}</b></div>`;}).join('')}</div>`
     :'<div class="empty">Tháng này chưa có khoản nào.</div>'}
     <div class="note">${[nap?'Không tính '+short(nap)+' tiền của mình chuyển vào tiết kiệm.':'',L.some(x=>x.mine!=null)?'Khoản trả dùm chỉ tính phần của mình.':'',once?'Có '+short(once)+' khoản 1 lần.':''].filter(Boolean).join(' ')}</div>
   </div>${tabbar('tk')}`;
@@ -11045,7 +11085,7 @@ function viView(){const k=S.w;
     $('bk').onclick=()=>{S={v:'home'};render();};$('mvc').onclick=()=>{S={v:'mvf',kind:'chuyen'};render();};
     document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{S={v:'vi',w:b.dataset.w};render();});return;}
   const i=wInfo(k),cut=i?i.at:0;
-  const rows=[...D.tx.filter(x=>(x.via||'mb')===k).map(x=>({ts:x.ts,d:x.d,t:kinName(x),s:SH[x.cat]||cat(x.cat)[1],v:-x.amt,ic:cat(x.cat)[2]})),
+  const rows=[...D.tx.filter(x=>(x.via||'mb')===k).map(x=>({id:x.id,ts:x.ts,d:x.d,t:kinName(x),s:SH[x.cat]||cat(x.cat)[1],v:-x.amt,ic:cat(x.cat)[2]})),
     ...(D.mv||[]).filter(m=>m.w===k||m.from===k||m.to===k).map(m=>({ts:m.ts,d:m.d,ic:m.kind==='thu'?'⬇':m.kind==='dc'?'✎':'⇄',
       t:m.kind==='thu'?(m.note||'Tiền vào'):m.kind==='dc'?'Cập nhật số dư':(m.from===k?'Chuyển sang '+wName(m.to):'Nhận từ '+wName(m.from)),
       s:m.kind==='chuyen'?'chuyển giữa ví · không tính chi':m.kind==='dc'?'đặt lại mốc':'tiền vào',v:m.kind==='dc'?null:m.kind==='thu'||m.to===k?m.amt:-m.amt}))]
@@ -11056,7 +11096,7 @@ function viView(){const k=S.w;
       <div class="dsub">${i?'tính từ lần cập nhật '+new Date(i.at).toLocaleString('vi-VN',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'chưa đặt số dư — bấm Cập nhật số dư'}</div></div>
     <div class="wact"><button id="w_set">✎ Cập nhật số dư</button><button id="w_in">⬇ Tiền vào</button><button id="w_mv">⇄ Chuyển</button></div>
     <div class="lh"><span>Giao dịch của ví</span></div>
-    ${rows.length?rows.map(r=>`<div class="row" style="cursor:default"><div class="ic">${r.ic}</div><div class="mid"><div class="n">${esc(r.t)}</div><div class="s">${dayLab(r.d)} · ${r.s}${r.ts<=cut?' · trước mốc':''}</div></div>
+    ${rows.length?rows.map(r=>`<div class="row"${r.id?` data-ed2="${r.id}"`:' style="cursor:default"'}><div class="ic">${r.ic}</div><div class="mid"><div class="n">${esc(r.t)}</div><div class="s">${dayLab(r.d)} · ${r.s}${r.ts<=cut?' · trước mốc':''}</div></div>
       <div class="r"><div class="a${r.v>0?' inc':''}">${r.v==null?'':(r.v>0?'+':'−')+short(Math.abs(r.v))}</div></div></div>`).join(''):'<div class="empty">Chưa có giao dịch nào qua ví này.</div>'}
   </div></div>`;
   $('bk').onclick=()=>{S={v:'vi'};render();};
