@@ -11298,19 +11298,35 @@ async function tsPull(){const c=syncCfg();if(!c||tsBusy||FB_PID.startsWith('__')
    Vàng và tiết kiệm vẫn theo bản Mac gửi (trang giá vàng chỉ đọc được từ máy chủ trên Mac). Chỉ gửi mã coin, không gửi số lượng. */
 const GIA_KEY='quetchi_gia';let giaBusy=false;
 function giaGet(){try{return JSON.parse(localStorage.getItem(GIA_KEY)||'null');}catch(e){return null;}}
+/* VÀNG (08/10): vang.today — cùng số với BTMC mà sổ Mac dùng (BT9999NTT = nhẫn tròn trơn, BTSJC = miếng SJC), yết theo LƯỢNG → ÷10 ra chỉ.
+   Dự phòng PNJ (N24K / SJC, nghìn đồng/chỉ). Chốt chặn như Mac: ngoài 3–60 triệu/chỉ coi như nguồn hỏng, thà không có giá. Giá MUA VÀO. */
+const vangOk=v=>Number.isFinite(v)&&v>=3e6&&v<=60e6;
+async function vangPull(){
+  try{const r=await fetch('https://www.vang.today/api/prices');if(r.ok){const j=await r.json(),P=j&&j.prices||{};
+    const n=P.BT9999NTT&&P.BT9999NTT.buy/10,m=P.BTSJC&&P.BTSJC.buy/10;
+    if(vangOk(n)||vangOk(m))return{'vang:nhan':vangOk(n)?n:null,'vang:mieng':vangOk(m)?m:null,vsrc:'BTMC'};}}catch(e){}
+  try{const r=await fetch('https://edge-api.pnj.io/ecom-frontend/v1/get-gold-price?zone=00');if(r.ok){const L=((await r.json())||{}).data||[];
+    const f=k=>{const x=L.find(y=>y.masp===k);return x?x.giamua*1000:null;},n=f('N24K'),m=f('SJC');
+    if(vangOk(n)||vangOk(m))return{'vang:nhan':vangOk(n)?n:null,'vang:mieng':vangOk(m)?m:null,vsrc:'PNJ'};}}catch(e){}
+  return null;}
 async function giaPull(force){const a=tsGet();if(!a||!Array.isArray(a.items)||giaBusy)return;
-  const ids=[...new Set(a.items.filter(i=>i.c==='crypto'&&i.id).map(i=>i.id))];if(!ids.length)return;
+  const ids=[...new Set(a.items.filter(i=>(i.c==='crypto'||i.c==='gold')&&i.id).map(i=>i.id))];if(!ids.length)return;
   const g=giaGet();if(!force&&g&&Date.now()-g.t<60000&&ids.every(i=>g.p&&g.p[i]))return;
-  giaBusy=true;try{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?vs_currencies=vnd&ids='+encodeURIComponent(ids.join(',')));
-    if(r.ok){const j=await r.json(),p={};ids.forEach(i=>{if(j[i]&&j[i].vnd>0)p[i]=j[i].vnd;});
-      if(Object.keys(p).length){localStorage.setItem(GIA_KEY,JSON.stringify({t:Date.now(),p}));if(S.v==='ts')render();}}}catch(e){}
+  giaBusy=true;const p={};
+  try{const cg=ids.filter(i=>!i.startsWith('vang:'));
+    const [cj,vj]=await Promise.all([cg.length?fetch('https://api.coingecko.com/api/v3/simple/price?vs_currencies=vnd&ids='+encodeURIComponent(cg.join(','))).then(r=>r.ok?r.json():null).catch(()=>null):null,
+      ids.some(i=>i.startsWith('vang:'))?vangPull():null]);
+    if(cj)cg.forEach(i=>{if(cj[i]&&cj[i].vnd>0)p[i]=cj[i].vnd;});
+    if(vj)Object.keys(vj).forEach(k=>{if(vj[k])p[k]=vj[k];});}catch(e){}
+  const n=Object.keys(p).filter(k=>k!=='vsrc').length;
+  if(n){localStorage.setItem(GIA_KEY,JSON.stringify({t:Date.now(),p}));if(S.v==='ts')render();}
   giaBusy=false;}
 function tsLive(a){const g=giaGet();if(!a||!Array.isArray(a.items)||!g||!g.p||g.t<a.ts)return a;   /* giá cũ hơn bản Mac → dùng bản Mac */
-  let d=0,hit=0;const items=a.items.map(i=>{const px=i.c==='crypto'&&i.id&&g.p[i.id];if(!px||!(i.q>0))return i;hit++;const v=Math.round(i.q*px);d+=v-i.v;return Object.assign({},i,{v});});
+  const dd={crypto:0,gold:0};let hit=0;const items=a.items.map(i=>{const px=(i.c==='crypto'||i.c==='gold')&&i.id&&g.p[i.id];if(!px||!(i.q>0))return i;hit++;const v=Math.round(i.q*px);dd[i.c]+=v-i.v;return Object.assign({},i,{v});});
   if(!hit)return a;
-  const total=a.total+d,base=(a.fire&&a.fire.base||0)+d,td=today(),hist=(a.hist||[]).slice();
+  const d=dd.crypto+dd.gold,total=a.total+d,base=(a.fire&&a.fire.base||0)+d,td=today(),hist=(a.hist||[]).slice();
   if(hist.length&&hist[hist.length-1][0]===td)hist[hist.length-1]=[td,total];else hist.push([td,total]);
-  return Object.assign({},a,{items,crypto:a.crypto+d,total,runAll:total/(a.spend||1),hist,gt:g.t,
+  return Object.assign({},a,{items,crypto:a.crypto+dd.crypto,gold:a.gold+dd.gold,total,runAll:total/(a.spend||1),hist,gt:g.t,
     fire:Object.assign({},a.fire,{base,pct:a.fire&&a.fire.target?Math.min(100,Math.max(0,base/a.fire.target*100)):0})});}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)giaPull(false);});
 /* KHOÁ TAB TÀI SẢN (06/10): phải gõ MẬT KHẨU ĐỒNG BỘ mới xem — sinh lại khoá từ mật khẩu gõ vào, so với khoá đang lưu
@@ -11398,7 +11414,7 @@ function tsView(){const real=tsOpen(),a0=tsLive(tsGet()),a=a0&&!real?tsFake(a0):
       <div class="dsub" style="margin:8px 0 4px">Sắp nhận</div>
       ${a.soon.map(x=>{const dd=Math.round((new Date(x.d)-new Date(today()))/864e5);return `<div class="tli"><span>${x.d.slice(8)}/${x.d.slice(5,7)}</span><span class="n">${esc(x.name)}${x.ef?' <small>· KC</small>':''}<small> · còn ${dd} ngày</small></span><b>${Sh(x.v)}</b></div>`;}).join('')}
     </div>
-    <div class="note">${a.fake?'Cập nhật lúc '+new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'Cập nhật từ sổ trên Mac '+(ago<60?ago+' phút':ago<1440?Math.round(ago/60)+' giờ':Math.round(ago/1440)+' ngày')+' trước'+(a.gt?' · giá crypto lúc '+new Date(a.gt).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'')+(tsErr?' · '+esc(tsErr):'')+'. Vàng, tiết kiệm mới hơn: mở khoá sổ trên Mac.'}</div>`;}
+    <div class="note">${a.fake?'Cập nhật lúc '+new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'Cập nhật từ sổ trên Mac '+(ago<60?ago+' phút':ago<1440?Math.round(ago/60)+' giờ':Math.round(ago/1440)+' ngày')+' trước'+(a.gt?' · giá vàng, crypto lúc '+new Date(a.gt).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'')+(tsErr?' · '+esc(tsErr):'')+'. Tiết kiệm mới hơn: mở khoá sổ trên Mac.'}</div>`;}
   $('app').innerHTML=`<div class="wrap hm2">
     <div class="topb"><div><div class="hi">Tiền riêng</div><b>Tài sản</b></div>
       <span style="display:flex;gap:8px;align-items:center"><button class="eye2" id="tsr" aria-label="tải lại">↻</button></span></div>
