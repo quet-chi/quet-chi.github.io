@@ -10744,18 +10744,19 @@ const budOf=m=>{const B=D.bud;if(!B)return 0;return (B.m&&B.m[m]!=null)?B.m[m]:(
    D.bud.jars=[{id,n,amt,cats:[...]}] — giữ qua các tháng. Phần chưa chia = lọ "Chi khác" cho mọi loại còn lại. */
 const jarsOf=()=>((D.bud&&D.bud.jars)||[]).filter(j=>j&&j.id);
 const jarIdOf=x=>{const J=jarsOf();if(x.jar==='_k')return'_k';if(x.jar&&J.some(j=>j.id===x.jar))return x.jar;const j=J.find(j=>(j.cats||[]).includes(x.cat));return j?j.id:'_k';};
-const jarInfo=x=>{const id=jarIdOf(x),j=jarsOf().find(j=>j.id===id);return j?{id,n:j.n,ic:j.ic||'◎',col:j.col||'#8B919A'}:{id:'_k',n:'Quỹ chung',ic:'💰',col:'#8B919A'};};
+const jarInfo=x=>{const id=jarIdOf(x),j=jarsOf().find(j=>j.id===id);return j?{id,n:j.n,ic:j.ic||'◎',col:j.col||'#8B919A'}:{id:'_k',n:'Tiền tổng',ic:'💰',col:'#8B919A'};};
 /* ── MÀN SỔ BẢN VỢ (08/10, rà UI): MỘT thẻ hồng = còn bao nhiêu tháng này + các lọ ngay dưới. Bỏ thẻ "đã chi" trùng, bỏ cảnh báo nhịp báo nhầm. ── */
-function voHero(s){const m=today().slice(0,7),A=budOf(m),sp=s.mo,left=A-sp,now=new Date(),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),dl=dim-now.getDate()+1;
-  const pool=A-jarsOf().reduce((a,j)=>a+(j.amt||0),0),J=jarStats(m),pct=A?Math.min(100,sp/A*100):0,H=D.hide;
-  const jr=J.map(j=>{const no=!j.amt&&!j.auto,l=j.amt-j.sp;return `<button class="jv${l<0&&j.amt?' over':''}" data-jar="${j.id}">${jarSvg(j,58)}<b>${esc(j.n)}</b><small>${H?'•••':no?'chưa nạp':l<0?'lố '+short(-l):'còn '+short(l)}</small></button>`;}).join('');
-  return `<button class="hcard vh" id="vhero"><div class="hcl">Tháng ${now.getMonth()+1} còn lại</div>
+function voHero(s){const m=today().slice(0,7),A=budOf(m),H=D.hide,J=jarStats(m),T=J.find(j=>j.auto)||{amt:A,sp:s.mo},sumJ=A-T.amt,left=T.amt-T.sp;
+  /* TIỀN TỔNG (08/10, Mau: "tách lọ rồi thì số tổng trừ hẳn ra"): ví tổng = tiền tháng − đã nạp vào lọ − chi không chọn lọ. Lọ tự lo phần lọ. */
+  const pct=A?Math.min(100,(sumJ+T.sp)/A*100):0,LJ=J.filter(j=>!j.auto);
+  const jr=LJ.map(j=>{const no=!j.amt,l=j.amt-j.sp;return `<button class="jv${l<0&&j.amt?' over':''}" data-jar="${j.id}">${jarSvg(j,58)}<b>${esc(j.n)}</b><small>${H?'•••':no?'chưa nạp':l<0?'lố '+short(-l):'còn '+short(l)}</small></button>`;}).join('');
+  return `<button class="hcard vh" id="vhero"><div class="hcl">💰 Tiền tổng còn</div>
       <div class="hcv">${H?'•••':(left<0?'−':'')+money(Math.abs(left))}<small> đ</small></div>
       <div class="vh-bar"><i style="width:${pct.toFixed(1)}%"></i></div>
-      <div class="vh-s"><span>Có <b>${short(A)}</b></span><span>Đã xài <b>${short(sp)}</b></span>${left<0?'<span><b>Đã lố '+short(-left)+'</b></span>':''}</div>
-      ${pool>0&&!H?`<div class="vh-pool">💰 ${short(pool)} chưa chia vào lọ <span>Chia ›</span></div>`:''}</button>
+      <div class="vh-s"><span>Tháng ${+m.slice(5)} <b>${short(A)}</b></span><span>Vào lọ <b>${short(sumJ)}</b></span><span>Chi từ tổng <b>${short(T.sp)}</b></span></div>
+      ${left<0&&!H?`<div class="vh-pool">⚠️ Tiền tổng đã âm ${short(-left)} — rút bớt từ lọ về <span>Chia ›</span></div>`:LJ.length&&!H?`<div class="vh-pool">Nạp thêm vào lọ <span>Chia ›</span></div>`:''}</button>
     <div class="tkc vjars"><div class="tkh"><span>Các lọ</span><small id="vchia">chia tiền ›</small></div><div class="jvs">${jr}<button class="jv add" id="jaradd"><span>＋</span><b>Lọ mới</b><small>&nbsp;</small></button></div></div>`;}
-function jarStats(m){const A=budOf(m),J=jarsOf().map(j=>Object.assign({},j,{sp:0})),other={id:'_k',n:'Quỹ chung',ic:'💰',col:'#8B919A',amt:Math.max(0,A-J.reduce((a,j)=>a+(j.amt||0),0)),sp:0,cats:null,auto:true};
+function jarStats(m){const A=budOf(m),J=jarsOf().map(j=>Object.assign({},j,{sp:0})),other={id:'_k',n:'Tiền tổng',ic:'💰',col:'#8B919A',amt:Math.max(0,A-J.reduce((a,j)=>a+(j.amt||0),0)),sp:0,cats:null,auto:true};
   D.tx.filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===m).forEach(x=>{const j=x.jar==='_k'?null:x.jar?(J.find(j=>j.id===x.jar)||J.find(j=>(j.cats||[]).includes(x.cat))):J.find(j=>(j.cats||[]).includes(x.cat));(j||other).sp+=mineOf(x);});
   return J.length?[...J,other]:[];}
 const jarOfCat=c=>jarsOf().find(j=>(j.cats||[]).includes(c));
@@ -10790,7 +10791,7 @@ function budCard(s){const m=today().slice(0,7),A=budOf(m);
   const jr2=J.map(j=>{const no=!j.amt&&!j.auto,l=j.amt-j.sp;return `<button class="jv${l<0&&j.amt?' over':''}" data-jar="${j.id}">${jarSvg(j,58)}<b>${esc(j.n)}</b><small>${D.hide?'•••':no?'chưa nạp':l<0?'lố '+short(-l):'còn '+short(l)}</small></button>`;}).join('');
   const jr=J.map(j=>{const no=!j.amt&&!j.auto,l=j.amt-j.sp,p=j.amt?Math.min(100,j.sp/j.amt*100):0,c=no?'n':l<0?'b':j.sp>j.amt*dn/dim*1.1?'w':'g';
     return `<button class="jar ${c}" ${j.auto?'':`data-jar="${j.id}"`} style="--jk:${j.col||'#8B919A'}"><div class="jar-t"><span><i>${j.ic||'…'}</i>${esc(j.n)}</span><b>${D.hide?'•••':no?'':(l<0?'lố '+short(-l):'còn '+short(l))}</b></div>
-      <div class="jar-b"><i style="width:${p.toFixed(1)}%"></i></div><small>${D.hide?'':no?(j.sp?'đã xài '+short(j.sp)+' · ':'')+'chạm để nạp tiền':short(j.sp)+' / '+short(j.amt)}${j.auto?' · tiền chưa chia vào lọ':''}</small></button>`;}).join('');
+      <div class="jar-b"><i style="width:${p.toFixed(1)}%"></i></div><small>${D.hide?'':no?(j.sp?'đã xài '+short(j.sp)+' · ':'')+'chạm để nạp tiền':short(j.sp)+' / '+short(j.amt)}${j.auto?' · chi thẳng từ tiền tổng':''}</small></button>`;}).join('');
   return `<div class="bud ${st}"><button class="bud-hd" id="budset"><div class="bud-t"><span>Tiền tháng ${+m.slice(5)}</span><small>chia tiền ›</small></div>
     <div class="bud-n"><div><small>Còn lại</small><b>${left<0?'−':''}${money(Math.abs(left))}<i> đ</i></b></div><div class="bud-r"><small>Có ${short(A)}</small><small>Đã xài ${short(sp)}</small></div></div>
     <div class="bud-bar"><i style="width:${pct.toFixed(1)}%"></i><b style="left:${Math.min(100,dn/dim*100).toFixed(1)}%"></b></div>
@@ -10802,10 +10803,10 @@ function budView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduc
     <button class="cta" id="b_ok" style="margin-top:10px">Lưu số tiền</button>
     <div class="lh"><span>Chia lọ</span><small class="lhh">mỗi lọ gắn vài loại chi — ghi khoản là tự trừ đúng lọ</small></div>
     ${J.map(j=>{const st=JS.find(x=>x.id===j.id)||{sp:0};return `<button class="srow" data-jx="${j.id}"><span class="sic">◎</span><span class="st"><b>${esc(j.n)}</b><small>${(j.cats||[]).map(c=>SH[c]||cat(c)[1]).join(' · ')||'chưa gán loại'}</small></span><span class="sr mono">${short(j.amt)}<br><small class="dim">đã xài ${short(st.sp)}</small></span></button>`;}).join('')}
-    ${J.length&&A?`<div class="srow" style="cursor:default"><span class="sic">💰</span><span class="st"><b>Quỹ chung</b><small>tiền chưa chia vào lọ — tự tính = tổng − các lọ</small></span><span class="sr mono" style="${A-sumJ<0?'color:var(--bad)':''}">${A-sumJ<0?'−':''}${short(Math.abs(A-sumJ))}</span></div>`:''}
+    ${J.length&&A?`<div class="srow" style="cursor:default"><span class="sic">💰</span><span class="st"><b>Tiền tổng</b><small>phần chưa chia vào lọ = tiền tháng − các lọ</small></span><span class="sr mono" style="${A-sumJ<0?'color:var(--bad)':''}">${A-sumJ<0?'−':''}${short(Math.abs(A-sumJ))}</span></div>`:''}
     ${A&&sumJ>A?`<div class="warn">Các lọ cộng lại ${short(sumJ)} — nhiều hơn tiền tháng ${short(A)}. Bớt lọ hoặc tăng tiền tháng.</div>`:''}
     <button class="cta ghost" id="b_jar">＋ Thêm lọ</button>
-    ${!J.length?`<div class="note" style="text-align:left">Ví dụ: <b>Ăn uống 15tr</b> (Ăn uống, Cà phê) · <b>Con cái 10tr</b> (Con cái). Phần còn lại tự vào <b>Quỹ chung</b>.</div>`:''}
+    ${!J.length?`<div class="note" style="text-align:left">Ví dụ: <b>Ăn uống 15tr</b> (Ăn uống, Cà phê) · <b>Con cái 10tr</b> (Con cái). Phần còn lại tự vào <b>Tiền tổng</b>.</div>`:''}
     ${A?'<button class="del" id="b_x">Bỏ theo dõi tiền tháng</button>':''}</div></div>`;
   const num=v=>+String(v).replace(/\D/g,'')||0;
   $('b_a').oninput=e=>{const n=num(e.target.value);e.target.value=n?n.toLocaleString('vi-VN'):'';};
@@ -10817,15 +10818,15 @@ function budView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduc
 /* ══ CHIA TIỀN (08/10, vợ Mau): nguồn tiền tổng → NẠP dần vào từng lọ, như chuyển từ ví chính sang các hũ.
    jar.amt = số đã nạp vào lọ (giữ qua các tháng, tháng mới chi tiêu tính lại từ 0). Chưa chia = tổng − Σ lọ. Rút = trả từ lọ về ví tổng. ══ */
 let chiaAnim=null;
-function chiaView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduce((a,j)=>a+(j.amt||0),0),pool=A-sumJ,JS=jarStats(m);
-  const pct=A?Math.min(100,sumJ/A*100):0,P=S.pick&&J.find(j=>j.id===S.pick);
+function chiaView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduce((a,j)=>a+(j.amt||0),0),JS=jarStats(m),tSp=(JS.find(j=>j.auto)||{sp:0}).sp,pool=A-sumJ-tSp;
+  const pct=A?Math.min(100,(sumJ+tSp)/A*100):0,P=S.pick&&J.find(j=>j.id===S.pick);
   $('app').innerHTML=`<div class="sheet chia"><div class="wrap">
     <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Chia tiền tháng ${+m.slice(5)}</b><button class="back bk2" id="ctot" style="text-align:right">Sửa tổng</button></div>
     <div class="pool">
       <div class="pool-t"><span>Tiền tháng ${+m.slice(5)}</span><b data-cnt="${A}">${money(A)}</b></div>
-      <div class="pool-big"><small>Chưa chia vào lọ</small><b id="poolv" data-from="${chiaAnim?chiaAnim.pool:pool}" data-to="${pool}">${pool<0?'−':''}${money(Math.abs(pool))}<i> đ</i></b></div>
+      <div class="pool-big"><small>💰 Tiền tổng còn</small><b id="poolv" data-from="${chiaAnim?chiaAnim.pool:pool}" data-to="${pool}">${pool<0?'−':''}${money(Math.abs(pool))}<i> đ</i></b></div>
       <div class="pool-bar"><i id="poolbar" style="width:${(chiaAnim?Math.min(100,chiaAnim.pct):pct).toFixed(1)}%" data-to="${pct.toFixed(1)}"></i></div>
-      <div class="pool-m">${pool<0?`Các lọ đang nhiều hơn tiền tháng <b>${short(-pool)}</b> — rút bớt hoặc sửa tổng`:pool===0?'Đã chia hết vào lọ 🎉':`Đã chia <b>${short(sumJ)}</b> · còn <b>${short(pool)}</b> để nạp vào lọ`}</div>
+      <div class="pool-m">${pool<0?`Tiền tổng đang âm <b>${short(-pool)}</b> — rút bớt từ lọ hoặc sửa tiền tháng`:`Đã nạp vào lọ <b>${short(sumJ)}</b>${tSp?' · chi từ tổng <b>'+short(tSp)+'</b>':''}`}</div>
     </div>
     <div class="jl">${J.map(j=>{const st=JS.find(x=>x.id===j.id)||{sp:0},l=(j.amt||0)-st.sp,fp=j.amt?Math.min(100,st.sp/j.amt*100):0,was=chiaAnim&&chiaAnim.id===j.id?chiaAnim.amt:j.amt;
       return `<div class="jc${S.pick===j.id?' on':''}" style="--jk:${j.col||'#8B919A'}">
@@ -10839,7 +10840,7 @@ function chiaView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.redu
   ${P?`<div class="ash on" id="tsh"><div class="ashb tup">
     <div class="tup-h"><span class="jc-ic" style="--jk:${P.col}">${P.ic||'◎'}</span><span><small>${S.dir==='out'?'Rút từ lọ về tiền tổng':'Nạp vào lọ'}</small><b>${esc(P.n)}</b></span></div>
     <div class="tup-v"><input id="tamt" inputmode="numeric" placeholder="0" value="${S.tamt?Number(S.tamt).toLocaleString('vi-VN'):''}"><i>đ</i></div>
-    <div class="tup-c">${(S.dir==='out'?[[500000,'500K'],[1e6,'1tr'],[2e6,'2tr'],[P.amt,'Rút hết']]:[[500000,'+500K'],[1e6,'+1tr'],[2e6,'+2tr'],[5e6,'+5tr'],[Math.max(0,pool),'Hết phần còn lại']]).filter(x=>x[0]>0).map(([v,l])=>`<button data-tq="${v}" data-set="${/hết|Hết/.test(l)?1:0}">${l}</button>`).join('')}</div>
+    <div class="tup-c">${(S.dir==='out'?[[500000,'500K'],[1e6,'1tr'],[2e6,'2tr'],[P.amt,'Rút hết']]:[[500000,'+500K'],[1e6,'+1tr'],[2e6,'+2tr'],[5e6,'+5tr'],[Math.max(0,pool),'Hết tiền tổng']]).filter(x=>x[0]>0).map(([v,l])=>`<button data-tq="${v}" data-set="${/hết|Hết/.test(l)?1:0}">${l}</button>`).join('')}</div>
     <div class="tup-m" id="tmsg"></div>
     <button class="cta" id="tok">${S.dir==='out'?'Rút về tiền tổng':'Nạp vào lọ'}</button><button class="c" id="tcx">Huỷ</button></div></div>`:''}</div>`;
   const num=v=>+String(v||'').replace(/\D/g,'')||0;
@@ -10855,8 +10856,8 @@ function chiaView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.redu
       const pb=$('poolbar');if(pb)pb.style.width=(chiaAnim.pct+(+pb.dataset.to-chiaAnim.pct)*e).toFixed(1)+'%';
       if(p<1)requestAnimationFrame(step);else chiaAnim=null;};requestAnimationFrame(step);}
   if(P){const inp=$('tamt'),msg=$('tmsg'),upd=()=>{const a=num(inp.value);
-      msg.innerHTML=S.dir==='out'?(a>(P.amt||0)?'<span class="dnc">Lọ chỉ có '+short(P.amt||0)+'</span>':a?'Lọ còn '+short((P.amt||0)-a)+' · tiền tổng chưa chia thành '+short(pool+a):'&nbsp;')
-        :(a>pool?'<span class="dnc">Nhiều hơn phần chưa chia ('+short(Math.max(0,pool))+') — vẫn nạp được, tổng lọ sẽ vượt tiền tháng</span>':a?'Lọ thành '+short((P.amt||0)+a)+' · còn '+short(pool-a)+' chưa chia':'&nbsp;');};
+      msg.innerHTML=S.dir==='out'?(a>(P.amt||0)?'<span class="dnc">Lọ chỉ có '+short(P.amt||0)+'</span>':a?'Lọ còn '+short((P.amt||0)-a)+' · tiền tổng thành '+short(pool+a):'&nbsp;')
+        :(a>pool?'<span class="dnc">Nhiều hơn tiền tổng còn ('+short(Math.max(0,pool))+') — tiền tổng sẽ âm</span>':a?'Lọ thành '+short((P.amt||0)+a)+' · tiền tổng còn '+short(pool-a):'&nbsp;');};
     inp.oninput=e=>{const n=num(e.target.value);e.target.value=n?n.toLocaleString('vi-VN'):'';upd();};upd();
     document.querySelectorAll('[data-tq]').forEach(b=>b.onclick=()=>{const v=+b.dataset.tq,cur=num(inp.value),n=b.dataset.set==='1'?v:cur+v;inp.value=n.toLocaleString('vi-VN');upd();});
     const close=()=>{S={v:'chia'};render();};$('tcx').onclick=close;$('tsh').onclick=e=>{if(e.target.id==='tsh')close();};
@@ -10875,7 +10876,7 @@ function jardView(){const m=S.m||today().slice(0,7),JS=jarStats(m),j=JS.find(x=>
     <div class="jdh" style="--jk:${j.col||'#8B919A'}">${jarSvg(j,88)}<div class="jdn">
       <small>${l<0&&j.amt?'Đã lố':'Còn trong lọ'}</small><b class="${l<0&&j.amt?'dnc':''}">${D.hide?'•••':(l<0?'−':'')+money(Math.abs(l))}<i> đ</i></b>
       <div class="jds"><span>Nạp <b>${short(j.amt)}</b></span><span>Đã xài <b>${short(j.sp)}</b></span><span>${L.length} khoản</span></div>
-      ${j.auto?'<small>tiền tháng chưa chia vào lọ — chi gì không thuộc lọ riêng thì trừ ở đây</small>':`<small>${(j.cats||[]).map(c=>SH[c]||cat(c)[1]).join(' · ')}</small>`}</div></div>
+      ${j.auto?'<small>tiền tháng chưa chia vào lọ — chi không chọn lọ thì trừ ở đây</small>':`<small>${(j.cats||[]).map(c=>SH[c]||cat(c)[1]).join(' · ')}</small>`}</div></div>
     ${j.auto||m!==cur?'':`<div class="jc-a" style="margin-top:12px;--jk:${j.col||'#8B919A'}"><button data-jin="${j.id}">＋ Nạp</button><button class="out" data-jout="${j.id}"${j.amt?'':' disabled'}>− Rút</button></div>`}
     <div class="lh"><span>Đã chi từ lọ</span><small class="lhh">chạm để sửa · đổi lọ</small></div>
     ${list||'<div class="empty">Tháng này chưa có khoản nào trừ vào lọ này.</div>'}
