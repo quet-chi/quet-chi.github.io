@@ -5,6 +5,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Quét chi">
+<link rel="apple-touch-icon" id="aticon" href="/icon.png">
 <meta name="theme-color" content="#F4F3EF">
 <meta name="color-scheme" content="light">
 <meta name="robots" content="noindex,nofollow"><!-- không cho Google đưa trang vào kết quả tìm kiếm -->
@@ -12,7 +13,7 @@
 <!-- KHOÁ MẠNG (CSP): trang không được gọi ra ngoài, không tải gì từ nơi khác. Kể cả khi có đoạn mã lạ lọt vào,
      nó cũng không gửi được dữ liệu đi đâu. Mở MB là chuyển trang (navigation) nên không bị chặn.
      Không dùng Google Fonts nữa: font hệ thống của iPhone, Google khỏi biết mỗi lần mở app. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src https://firestore.googleapis.com https://api.coingecko.com https://www.vang.today https://edge-api.pnj.io; worker-src 'self'; font-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data: blob:; media-src blob: mediastream:; connect-src https://firestore.googleapis.com https://api.coingecko.com https://www.vang.today https://edge-api.pnj.io; worker-src 'self'; font-src 'none'; form-action 'none'; base-uri 'none'">
 <style>
 /* Quét chi — ghi từng khoản NGAY LÚC TRẢ: quét QR → gõ tiền → MB mở sẵn → khoản đã nằm trong sổ.
    Dữ liệu CHỈ nằm trên điện thoại (localStorage). Không tài khoản, không máy chủ riêng.
@@ -11946,7 +11947,7 @@ window.addEventListener('unhandledrejection',e=>{const m=String(e.reason&&e.reas
    GIỮ mã trên thanh địa chỉ: "Thêm vào MH chính" của iPhone chép nguyên link → icon mới cũng tự kết nối. */
 if(VO){document.documentElement.classList.add('vo');const tc=document.querySelector('meta[name="theme-color"]');if(tc)tc.content='#FFF5F8';try{const k=new URLSearchParams(location.search).get('k'),m=k&&/^([0-9a-f]{40})\.([A-Za-z0-9_-]{43})$/.exec(k);
   if(m){const key=m[2].replace(/-/g,'+').replace(/_/g,'/')+'=',c=syncCfg();if(!c||c.vid!==m[1]||c.k!==key)syncSet({vid:m[1],k:key,sent:{}});}}catch(e){}
-  document.title='Chi tiêu';const mt=document.querySelector('meta[name="apple-mobile-web-app-title"]');if(mt)mt.content='Chi tiêu';}
+  document.title='Nhà mình';const mt=document.querySelector('meta[name="apple-mobile-web-app-title"]');if(mt)mt.content='Nhà mình';const ai=document.getElementById('aticon');if(ai)ai.href='/icon-vo.png';}
 try{noInit();}catch(e){}
 setTimeout(()=>{try{giaPull(false);}catch(e){}},1500);   /* mở app → lấy giá crypto mới */
 try{if(!fromHash())render();}catch(e){showCrash(e);}
