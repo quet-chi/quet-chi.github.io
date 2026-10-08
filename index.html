@@ -319,9 +319,15 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .del{display:block;width:100%;margin-top:22px;height:50px;border-radius:14px;background:rgba(200,62,62,.08);border:1px solid rgba(200,62,62,.3);color:var(--bad);font-weight:600}
 .bud{display:block;width:100%;text-align:left;margin-top:12px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px 16px;color:var(--ink);font:inherit;box-shadow:0 1px 2px rgba(20,22,24,.04),0 2px 8px rgba(20,22,24,.03);--bc:var(--good)}
 .bud.w{--bc:var(--warn)}.bud.b{--bc:var(--bad);border-color:rgba(200,62,62,.4)}
+.gcard .gv{display:flex;justify-content:space-between;align-items:flex-end;margin:2px 0 6px}.gcard .gv small{display:block;font-size:.72rem;color:var(--ink3)}
+.gcard .gv b{font:700 1.75rem ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:-.03em}.gcard .gv b i{font-style:normal;font-size:.4em;color:var(--ink3)}
+.gpl{text-align:right}.gpl b{font-size:1.25rem!important}.gpl em{display:block;font:600 .8rem ui-monospace,"SF Mono",Menlo,monospace;font-style:normal}.gpl.up b,.gpl.up em{color:var(--good)}.gpl.dn b,.gpl.dn em{color:var(--bad)}
+.gk{font-size:.76rem;color:var(--ink3);padding-bottom:6px}.gk b{font-family:ui-monospace,"SF Mono",Menlo,monospace;color:var(--ink2)}
+.gl1{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed var(--line);cursor:pointer}.gl1 b{font-weight:600;font-size:.84rem}.gl1 small{display:block;font-size:.7rem;color:var(--ink3);margin-top:2px}.gl1 .r{text-align:right;white-space:nowrap}.gl1 .r b{font:600 .86rem ui-monospace,"SF Mono",Menlo,monospace}
 .bud-hd{display:block;width:100%;background:none;border:0;padding:0;text-align:left;color:inherit;font:inherit}
 .jars{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
-.jar{background:var(--panel2);border-radius:12px;padding:9px 10px;--jc:var(--good)}.jar.w{--jc:var(--warn)}.jar.b{--jc:var(--bad)}
+.jar{display:block;width:100%;text-align:left;font:inherit;color:var(--ink);background:var(--panel2);border:0;border-left:4px solid var(--jk);border-radius:12px;padding:9px 10px;--jc:var(--jk)}.jar.w{--jc:var(--warn)}.jar.b{--jc:var(--bad)}.jar.n{background:none;border:1px dashed var(--line);border-left:4px solid var(--jk)}
+.jar-t span i{font-style:normal;margin-right:5px}.jar.add{border:1px dashed var(--line);border-left:1px dashed var(--line);background:none;color:var(--accent2);font-weight:600;font-size:.84rem;text-align:center}.jar.add small{display:block;font-weight:400;color:var(--ink3);margin-top:3px}
 .jar-t{display:flex;justify-content:space-between;gap:6px;align-items:baseline}.jar-t span{font-weight:600;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.jar-t b{font:600 .76rem ui-monospace,"SF Mono",Menlo,monospace;color:var(--jc);white-space:nowrap}.jar.g .jar-t b{color:var(--ink)}
 .jar-b{height:6px;border-radius:3px;background:var(--line);margin:6px 0 4px;overflow:hidden}.jar-b i{display:block;height:100%;background:var(--jc);border-radius:3px}.jar small{font-size:.66rem;color:var(--ink3)}
 .jarh{text-align:center;font-size:.78rem;color:var(--ink2);min-height:18px;margin-top:6px}.jarh b{color:var(--ink)}
@@ -10461,7 +10467,7 @@ const BANK={"970415":"icb","970436":"vcb","970418":"bidv","970405":"vba","970448
 /* CÙNG danh sách loại với tab Chi tiêu trên máy tính — chép sang là loại đi theo, khỏi chọn lại */
 const CATS=[['an','Ăn uống','🍜'],['giaitri','Giải trí · cà phê','☕'],['dilai','Đi lại','🛵'],['muasam','Mua sắm','🛍'],
   ['nha','Nhà cửa · hoá đơn','🏠'],['con','Con cái','🧸'],['ca','Cá','🐠'],['dautu','Đầu tư','📈'],['giadinh','Gia đình','👪'],
-  ['suckhoe','Sức khoẻ','💊'],['khac','Khác','•'],['nap','Tiết kiệm · của mình','↪']];
+  ['suckhoe','Sức khoẻ','💊'],['dodung','Đồ dùng nhà','🧴'],['rieng','Của em · làm đẹp','💄'],['khac','Khác','•'],['nap','Tiết kiệm · của mình','↪']];
 /* loại đã bỏ khỏi lưới chọn nhưng khoản cũ vẫn mang — vẫn hiện đúng tên (05/10: Sức khoẻ → thay bằng Đầu tư) */
 const CATS_CU=[['bieu','Biếu · hỗ trợ','🎁']];   /* 08/10: Biếu rời lưới, Sức khoẻ quay lại */
 const cat=k=>CATS.find(c=>c[0]===k)||CATS_CU.find(c=>c[0]===k)||['','chưa phân loại','?'];
@@ -10574,7 +10580,7 @@ function dayLab(d){if(d===today())return'Hôm nay';const y=new Date();y.setDate(
   const p=d.split('-');return p[2]+'/'+p[1];}
 
 /* tên loại ngắn cho lưới chọn và dòng phụ */
-const SH={an:'Ăn uống',giaitri:'Cà phê',dilai:'Đi lại',muasam:'Mua sắm',nha:'Nhà · HĐ',con:'Con cái',suckhoe:'Sức khoẻ',ca:'Cá',dautu:'Đầu tư',giadinh:'Gia đình',bieu:'Biếu',khac:'Khác',nap:'Tiết kiệm'};
+const SH={an:'Ăn uống',giaitri:'Cà phê',dilai:'Đi lại',muasam:'Mua sắm',nha:'Nhà · HĐ',con:'Con cái',suckhoe:'Sức khoẻ',ca:'Cá',dautu:'Đầu tư',dodung:'Đồ dùng',rieng:'Của em',giadinh:'Gia đình',bieu:'Biếu',khac:'Khác',nap:'Tiết kiệm'};
 /* tên hiển thị: chưa gõ tên (hoặc tên là số TK) → "TPBank ··4481", không có TK → tên loại */
 const dispName=x=>{const n=(x.name||'').trim();if(n&&!/^\d{5,}$/.test(n))return n;
   if(x.acc)return (BANKNAME[x.bin]||'TK')+' ··'+String(x.acc).slice(-4);return SH[x.cat]||'Không tên';};
@@ -10584,7 +10590,7 @@ const kin=x=>D.hide&&(x.cat==='giadinh'||x.cat==='bieu'||x.cat==='dautu');
 const kinName=x=>kin(x)?(x.cat==='bieu'?'Biếu':x.cat==='dautu'?'Đầu tư':'Gia đình'):dispName(x);
 const kinNote=x=>kin(x)?'':(x.note||'');
 const noName=x=>!(x.name||'').trim()||/^\d{5,}$/.test((x.name||'').trim());
-const catGrid=sel=>`<div class="cg">${CATS.filter(c=>!VO||(c[0]!=='ca'&&c[0]!=='dautu')).map(c=>`<button class="cgb${sel===c[0]?' on':''}" data-c="${c[0]}"><i>${c[2]}</i>${SH[c[0]]||c[1]}</button>`).join('')}</div>`;
+const catGrid=sel=>`<div class="cg">${CATS.filter(c=>VO?(c[0]!=='ca'&&c[0]!=='dautu'):(c[0]!=='dodung'&&c[0]!=='rieng')).map(c=>`<button class="cgb${sel===c[0]?' on':''}" data-c="${c[0]}"><i>${c[2]}</i>${SH[c[0]]||c[1]}</button>`).join('')}</div>`;
 /* SỐ PHIÊN BẢN = giờ máy chủ phát file (Last-Modified lúc đưa lên) — nhìn là biết máy đang chạy bản nào */
 function verTxt(){const d=new Date(document.lastModified);if(isNaN(d)||location.protocol==='file:')return 'trên máy';
   return pad2(d.getDate())+'/'+pad2(d.getMonth()+1)+' '+pad2(d.getHours())+':'+pad2(d.getMinutes());}
@@ -10661,6 +10667,8 @@ function home(){
     $('askX').onclick=()=>{delete D.ask;save();render();};}
   if($('cho'))$('cho').onclick=()=>{S={v:'cho'};render();};
   if($('budset'))$('budset').onclick=()=>{S={v:'bud'};render();};
+  document.querySelectorAll('[data-jar]').forEach(b=>b.onclick=()=>{S={v:'jarf',id:b.dataset.jar,back:'home'};render();});
+  if($('jaradd'))$('jaradd').onclick=()=>{S={v:'jarf',back:'home'};render();};
   if($('nob'))$('nob').onclick=()=>{S={v:'no',back:'home'};render();};
   document.querySelectorAll('[data-nol]').forEach(b=>b.onclick=()=>{const x=D.no.find(y=>y.id===b.dataset.nol);S={v:'nod',id:x.id,k:x.k,back:'home'};render();});
   document.querySelectorAll('[data-nm]').forEach(b=>b.onclick=()=>{const x=D.no.find(y=>y.id===b.dataset.nm);if(x.k==='thu')noCopy(x);else{S={v:'nod',id:x.id,k:x.k,back:'home'};render();}});
@@ -10674,7 +10682,7 @@ const budOf=m=>{const B=D.bud;if(!B)return 0;return (B.m&&B.m[m]!=null)?B.m[m]:(
 /* LỌ (08/10): chia tiền tháng thành từng lọ, mỗi lọ gắn với vài LOẠI chi → ghi khoản là tự trừ đúng lọ, không phải chọn thêm.
    D.bud.jars=[{id,n,amt,cats:[...]}] — giữ qua các tháng. Phần chưa chia = lọ "Chi khác" cho mọi loại còn lại. */
 const jarsOf=()=>((D.bud&&D.bud.jars)||[]).filter(j=>j&&j.id);
-function jarStats(m){const A=budOf(m),J=jarsOf().map(j=>Object.assign({},j,{sp:0})),other={id:'_k',n:'Chi khác',amt:Math.max(0,A-J.reduce((a,j)=>a+(j.amt||0),0)),sp:0,cats:null,auto:true};
+function jarStats(m){const A=budOf(m),J=jarsOf().map(j=>Object.assign({},j,{sp:0})),other={id:'_k',n:'Chi khác',ic:'…',col:'#8B919A',amt:Math.max(0,A-J.reduce((a,j)=>a+(j.amt||0),0)),sp:0,cats:null,auto:true};
   D.tx.filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===m).forEach(x=>{const j=J.find(j=>(j.cats||[]).includes(x.cat));(j||other).sp+=mineOf(x);});
   return J.length?[...J,other]:[];}
 const jarOfCat=c=>jarsOf().find(j=>(j.cats||[]).includes(c));
@@ -10686,13 +10694,13 @@ function budCard(s){const m=today().slice(0,7),A=budOf(m);
     :st==='w'?`Đang xài nhanh hơn kế hoạch — tới hôm nay lẽ ra khoảng ${short(plan)}`
     :`Còn ${dl} ngày · mỗi ngày tiêu được <b>~${short(left/dl)}</b>`;
   const J=jarStats(m);
-  const jr=J.map(j=>{const l=j.amt-j.sp,p=j.amt?Math.min(100,j.sp/j.amt*100):(j.sp?100:0),c=l<0?'b':j.amt&&j.sp>j.amt*dn/dim*1.1?'w':'g';
-    return `<div class="jar ${c}" data-jar="${j.id}"><div class="jar-t"><span>${esc(j.n)}</span><b>${D.hide?'•••':(l<0?'lố '+short(-l):'còn '+short(l))}</b></div>
-      <div class="jar-b"><i style="width:${p.toFixed(1)}%"></i></div><small>${D.hide?'':short(j.sp)+' / '+short(j.amt)}${j.auto?' · các loại chưa gán lọ':''}</small></div>`;}).join('');
+  const jr=J.map(j=>{const no=!j.amt&&!j.auto,l=j.amt-j.sp,p=j.amt?Math.min(100,j.sp/j.amt*100):0,c=no?'n':l<0?'b':j.sp>j.amt*dn/dim*1.1?'w':'g';
+    return `<button class="jar ${c}" ${j.auto?'':`data-jar="${j.id}"`} style="--jk:${j.col||'#8B919A'}"><div class="jar-t"><span><i>${j.ic||'…'}</i>${esc(j.n)}</span><b>${D.hide?'•••':no?'':(l<0?'lố '+short(-l):'còn '+short(l))}</b></div>
+      <div class="jar-b"><i style="width:${p.toFixed(1)}%"></i></div><small>${D.hide?'':no?(j.sp?'đã xài '+short(j.sp)+' · ':'')+'chạm để điền số':short(j.sp)+' / '+short(j.amt)}${j.auto?' · loại chưa gán lọ':''}</small></button>`;}).join('');
   return `<div class="bud ${st}"><button class="bud-hd" id="budset"><div class="bud-t"><span>Tiền tháng ${+m.slice(5)}</span><small>sửa · chia lọ ›</small></div>
     <div class="bud-n"><div><small>Còn lại</small><b>${left<0?'−':''}${money(Math.abs(left))}<i> đ</i></b></div><div class="bud-r"><small>Có ${short(A)}</small><small>Đã xài ${short(sp)}</small></div></div>
     <div class="bud-bar"><i style="width:${pct.toFixed(1)}%"></i><b style="left:${Math.min(100,dn/dim*100).toFixed(1)}%"></b></div>
-    <div class="bud-m">${D.hide?'đang ẩn số':msg}</div></button>${J.length?`<div class="jars">${jr}</div>`:''}</div>`;}
+    <div class="bud-m">${D.hide?'đang ẩn số':msg}</div></button>${J.length?`<div class="jars">${jr}<button class="jar add" id="jaradd">＋ Lọ mới<small>đổi tên · số tiền: chạm vào lọ</small></button></div>`:''}</div>`;}
 function budView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduce((a,j)=>a+(j.amt||0),0),JS=jarStats(m);
   $('app').innerHTML=`<div class="sheet"><div class="wrap">
     <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Tiền tháng ${+m.slice(5)}</b><span style="width:64px"></span></div>
@@ -10714,11 +10722,11 @@ function budView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduc
   if($('b_x'))$('b_x').onclick=()=>{const old=D.bud;D.bud={m:{},def:0,jars:old.jars,u:Date.now()};save();S={v:'home'};render();toast('đã bỏ',()=>{D.bud=Object.assign(old,{u:Date.now()});save();render();});};}
 function jarfView(){const J=jarsOf(),x=S.id?J.find(j=>j.id===S.id):null,used=new Set(J.filter(j=>j!==x).flatMap(j=>j.cats||[]));
   const sel=S.jc||(S.jc=new Set(x?x.cats||[]:[]));
-  const CC=CATS.filter(c=>c[0]!=='nap'&&(!VO||(c[0]!=='ca'&&c[0]!=='dautu')));
+  const CC=CATS.filter(c=>c[0]!=='nap'&&(VO?(c[0]!=='ca'&&c[0]!=='dautu'):(c[0]!=='dodung'&&c[0]!=='rieng')));
   $('app').innerHTML=`<div class="sheet"><div class="wrap">
     <div class="bar1"><button class="back bk2" id="bk">‹ Huỷ</button><b>${x?'Sửa lọ':'Thêm lọ'}</b><span style="width:64px"></span></div>
     <label class="fl">Tên lọ<input id="j_n" value="${x?esc(x.n):''}" placeholder="vd: Ăn uống, Con cái"></label>
-    <label class="fl">Mỗi tháng bỏ vào lọ<input id="j_a" inputmode="numeric" value="${x?Math.round(x.amt).toLocaleString('vi-VN'):''}" placeholder="vd: 15.000.000"></label>
+    <label class="fl">Mỗi tháng bỏ vào lọ (để trống nếu chưa biết)<input id="j_a" inputmode="numeric" value="${x?Math.round(x.amt).toLocaleString('vi-VN'):''}" placeholder="vd: 15.000.000"></label>
     <div class="fl">Những loại chi trừ vào lọ này</div>
     <div class="cg">${CC.map(c=>{const u=used.has(c[0]);return `<button class="cgb${sel.has(c[0])?' on':''}${u?' off':''}" data-jc="${c[0]}"${u?' disabled':''}><i>${c[2]}</i>${SH[c[0]]||c[1]}</button>`;}).join('')}</div>
     <div class="note" style="text-align:left">Loại mờ là đã thuộc lọ khác. Mỗi loại chỉ nằm trong một lọ.</div>
@@ -10726,9 +10734,9 @@ function jarfView(){const J=jarsOf(),x=S.id?J.find(j=>j.id===S.id):null,used=new
   const num=v=>+String(v).replace(/\D/g,'')||0;
   $('j_a').oninput=e=>{const n=num(e.target.value);e.target.value=n?n.toLocaleString('vi-VN'):'';};
   document.querySelectorAll('[data-jc]').forEach(b=>b.onclick=()=>{const c=b.dataset.jc;sel.has(c)?sel.delete(c):sel.add(c);b.classList.toggle('on',sel.has(c));});
-  $('bk').onclick=()=>{S={v:'bud'};render();};
-  $('j_ok').onclick=()=>{const n=$('j_n').value.trim(),a=num($('j_a').value);if(!n||!a){toast('cần tên lọ và số tiền');return;}if(!sel.size){toast('chọn ít nhất một loại chi');return;}
-    D.bud=D.bud||{m:{},def:0};D.bud.jars=D.bud.jars||[];const y=x||{id:'j'+Date.now()};Object.assign(y,{n,amt:a,cats:[...sel]});if(!x)D.bud.jars.push(y);D.bud.u=Date.now();save();S={v:'bud'};render();toast(x?'đã lưu lọ':'đã thêm lọ '+esc(n));};
+  $('bk').onclick=()=>{S={v:S.back||'bud'};render();};
+  $('j_ok').onclick=()=>{const n=$('j_n').value.trim(),a=num($('j_a').value);if(!n){toast('cần tên lọ');return;}if(!sel.size){toast('chọn ít nhất một loại chi');return;}
+    D.bud=D.bud||{m:{},def:0};D.bud.jars=D.bud.jars||[];const y=x||{id:'j'+Date.now()};Object.assign(y,{n,amt:a,cats:[...sel]});if(!x){const P=[['#2563EB','🧒'],['#C2410C','🍜'],['#0F8A5F','🧴'],['#C2255C','💄'],['#A16207','◎']];const k=D.bud.jars.length%P.length;y.col=P[k][0];y.ic=P[k][1];D.bud.jars.push(y);}D.bud.u=Date.now();save();S={v:S.back||'bud'};render();toast(x?'đã lưu lọ':'đã thêm lọ '+esc(n));};
   if($('j_x'))$('j_x').onclick=()=>{D.bud.jars=D.bud.jars.filter(j=>j!==x);D.bud.u=Date.now();save();S={v:'bud'};render();toast('đã xoá lọ',()=>{D.bud.jars.push(x);D.bud.u=Date.now();save();render();});};}
 
 /* ── Cài đặt: đồng bộ, ẩn số, chép tay, phiên bản ── */
@@ -10901,7 +10909,7 @@ function amtView(){
   const f=n=>n?n.toLocaleString('vi-VN'):'0';
   const sync=()=>{const n=+S.amt||0,m=+S.mine||0;
     {const h=$('jarh');if(h){const j=S.cat&&jarOfCat(S.cat),js=j&&jarStats(today().slice(0,7)).find(x=>x.id===j.id),l=js?js.amt-js.sp-(S.dum?m:n):0;
-      h.innerHTML=js&&!D.hide?`Lọ <b>${esc(j.n)}</b> ${l<0?'<span style="color:var(--bad)">sẽ lố '+short(-l)+'</span>':'còn '+short(l)+' sau khoản này'}`:'&nbsp;';}}
+      h.innerHTML=js&&!D.hide?(!js.amt?`Lọ <b>${esc(j.n)}</b> chưa đặt số tiền`:`Lọ <b>${esc(j.n)}</b> ${l<0?'<span style="color:var(--bad)">sẽ lố '+short(-l)+'</span>':'còn '+short(l)+' sau khoản này'}`):'&nbsp;';}}
     if(S.dum){$('amtT').innerHTML=`<span class="cap">Tổng chuyển</span>${f(n)}`;$('mineT').innerHTML=`<span class="cap">Phần của mình</span>${f(m)}`;
       $('amtT').classList.toggle('tgt',S.tgt==='amt');$('mineT').classList.toggle('tgt',S.tgt==='mine');
       $('wl').innerHTML=n>m?`Chờ mọi người trả lại <b>${f(n-m)} đ</b>`:'&nbsp;';}
@@ -11549,6 +11557,7 @@ function asfView(){const A=D.as=D.as||{gold:[],sv:[],h:[],u:0};A.gold=A.gold||[]
   if($('a_x'))$('a_x').onclick=()=>{const k=kind==='gold'?'gold':'sv',i=A[k].indexOf(x);A[k].splice(i,1);asTouch();S={v:'ts'};render();
     toast('đã xoá',()=>{A[k].splice(i,0,x);asTouch();render();});};}
 
+const f1n=v=>(Math.round(v*10)/10).toFixed(1).replace('.',',');
 function tsView(){const real=VO||tsOpen(),a0=VO?voSummary():tsLive(tsGet()),a=a0&&!real?tsFake(a0):a0,H=D.hide,c=syncCfg();
   const M=n=>H?'•••':money(n),Sh=n=>H?'•••':short(n),N=(v,d)=>H?'•••':(Math.round(v*10)/10).toFixed(d==null?1:d).replace('.',',');
   const toDate=m=>{const d=new Date();d.setMonth(d.getMonth()+Math.floor(m));return pad2(d.getMonth()+1)+'/'+d.getFullYear();};
@@ -11571,6 +11580,13 @@ function tsView(){const real=VO||tsOpen(),a0=VO?voSummary():tsLive(tsGet()),a=a0
       ${hv.length>1&&!H?`<svg class="tspark" viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="none"><path d="M${pts.map(p=>p.join(' ')).join(' L')}" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="2" stroke-linejoin="round"/></svg>`:''}
       <div class="segbar" style="margin-top:12px">${parts.map(x=>`<i style="flex:${x[1]};background:${x[2]}"></i>`).join('')}</div>
     </div>
+    ${(()=>{/* THẺ VÀNG (08/10, Mau: "vàng hiển thị giá trị thực tế hiện tại, để biết lời lãi"): tổng chỉ · giá hôm nay · giá trị · vốn · lời/lỗ, từng lô bên dưới */
+      const G=(a.items||[]).filter(i=>i.c==='gold');if(!G.length)return'';
+      const q=G.reduce((x,i)=>x+(i.q||0),0),v=G.reduce((x,i)=>x+i.v,0),k=G.reduce((x,i)=>x+(i.k||0),0),pl=v-k,pp=k?pl/k*100:0,np=G.some(i=>i.np),g=giaGet(),px=g&&g.p&&(g.p['vang:nhan']||g.p['vang:mieng']);
+      return `<div class="tkc gcard"><div class="tkh"><span><i class="cib cib-gold sm">${ICO.gold}</i>Vàng</span><small>${q%10===0?q/10+' cây':String(q).replace('.',',')+' chỉ'}${px?' · giá mua vào hôm nay '+short(px)+'/chỉ':''}</small></div>
+        <div class="gv"><div><small>Giá trị hôm nay</small><b>${M(v)}<i> đ</i></b></div><div class="gpl ${pl>=0?'up':'dn'}"><small>${pl>=0?'Đang lời':'Đang lỗ'}</small><b>${H?'•••':(pl>=0?'+':'−')+short(Math.abs(pl))}</b><em>${H?'':(pl>=0?'+':'−')+f1n(Math.abs(pp))+'%'}</em></div></div>
+        <div class="gk">Mua vào tổng <b>${Sh(k)}</b>${np?' · <span style="color:var(--warn)">chưa lấy được giá — đang tạm tính theo giá mua</span>':''}</div>
+        ${G.map(i=>{const l=i.v-(i.k||i.v),lp=i.k?l/i.k*100:0;return `<div class="gl1" data-as="${i.aid||''}"><span><b>${esc(i.n)}</b><small>${String(i.q).replace('.',',')} chỉ ${i.g} · mua ${Sh(i.k||0)}</small></span><span class="r"><b>${M(i.v)}</b><small class="${l>=0?'upc':'dnc'}">${H?'•••':(l>=0?'+':'−')+short(Math.abs(l))+' · '+f1n(Math.abs(lp))+'%'}</small></span></div>`;}).join('')}</div>`;})()}
     <div class="tkc"><div class="tkh"><span>Danh mục</span><small>chạm để xem từng khoản</small></div>
       ${parts.map(x=>{const its=(a.items||[]).filter(i=>i.c===x[3]).sort((p,q)=>q.v-p.v),op=tsCls===x[3];
         return `<button class="tcl${op?' on':''}" data-c="${x[3]}"><i class="cib cib-${x[3]}">${ICO[x[3]]}</i><span>${x[0]}<small>${H?'•••':Math.round(x[1]/a.total*100)+'%'}${its.length?' · '+its.length+' khoản':''}</small></span><b>${Sh(x[1])}</b><em>›</em></button>
@@ -11590,12 +11606,12 @@ function tsView(){const real=VO||tsOpen(),a0=VO?voSummary():tsLive(tsGet()),a=a0
       <div class="lbv">${N(a.fire.pct)}<small> %</small></div>
       <div class="lbt"><i style="width:${H?0:a.fire.pct.toFixed(1)}%;background:var(--accent)"></i></div>
       <div class="dsub">${a.fire.years!=null&&isFinite(a.fire.years)?'Giữ nhịp nạp '+Sh(a.fire.contrib)+'/tháng → chạm đích khoảng <b>'+(H?'•••':new Date().getFullYear()+Math.ceil(a.fire.years))+'</b>':'Chưa đủ dữ liệu để ước năm chạm đích'}</div></div>`}
-    <div class="tkc"><div class="tkh"><span><i class="cib cib-savings sm">${ICO.savings}</i>Tiết kiệm</span><small>${a.sv.n} sổ</small></div>
+    ${VO&&!a.sv.n?'':`<div class="tkc"><div class="tkh"><span><i class="cib cib-savings sm">${ICO.savings}</i>Tiết kiệm</span><small>${a.sv.n} sổ</small></div>
       ${VO?`<div class="hs3"><div><span>Đang gửi</span><b>${Sh(a.savings)}</b></div><div><span>Lãi tới nay</span><b class="upc">+${Sh(a.sv.dang)}</b></div><div><span>Sắp đáo hạn</span><b>${a.soon.length} sổ</b></div></div>`
         :`<div class="hs3"><div><span>Đang có</span><b>${Sh(a.savings)}</b></div><div><span>Lãi đã nhận</span><b class="upc">+${Sh(a.sv.lai)}</b></div><div><span>Đang dồn</span><b class="upc">+${Sh(a.sv.dang)}</b></div></div>`}
       ${a.soon.length?'<div class="dsub" style="margin:8px 0 4px">Sắp nhận (cả gốc lẫn lãi)</div>':''}
       ${a.soon.map(x=>{const dd=Math.round((new Date(x.d)-new Date(today()))/864e5);return `<div class="tli"><span>${x.d.slice(8)}/${x.d.slice(5,7)}</span><span class="n">${esc(x.name)}${x.ef?' <small>· KC</small>':''}<small> · còn ${dd} ngày</small></span><b>${Sh(x.v)}</b></div>`;}).join('')}
-    </div>
+    </div>`}
     <div class="note">${VO?(a.gt?'Giá vàng (BTMC, giá mua vào) lúc '+new Date(a.gt).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})+' · ':'')+'lãi tính tới hôm nay':a.fake?'Cập nhật lúc '+new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'Cập nhật từ sổ trên Mac '+(ago<60?ago+' phút':ago<1440?Math.round(ago/60)+' giờ':Math.round(ago/1440)+' ngày')+' trước'+(a.gt?' · giá vàng, crypto lúc '+new Date(a.gt).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'')+(tsErr?' · '+esc(tsErr):'')+'. Tiết kiệm mới hơn: mở khoá sổ trên Mac.'}</div>`;}
   $('app').innerHTML=`<div class="wrap hm2">
     <div class="topb"><div><div class="hi">${VO?'Của mình':'Tiền riêng'}</div><b>Tài sản</b></div>
