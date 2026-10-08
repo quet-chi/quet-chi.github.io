@@ -341,7 +341,8 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .jv.add span{width:58px;height:68px;display:grid;place-items:center;border:1.5px dashed var(--line);border-radius:14px;font-size:1.4rem;color:var(--accent2)}.jv.add b{color:var(--ink3)}
 .jwave{animation:wave 3.2s linear infinite}@keyframes wave{to{transform:translateX(50%)}}
 @media(prefers-reduced-motion:reduce){.jwave{animation:none}}
-.jsel{margin-top:8px}.jsl{display:block;font-size:.68rem;color:var(--ink3);font-weight:600;margin-bottom:4px}
+.jsel{margin-top:8px}.jsel.big .jsc{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;overflow:visible;margin:0;padding:0}
+.jsel.big .jch{align-items:center;text-align:center;padding:10px 4px 8px;border-radius:16px;font-size:.8rem}.jsel.big .jch i{font-size:1.5rem;line-height:1.2}.jsel.big .jsl{font-size:.78rem;color:var(--ink2);margin:4px 0 6px}.jsl{display:block;font-size:.68rem;color:var(--ink3);font-weight:600;margin-bottom:4px}
 .jsc{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}.jsc::-webkit-scrollbar{display:none}
 .jch{flex:none;display:flex;flex-direction:column;align-items:flex-start;gap:1px;background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:6px 10px;font-size:.78rem;font-weight:600;color:var(--ink);text-align:left}
 .jch i{font-style:normal;display:inline}.jch small{font:500 .64rem ui-monospace,"SF Mono",Menlo,monospace;color:var(--ink3)}
@@ -10747,9 +10748,12 @@ function jarSvg(j,size){const W=size||64,H=Math.round(W*1.18),l=(j.amt||0)-j.sp,
     ${full>0?`<g clip-path="url(#${id})"><path class="jwave" d="M-${W} ${lv} q${W/4} -5 ${W/2} 0 t${W/2} 0 t${W/2} 0 t${W/2} 0 V${H} H-${W}z" fill="${c}" fill-opacity=".85"/></g>`:''}
     <rect x="${W*.2}" y="2" width="${W*.6}" height="7" rx="3" fill="${c}" fill-opacity="${none?.25:.9}"/>
     <text x="${W/2}" y="${H*.62}" text-anchor="middle" font-size="${W*.3}">${j.ic||'…'}</text>${over?`<circle cx="${W-8}" cy="16" r="8" fill="#C83E3E"/><text x="${W-8}" y="20" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">!</text>`:''}</svg>`;}
+/* CHỈ CHỌN LỌ (08/10, Mau: "dùng note là được"): bản vợ có lọ → bỏ lưới loại, chọn lọ + ghi chú. Loại tự gán = loại đầu của lọ (Chi khác → Khác) để Thống kê vẫn chạy. */
+const jarOnly=()=>VO&&jarsOf().length>0&&budOf(today().slice(0,7))>0;
+const catOfJar=id=>{const j=jarsOf().find(x=>x.id===id);return j&&j.cats&&j.cats[0]||'khac';};
 const jarAuto=c=>{const j=c&&jarOfCat(c);return j?j.id:'_k';};
-function jarRow(sel,amtNow,exceptId){const m=today().slice(0,7);if(!jarsOf().length||!budOf(m))return'';const JS=jarStats(m);
-  return `<div class="jsel"><span class="jsl">Trừ vào lọ</span><div class="jsc">${JS.map(j=>{const l=j.amt-j.sp;return `<button type="button" class="jch${sel===j.id?' on':''}" data-jsel="${j.id}" style="--jk:${j.col||'#8B919A'}"><i>${j.ic||'…'}</i>${esc(j.n)}<small>${D.hide?'':j.amt||j.auto?(l<0?'lố '+short(-l):'còn '+short(l)):'chưa nạp'}</small></button>`;}).join('')}</div>
+function jarRow(sel,amtNow,exceptId){const m=today().slice(0,7);if(!jarsOf().length||!budOf(m))return'';const JS=jarStats(m),big=jarOnly();
+  return `<div class="jsel${big?' big':''}"><span class="jsl">${big?'Chi từ lọ nào?':'Trừ vào lọ'}</span><div class="jsc">${JS.map(j=>{const l=j.amt-j.sp;return `<button type="button" class="jch${sel===j.id?' on':''}" data-jsel="${j.id}" style="--jk:${j.col||'#8B919A'}"><i>${j.ic||'…'}</i>${esc(j.n)}<small>${D.hide?'':j.amt||j.auto?(l<0?'lố '+short(-l):'còn '+short(l)):'chưa nạp'}</small></button>`;}).join('')}</div>
     <div class="jarh" id="jarh">&nbsp;</div></div>`;}
 function jarHint(sel,amt,ownId){const h=$('jarh');if(!h)return;const m=today().slice(0,7),js=jarStats(m).find(j=>j.id===sel);if(!js||D.hide){h.innerHTML='&nbsp;';return;}
   const own=ownId?D.tx.find(t=>t.id===ownId):null,base=own&&(own.jar||jarAuto(own.cat))===sel?mineOf(own):0,l=js.amt-js.sp+base-amt;
@@ -10921,7 +10925,7 @@ function edView(){
     <label class="fl">Ghi chú<input id="e_t" value="${esc(x.note||'')}" placeholder="không bắt buộc"></label>
     <div class="f2"><label class="fl">Ngày<input id="e_d" type="date" value="${x.d}" max="${today()}"></label>
       <label class="fl">Trả bằng<select id="e_v" class="fsel">${VIA.map(v=>`<option value="${v[0]}"${(x.via||'mb')===v[0]?' selected':''}>${v[1]}</option>`).join('')}</select></label></div>
-    <div class="fl">Loại</div>${catGrid(x.cat)}
+    ${jarOnly()?'':'<div class="fl">Loại</div>'+catGrid(x.cat)}
     ${jarRow(x.jar||jarAuto(x.cat))}
     <div class="meta">${x.src==='qr'?'quét QR':'ghi tay'} lúc ${new Date(x.ts).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}</div>
     <button class="cta" id="e_ok" style="margin-top:14px">Lưu</button>
@@ -10939,7 +10943,7 @@ function edView(){
   ['e_n','e_a','e_m','e_t','e_d','e_v'].forEach(id=>{if($(id))$(id).onchange=put;});
   document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{x.cat=b.dataset.c;if(x.synced)x.edited=true;if(!x.jarTay&&jarsOf().length)x.jar=jarAuto(x.cat);save();
     document.querySelectorAll('[data-c]').forEach(y=>y.classList.toggle('on',y===b));document.querySelectorAll('[data-jsel]').forEach(y=>y.classList.toggle('on',y.dataset.jsel===(x.jar||jarAuto(x.cat))));jarHint(x.jar||jarAuto(x.cat),mineOf(x),x.id);});
-  document.querySelectorAll('[data-jsel]').forEach(b=>b.onclick=()=>{x.jar=b.dataset.jsel;x.jarTay=true;save();document.querySelectorAll('[data-jsel]').forEach(y=>y.classList.toggle('on',y===b));jarHint(x.jar,mineOf(x),x.id);});
+  document.querySelectorAll('[data-jsel]').forEach(b=>b.onclick=()=>{x.jar=b.dataset.jsel;x.jarTay=true;if(jarOnly())x.cat=catOfJar(x.jar);if(x.synced)x.edited=true;save();document.querySelectorAll('[data-jsel]').forEach(y=>y.classList.toggle('on',y===b));jarHint(x.jar,mineOf(x),x.id);});
   if($('jarh'))jarHint(x.jar||jarAuto(x.cat),mineOf(x),x.id);
   const back=()=>S.prev?S.prev:S.back==='find'?{v:'find',f:S.f}:{v:'home'};
   $('bk').onclick=()=>{put();S=back();render();};
@@ -11037,9 +11041,9 @@ function amtView(){
       :`<button class="amt" id="amtT"></button>`}
     <div class="opts"><div class="seg">${VIA.map(v=>`<button data-via="${v[0]}" class="${S.via===v[0]?'on':''}">${v[1]}</button>`).join('')}</div>
       ${VO?'':`<button class="op${S.dum?' on':''}" id="dumT">👥 Trả dùm</button>`}<button class="op${S.once?' on':''}" id="onceT" title="Khoản lớn một lần — học phí, bảo hiểm năm…">1 lần</button></div>
-    <input id="nt" class="nt" value="${esc(S.note||'')}" placeholder="✎ Mua gì? (không bắt buộc)" enterkeyhint="done">
-    ${catGrid(S.cat)}
-    ${jarRow(S.jar||jarAuto(S.cat))}
+    <input id="nt" class="nt" value="${esc(S.note||'')}" placeholder="${jarOnly()?'✎ Mua gì, cho ai… (không bắt buộc)':'✎ Mua gì? (không bắt buộc)'}" enterkeyhint="done">
+    ${jarOnly()?'':catGrid(S.cat)}
+    ${jarRow(jarOnly()?S.jar:(S.jar||jarAuto(S.cat)))}
     ${khongNapas?'<div class="warn">🏪 <b>QR thanh toán cửa hàng</b> — ngân hàng không cho tự điền loại này. Bấm nút: khoản được ghi, MB mở ra → <b>quét lại mã ở quầy bằng MB</b>.</div>':''}
     <div class="padw"><div class="pad">${['1','2','3','4','5','6','7','8','9','000','0','⌫'].map(k=>`<button data-k="${k}">${k}</button>`).join('')}</div>
       <button class="cta" id="go">${goLabel()}</button><div class="hint" id="hint">${hintTxt()}</div></div>
@@ -11052,7 +11056,7 @@ function amtView(){
   /* bấm số / chọn loại: sửa tại chỗ, không vẽ lại cả màn — vẽ lại làm trang nhảy về đầu */
   const f=n=>n?n.toLocaleString('vi-VN'):'0';
   const sync=()=>{const n=+S.amt||0,m=+S.mine||0;
-    if(!S.jarTay)S.jar=jarAuto(S.cat);document.querySelectorAll('[data-jsel]').forEach(b=>b.classList.toggle('on',b.dataset.jsel===S.jar));jarHint(S.jar,S.dum?m:n);
+    if(jarOnly()){if(!S.jar&&S.cat){S.jar=jarAuto(S.cat);}}else if(!S.jarTay)S.jar=jarAuto(S.cat);if(jarOnly()&&!S.jar){const h=$('jarh');if(h)h.innerHTML='Chạm một lọ để ghi';}document.querySelectorAll('[data-jsel]').forEach(b=>b.classList.toggle('on',b.dataset.jsel===S.jar));if(S.jar)jarHint(S.jar,S.dum?m:n);
     if(S.dum){$('amtT').innerHTML=`<span class="cap">Tổng chuyển</span>${f(n)}`;$('mineT').innerHTML=`<span class="cap">Phần của mình</span>${f(m)}`;
       $('amtT').classList.toggle('tgt',S.tgt==='amt');$('mineT').classList.toggle('tgt',S.tgt==='mine');
       $('wl').innerHTML=n>m?`Chờ mọi người trả lại <b>${f(n-m)} đ</b>`:'&nbsp;';}
@@ -11067,7 +11071,7 @@ function amtView(){
     document.querySelectorAll('[data-via]').forEach(x=>x.classList.toggle('on',x===b));$('go').textContent=goLabel();$('hint').innerHTML=hintTxt();});
   document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{S.cat=b.dataset.c;
     document.querySelectorAll('[data-c]').forEach(x=>x.classList.toggle('on',x===b));sync();});
-  document.querySelectorAll('[data-jsel]').forEach(b=>b.onclick=()=>{S.jar=b.dataset.jsel;S.jarTay=true;sync();});
+  document.querySelectorAll('[data-jsel]').forEach(b=>b.onclick=()=>{S.jar=b.dataset.jsel;S.jarTay=true;if(jarOnly())S.cat=catOfJar(S.jar);sync();});
   /* BÀN PHÍM: nhận phím lúc ngón chạm xuống (pointerdown) — mỗi chạm đúng một số. Trước đây "chống phóng to" tự
      bấm thêm click cho cú chạm thứ hai trong khi iPhone vẫn gửi click gốc → bấm nhanh "35" ra "355" (05/10). */
   document.querySelectorAll('[data-k]').forEach(b=>b.onpointerdown=e=>{e.preventDefault();const k=b.dataset.k,key=S.tgt==='mine'?'mine':'amt';let t=String(S[key]||'');
@@ -11075,7 +11079,7 @@ function amtView(){
   $('go').onclick=()=>{
     const amt=+S.amt||0,mine=+S.mine||0;
     if(!(amt>0)){toast('chưa gõ số tiền');return;}
-    if(!S.cat){toast('chọn một loại');return;}
+    if(!S.cat){toast(jarOnly()?'chạm một lọ':'chọn một loại');return;}
     if(S.dum&&mine>amt){toast('phần của mình lớn hơn tổng chuyển');return;}
     const x={id:'p'+Date.now(),ts:Date.now(),d:today(),amt,name:(S.name||'').trim(),cat:S.cat,src:S.tay?'tay':'qr',via:S.via||'mb',synced:false};
     const nt=(S.note||'').trim();if(nt)x.note=nt;
