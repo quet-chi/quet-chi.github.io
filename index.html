@@ -12,7 +12,7 @@
 <!-- KHOÁ MẠNG (CSP): trang không được gọi ra ngoài, không tải gì từ nơi khác. Kể cả khi có đoạn mã lạ lọt vào,
      nó cũng không gửi được dữ liệu đi đâu. Mở MB là chuyển trang (navigation) nên không bị chặn.
      Không dùng Google Fonts nữa: font hệ thống của iPhone, Google khỏi biết mỗi lần mở app. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src https://firestore.googleapis.com; worker-src 'self'; font-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; media-src blob: mediastream:; connect-src https://firestore.googleapis.com https://api.coingecko.com https://www.vang.today https://edge-api.pnj.io; worker-src 'self'; font-src 'none'; form-action 'none'; base-uri 'none'">
 <style>
 /* Quét chi — ghi từng khoản NGAY LÚC TRẢ: quét QR → gõ tiền → MB mở sẵn → khoản đã nằm trong sổ.
    Dữ liệu CHỈ nằm trên điện thoại (localStorage). Không tài khoản, không máy chủ riêng.
