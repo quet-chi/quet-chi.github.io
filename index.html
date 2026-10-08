@@ -319,6 +319,14 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .del{display:block;width:100%;margin-top:22px;height:50px;border-radius:14px;background:rgba(200,62,62,.08);border:1px solid rgba(200,62,62,.3);color:var(--bad);font-weight:600}
 .bud{display:block;width:100%;text-align:left;margin-top:12px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px 16px;color:var(--ink);font:inherit;box-shadow:0 1px 2px rgba(20,22,24,.04),0 2px 8px rgba(20,22,24,.03);--bc:var(--good)}
 .bud.w{--bc:var(--warn)}.bud.b{--bc:var(--bad);border-color:rgba(200,62,62,.4)}
+.bud-hd{display:block;width:100%;background:none;border:0;padding:0;text-align:left;color:inherit;font:inherit}
+.jars{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.jar{background:var(--panel2);border-radius:12px;padding:9px 10px;--jc:var(--good)}.jar.w{--jc:var(--warn)}.jar.b{--jc:var(--bad)}
+.jar-t{display:flex;justify-content:space-between;gap:6px;align-items:baseline}.jar-t span{font-weight:600;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.jar-t b{font:600 .76rem ui-monospace,"SF Mono",Menlo,monospace;color:var(--jc);white-space:nowrap}.jar.g .jar-t b{color:var(--ink)}
+.jar-b{height:6px;border-radius:3px;background:var(--line);margin:6px 0 4px;overflow:hidden}.jar-b i{display:block;height:100%;background:var(--jc);border-radius:3px}.jar small{font-size:.66rem;color:var(--ink3)}
+.jarh{text-align:center;font-size:.78rem;color:var(--ink2);min-height:18px;margin-top:6px}.jarh b{color:var(--ink)}
+.cgb.off{opacity:.3}
+#app.anim .jar-b i{transform-origin:left;animation:grow .7s cubic-bezier(.2,.7,.2,1) both .25s}
 .bud.set{display:grid;grid-template-columns:40px 1fr auto;gap:12px;align-items:center;border-style:dashed}.bud.set b{display:block;font-size:.95rem}.bud.set small{display:block;font-size:.74rem;color:var(--ink3);margin-top:2px}.bud.set em{font-style:normal;color:var(--ink3)}
 .bud-ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(15,157,138,.12);color:var(--accent)}.bud-ic svg{width:22px;height:22px}
 .bud-t{display:flex;justify-content:space-between;align-items:baseline}.bud-t span{font-weight:700;font-size:.9rem}.bud-t small{font-size:.72rem;color:var(--ink3)}
@@ -10663,29 +10671,65 @@ function home(){
 /* ══ TIỀN THÁNG NÀY (08/10) — cho vợ Mau: "có bao nhiêu, xài bao nhiêu, lố hông". Một hạn mức tổng, mỗi tháng tính lại từ đầu.
    D.bud={def:số mặc định, m:{'YYYY-MM':số}, u}. Tháng chưa gõ thì lấy số mặc định (số gần nhất đã gõ). Đồng bộ qua doc "z-bud". ══ */
 const budOf=m=>{const B=D.bud;if(!B)return 0;return (B.m&&B.m[m]!=null)?B.m[m]:(B.def||0);};
+/* LỌ (08/10): chia tiền tháng thành từng lọ, mỗi lọ gắn với vài LOẠI chi → ghi khoản là tự trừ đúng lọ, không phải chọn thêm.
+   D.bud.jars=[{id,n,amt,cats:[...]}] — giữ qua các tháng. Phần chưa chia = lọ "Chi khác" cho mọi loại còn lại. */
+const jarsOf=()=>((D.bud&&D.bud.jars)||[]).filter(j=>j&&j.id);
+function jarStats(m){const A=budOf(m),J=jarsOf().map(j=>Object.assign({},j,{sp:0})),other={id:'_k',n:'Chi khác',amt:Math.max(0,A-J.reduce((a,j)=>a+(j.amt||0),0)),sp:0,cats:null,auto:true};
+  D.tx.filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===m).forEach(x=>{const j=J.find(j=>(j.cats||[]).includes(x.cat));(j||other).sp+=mineOf(x);});
+  return J.length?[...J,other]:[];}
+const jarOfCat=c=>jarsOf().find(j=>(j.cats||[]).includes(c));
 function budCard(s){const m=today().slice(0,7),A=budOf(m);
-  if(!A)return VO?`<button class="bud set" id="budset"><span class="bud-ic">${ICO.wallet}</span><span><b>Đặt tiền tháng này</b><small>gõ số tiền đang có để xài trong tháng — app báo còn bao nhiêu, có lố không</small></span><em>›</em></button>`:'';
+  if(!A)return VO?`<button class="bud set" id="budset"><span class="bud-ic">${ICO.wallet}</span><span><b>Đặt tiền tháng này</b><small>gõ số tiền đang có để xài trong tháng, chia lọ nếu muốn — app báo còn bao nhiêu, có lố không</small></span><em>›</em></button>`:'';
   const sp=s.mo,left=A-sp,now=new Date(),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),dn=now.getDate(),dl=dim-dn+1;
   const pct=Math.min(100,sp/A*100),plan=A*dn/dim,st=left<0?'b':sp>plan*1.1?'w':'g';
   const msg=left<0?`Đã <b>lố ${short(-left)}</b> so với tiền tháng này`
     :st==='w'?`Đang xài nhanh hơn kế hoạch — tới hôm nay lẽ ra khoảng ${short(plan)}`
     :`Còn ${dl} ngày · mỗi ngày tiêu được <b>~${short(left/dl)}</b>`;
-  return `<button class="bud ${st}" id="budset"><div class="bud-t"><span>Tiền tháng ${+m.slice(5)}</span><small>sửa ›</small></div>
+  const J=jarStats(m);
+  const jr=J.map(j=>{const l=j.amt-j.sp,p=j.amt?Math.min(100,j.sp/j.amt*100):(j.sp?100:0),c=l<0?'b':j.amt&&j.sp>j.amt*dn/dim*1.1?'w':'g';
+    return `<div class="jar ${c}" data-jar="${j.id}"><div class="jar-t"><span>${esc(j.n)}</span><b>${D.hide?'•••':(l<0?'lố '+short(-l):'còn '+short(l))}</b></div>
+      <div class="jar-b"><i style="width:${p.toFixed(1)}%"></i></div><small>${D.hide?'':short(j.sp)+' / '+short(j.amt)}${j.auto?' · các loại chưa gán lọ':''}</small></div>`;}).join('');
+  return `<div class="bud ${st}"><button class="bud-hd" id="budset"><div class="bud-t"><span>Tiền tháng ${+m.slice(5)}</span><small>sửa · chia lọ ›</small></div>
     <div class="bud-n"><div><small>Còn lại</small><b>${left<0?'−':''}${money(Math.abs(left))}<i> đ</i></b></div><div class="bud-r"><small>Có ${short(A)}</small><small>Đã xài ${short(sp)}</small></div></div>
     <div class="bud-bar"><i style="width:${pct.toFixed(1)}%"></i><b style="left:${Math.min(100,dn/dim*100).toFixed(1)}%"></b></div>
-    <div class="bud-m">${D.hide?'đang ẩn số':msg}</div></button>`;}
-function budView(){const m=today().slice(0,7),A=budOf(m);
+    <div class="bud-m">${D.hide?'đang ẩn số':msg}</div></button>${J.length?`<div class="jars">${jr}</div>`:''}</div>`;}
+function budView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduce((a,j)=>a+(j.amt||0),0),JS=jarStats(m);
   $('app').innerHTML=`<div class="sheet"><div class="wrap">
-    <div class="bar1"><button class="back bk2" id="bk">‹ Huỷ</button><b>Tiền tháng ${+m.slice(5)}</b><span style="width:64px"></span></div>
+    <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Tiền tháng ${+m.slice(5)}</b><span style="width:64px"></span></div>
     <label class="fl">Tháng này có bao nhiêu tiền để xài?<input id="b_a" inputmode="numeric" value="${A?Math.round(A).toLocaleString('vi-VN'):''}" placeholder="vd: 40.000.000"></label>
-    <div class="note" style="text-align:left">Gõ số tiền đang có cho tháng này (tiền chồng đưa, lương…). App lấy tổng chi trong tháng trừ ra để biết <b>còn bao nhiêu</b> và báo khi <b>lố</b>.
-      Sang tháng mới tính lại từ đầu, số này được đề sẵn — khác thì sửa.</div>
-    <button class="cta" id="b_ok">Lưu</button>${A?'<button class="del" id="b_x">Bỏ theo dõi tiền tháng</button>':''}</div></div>`;
+    <button class="cta" id="b_ok" style="margin-top:10px">Lưu số tiền</button>
+    <div class="lh"><span>Chia lọ</span><small class="lhh">mỗi lọ gắn vài loại chi — ghi khoản là tự trừ đúng lọ</small></div>
+    ${J.map(j=>{const st=JS.find(x=>x.id===j.id)||{sp:0};return `<button class="srow" data-jx="${j.id}"><span class="sic">◎</span><span class="st"><b>${esc(j.n)}</b><small>${(j.cats||[]).map(c=>SH[c]||cat(c)[1]).join(' · ')||'chưa gán loại'}</small></span><span class="sr mono">${short(j.amt)}<br><small class="dim">đã xài ${short(st.sp)}</small></span></button>`;}).join('')}
+    ${J.length&&A?`<div class="srow" style="cursor:default"><span class="sic">…</span><span class="st"><b>Chi khác</b><small>mọi loại chưa gán lọ — tự tính = tổng − các lọ</small></span><span class="sr mono" style="${A-sumJ<0?'color:var(--bad)':''}">${A-sumJ<0?'−':''}${short(Math.abs(A-sumJ))}</span></div>`:''}
+    ${A&&sumJ>A?`<div class="warn">Các lọ cộng lại ${short(sumJ)} — nhiều hơn tiền tháng ${short(A)}. Bớt lọ hoặc tăng tiền tháng.</div>`:''}
+    <button class="cta ghost" id="b_jar">＋ Thêm lọ</button>
+    ${!J.length?`<div class="note" style="text-align:left">Ví dụ: <b>Ăn uống 15tr</b> (Ăn uống, Cà phê) · <b>Con cái 10tr</b> (Con cái). Phần còn lại tự vào <b>Chi khác</b>.</div>`:''}
+    ${A?'<button class="del" id="b_x">Bỏ theo dõi tiền tháng</button>':''}</div></div>`;
   const num=v=>+String(v).replace(/\D/g,'')||0;
   $('b_a').oninput=e=>{const n=num(e.target.value);e.target.value=n?n.toLocaleString('vi-VN'):'';};
-  $('bk').onclick=()=>{S={v:'home'};render();};
-  $('b_ok').onclick=()=>{const a=num($('b_a').value);if(!a){toast('gõ số tiền');return;}D.bud=D.bud||{m:{}};D.bud.m=D.bud.m||{};D.bud.m[m]=a;D.bud.def=a;D.bud.u=Date.now();save();S={v:'home'};render();toast('đã lưu tiền tháng '+(+m.slice(5)));};
-  if($('b_x'))$('b_x').onclick=()=>{const old=D.bud;D.bud={m:{},def:0,u:Date.now()};save();S={v:'home'};render();toast('đã bỏ',()=>{D.bud=Object.assign(old,{u:Date.now()});save();render();});};}
+  $('bk').onclick=()=>{const a=num($('b_a').value);if(a&&a!==A){D.bud=D.bud||{m:{}};D.bud.m=D.bud.m||{};D.bud.m[m]=a;D.bud.def=a;D.bud.u=Date.now();save();}S={v:'home'};render();};
+  $('b_ok').onclick=()=>{const a=num($('b_a').value);if(!a){toast('gõ số tiền');return;}D.bud=D.bud||{m:{}};D.bud.m=D.bud.m||{};D.bud.m[m]=a;D.bud.def=a;D.bud.u=Date.now();save();render();toast('đã lưu tiền tháng '+(+m.slice(5)));};
+  $('b_jar').onclick=()=>{S={v:'jarf'};render();};
+  document.querySelectorAll('[data-jx]').forEach(b=>b.onclick=()=>{S={v:'jarf',id:b.dataset.jx};render();});
+  if($('b_x'))$('b_x').onclick=()=>{const old=D.bud;D.bud={m:{},def:0,jars:old.jars,u:Date.now()};save();S={v:'home'};render();toast('đã bỏ',()=>{D.bud=Object.assign(old,{u:Date.now()});save();render();});};}
+function jarfView(){const J=jarsOf(),x=S.id?J.find(j=>j.id===S.id):null,used=new Set(J.filter(j=>j!==x).flatMap(j=>j.cats||[]));
+  const sel=S.jc||(S.jc=new Set(x?x.cats||[]:[]));
+  const CC=CATS.filter(c=>c[0]!=='nap'&&(!VO||(c[0]!=='ca'&&c[0]!=='dautu')));
+  $('app').innerHTML=`<div class="sheet"><div class="wrap">
+    <div class="bar1"><button class="back bk2" id="bk">‹ Huỷ</button><b>${x?'Sửa lọ':'Thêm lọ'}</b><span style="width:64px"></span></div>
+    <label class="fl">Tên lọ<input id="j_n" value="${x?esc(x.n):''}" placeholder="vd: Ăn uống, Con cái"></label>
+    <label class="fl">Mỗi tháng bỏ vào lọ<input id="j_a" inputmode="numeric" value="${x?Math.round(x.amt).toLocaleString('vi-VN'):''}" placeholder="vd: 15.000.000"></label>
+    <div class="fl">Những loại chi trừ vào lọ này</div>
+    <div class="cg">${CC.map(c=>{const u=used.has(c[0]);return `<button class="cgb${sel.has(c[0])?' on':''}${u?' off':''}" data-jc="${c[0]}"${u?' disabled':''}><i>${c[2]}</i>${SH[c[0]]||c[1]}</button>`;}).join('')}</div>
+    <div class="note" style="text-align:left">Loại mờ là đã thuộc lọ khác. Mỗi loại chỉ nằm trong một lọ.</div>
+    <button class="cta" id="j_ok">Lưu lọ</button>${x?'<button class="del" id="j_x">Xoá lọ</button>':''}</div></div>`;
+  const num=v=>+String(v).replace(/\D/g,'')||0;
+  $('j_a').oninput=e=>{const n=num(e.target.value);e.target.value=n?n.toLocaleString('vi-VN'):'';};
+  document.querySelectorAll('[data-jc]').forEach(b=>b.onclick=()=>{const c=b.dataset.jc;sel.has(c)?sel.delete(c):sel.add(c);b.classList.toggle('on',sel.has(c));});
+  $('bk').onclick=()=>{S={v:'bud'};render();};
+  $('j_ok').onclick=()=>{const n=$('j_n').value.trim(),a=num($('j_a').value);if(!n||!a){toast('cần tên lọ và số tiền');return;}if(!sel.size){toast('chọn ít nhất một loại chi');return;}
+    D.bud=D.bud||{m:{},def:0};D.bud.jars=D.bud.jars||[];const y=x||{id:'j'+Date.now()};Object.assign(y,{n,amt:a,cats:[...sel]});if(!x)D.bud.jars.push(y);D.bud.u=Date.now();save();S={v:'bud'};render();toast(x?'đã lưu lọ':'đã thêm lọ '+esc(n));};
+  if($('j_x'))$('j_x').onclick=()=>{D.bud.jars=D.bud.jars.filter(j=>j!==x);D.bud.u=Date.now();save();S={v:'bud'};render();toast('đã xoá lọ',()=>{D.bud.jars.push(x);D.bud.u=Date.now();save();render();});};}
 
 /* ── Cài đặt: đồng bộ, ẩn số, chép tay, phiên bản ── */
 function caiView(){const c=syncCfg(),n=syncPending(),s=stats();
@@ -10843,6 +10887,7 @@ function amtView(){
       ${VO?'':`<button class="op${S.dum?' on':''}" id="dumT">👥 Trả dùm</button>`}<button class="op${S.once?' on':''}" id="onceT" title="Khoản lớn một lần — học phí, bảo hiểm năm…">1 lần</button></div>
     <input id="nt" class="nt" value="${esc(S.note||'')}" placeholder="✎ Mua gì? (không bắt buộc)" enterkeyhint="done">
     ${catGrid(S.cat)}
+    ${jarsOf().length&&budOf(today().slice(0,7))?'<div class="jarh" id="jarh">&nbsp;</div>':''}
     ${khongNapas?'<div class="warn">🏪 <b>QR thanh toán cửa hàng</b> — ngân hàng không cho tự điền loại này. Bấm nút: khoản được ghi, MB mở ra → <b>quét lại mã ở quầy bằng MB</b>.</div>':''}
     <div class="padw"><div class="pad">${['1','2','3','4','5','6','7','8','9','000','0','⌫'].map(k=>`<button data-k="${k}">${k}</button>`).join('')}</div>
       <button class="cta" id="go">${goLabel()}</button><div class="hint" id="hint">${hintTxt()}</div></div>
@@ -10855,6 +10900,8 @@ function amtView(){
   /* bấm số / chọn loại: sửa tại chỗ, không vẽ lại cả màn — vẽ lại làm trang nhảy về đầu */
   const f=n=>n?n.toLocaleString('vi-VN'):'0';
   const sync=()=>{const n=+S.amt||0,m=+S.mine||0;
+    {const h=$('jarh');if(h){const j=S.cat&&jarOfCat(S.cat),js=j&&jarStats(today().slice(0,7)).find(x=>x.id===j.id),l=js?js.amt-js.sp-(S.dum?m:n):0;
+      h.innerHTML=js&&!D.hide?`Lọ <b>${esc(j.n)}</b> ${l<0?'<span style="color:var(--bad)">sẽ lố '+short(-l)+'</span>':'còn '+short(l)+' sau khoản này'}`:'&nbsp;';}}
     if(S.dum){$('amtT').innerHTML=`<span class="cap">Tổng chuyển</span>${f(n)}`;$('mineT').innerHTML=`<span class="cap">Phần của mình</span>${f(m)}`;
       $('amtT').classList.toggle('tgt',S.tgt==='amt');$('mineT').classList.toggle('tgt',S.tgt==='mine');
       $('wl').innerHTML=n>m?`Chờ mọi người trả lại <b>${f(n-m)} đ</b>`:'&nbsp;';}
@@ -11566,7 +11613,7 @@ function tsView(){const real=VO||tsOpen(),a0=VO?voSummary():tsLive(tsGet()),a=a0
   document.querySelectorAll('.tcl').forEach(b=>b.onclick=()=>{tsCls=tsCls===b.dataset.c?null:b.dataset.c;render();});}
 
 function render(){if(S.v!=='scan')stopCam();
-  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else if(S.v==='sync')syncView();else if(S.v==='cai')caiView();else if(S.v==='vi')viView();else if(S.v==='mvf')mvfView();else if(S.v==='rec')recView();else if(S.v==='find')findView();else if(S.v==='ts')tsView();else if(S.v==='tsk')tsLockView();else if(S.v==='asf')asfView();else if(S.v==='bud')budView();else if(S.v==='no')noView();else if(S.v==='nod')nodView();else if(S.v==='nof')nofView();else home();}
+  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else if(S.v==='sync')syncView();else if(S.v==='cai')caiView();else if(S.v==='vi')viView();else if(S.v==='mvf')mvfView();else if(S.v==='rec')recView();else if(S.v==='find')findView();else if(S.v==='ts')tsView();else if(S.v==='tsk')tsLockView();else if(S.v==='asf')asfView();else if(S.v==='bud')budView();else if(S.v==='jarf')jarfView();else if(S.v==='no')noView();else if(S.v==='nod')nodView();else if(S.v==='nof')nofView();else home();}
 /* ĐƯỜNG TẮT: mở link có #quet → vào thẳng camera; #tay → vào thẳng ghi tay.
    Dùng cho Phím tắt iPhone (chạm 2 lần mặt lưng / nút Tác vụ / Trung tâm điều khiển). Xoá hash ngay
    để tải lại trang không bị bật camera lần nữa. */
