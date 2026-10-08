@@ -10604,9 +10604,11 @@ let S={v:'home',q:null,amt:'',cat:null,name:'',tay:false};
 /* Danh sách chính thức VietQR (api.vietqr.io/v2/ios-app-deeplinks, 25/09): TỰ ĐIỀN chỉ có MB, VietinBank,
    BIDV, OCB, ACB. Techcombank: autofill 0 — chỉ mở app. MoMo: không có trong danh sách → link VietQR báo lỗi,
    nên mở thẳng app bằng momo:// (không điền được). */
-const VIA=[['mb','MB'],['tcb','Techcom'],['momo','Momo'],['cash','Tiền mặt']];
+const VIA_ALL=[['mb','MB'],['tcb','Techcom'],['momo','Momo'],['cash','Tiền mặt']];
+/* bản vợ (08/10): chỉ MB + Tiền mặt */
+const VIA=VIA_ALL.filter(v=>!/^\/vo\/?$/.test(location.pathname)||v[0]==='mb'||v[0]==='cash');
 const AUTOFILL={mb:1};
-const viaName=k=>(VIA.find(v=>v[0]===k)||VIA[0])[1];
+const viaName=k=>(VIA_ALL.find(v=>v[0]===k)||VIA_ALL[0])[1];
 /* luôn mặc định MB (ví chính, tự điền được) — nhớ ví lần trước dễ mở nhầm Momo */
 const lastVia=()=>'mb';
 const $=id=>document.getElementById(id);
@@ -11342,8 +11344,9 @@ function syncView(){const c=syncCfg(),n=syncPending();
 /* ══ VÍ · CHUYỂN GIỮA VÍ · KHOẢN ĐỊNH KỲ · TÌM KIẾM (05/10) — học từ Cashew / Ivy Wallet ══
    Tiền vào / chuyển giữa ví / điều chỉnh số dư nằm ở D.mv (KHÔNG trộn vào D.tx) → thống kê chi, đồng bộ, chép sang Mac
    không đổi. Số dư ví = số dư lần cập nhật gần nhất − mọi khoản chi qua ví đó sau mốc + tiền vào ± chuyển. */
-const WALLETS=[['mb','MB','🏦'],['tcb','Techcom','💳'],['momo','Momo','📱'],['cash','Tiền mặt','💵']];
-const wName=k=>(WALLETS.find(w=>w[0]===k)||['',k,'•'])[1],wIc=k=>(WALLETS.find(w=>w[0]===k)||['','','•'])[2];
+const WALLETS_ALL=[['mb','MB','🏦'],['tcb','Techcom','💳'],['momo','Momo','📱'],['cash','Tiền mặt','💵']];
+const WALLETS=WALLETS_ALL.filter(w=>!/^\/vo\/?$/.test(location.pathname)||w[0]==='mb'||w[0]==='cash');
+const wName=k=>(WALLETS_ALL.find(w=>w[0]===k)||['',k,'•'])[1],wIc=k=>(WALLETS_ALL.find(w=>w[0]===k)||['','','•'])[2];
 function wInfo(k){const w=(D.wallets||{})[k];if(!w||w.base==null)return null;
   const after=x=>x.ts>w.at;let b=w.base;
   D.tx.forEach(x=>{if((x.via||'mb')===k&&after(x))b-=x.amt;});
