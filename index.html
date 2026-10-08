@@ -276,7 +276,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .hero .hs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 .hero .hs span{display:block;font-size:.68rem;color:var(--ink3)}.hero .hs b{font:700 1rem ui-monospace,"SF Mono",Menlo,monospace}
 .tkc{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px}
-.tkh{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}.tkh span{font-weight:700;font-size:.92rem}.tkh small{font-size:.7rem;color:var(--ink3)}
+.tkh{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.tkh span{font-weight:700;font-size:.92rem;display:flex;align-items:center;gap:8px}.cib.sm{width:26px;height:26px;border-radius:8px}.cib.sm svg{width:15px;height:15px}.tkh small{font-size:.7rem;color:var(--ink3)}
 .segbar{display:flex;gap:2px;height:12px;border-radius:6px;overflow:hidden;margin-bottom:8px}.segbar i{display:block;min-width:3px}
 .tkr{display:grid;grid-template-columns:8px 22px 1fr auto 64px;gap:10px;align-items:center;width:100%;background:none;color:var(--ink);padding:10px 4px;border-top:1px solid var(--line);text-align:left;border-radius:10px}
 .tkr.on{background:var(--panel2)}.tdot{width:8px;height:8px;border-radius:50%}.tic{font-size:1rem}
@@ -284,8 +284,9 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .tup{color:var(--bad)}.tdn{color:var(--good)}.tpc{font:600 .74rem ui-monospace,"SF Mono",Menlo,monospace;color:var(--ink3)}
 .tv{font:700 .9rem ui-monospace,"SF Mono",Menlo,monospace;text-align:right}
 .tkl{padding:2px 4px 8px 40px}
-.tcl{display:grid;grid-template-columns:10px 1fr auto 14px;gap:10px;align-items:center;width:100%;padding:12px 0;background:none;border:0;border-top:1px solid var(--line);color:var(--ink);font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
-.tcl:first-of-type{border-top:0}.tcl>i{width:10px;height:10px;border-radius:50%}.tcl span{font-weight:600;font-size:.9rem}.tcl small{display:block;font-weight:400;font-size:.7rem;color:var(--ink3);margin-top:2px}
+.tcl{display:grid;grid-template-columns:36px 1fr auto 14px;gap:10px;align-items:center;width:100%;padding:12px 0;background:none;border:0;border-top:1px solid var(--line);color:var(--ink);font:inherit;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.tcl:first-of-type{border-top:0}.cib{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:var(--tb);color:var(--tc)}.cib svg{width:20px;height:20px}
+.cib-savings{--tc:#0F8A5F;--tb:rgba(15,138,95,.12)}.cib-gold{--tc:#A16207;--tb:rgba(161,98,7,.12)}.cib-crypto{--tc:#C2410C;--tb:rgba(194,65,12,.12)}.cib-lb{--tc:var(--accent);--tb:rgba(15,157,138,.12)}.cib-chi{--tc:#2563EB;--tb:rgba(37,99,235,.10)}.tcl span{font-weight:600;font-size:.9rem}.tcl small{display:block;font-weight:400;font-size:.7rem;color:var(--ink3);margin-top:2px}
 .tcl b{font:600 .92rem ui-monospace,"SF Mono",Menlo,monospace}.tcl em{font-style:normal;color:var(--ink3);transition:transform .2s}.tcl.on em{transform:rotate(90deg)}
 .tcd{margin:0 0 6px 20px;border-left:1px solid var(--line);padding-left:12px}.tci{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed var(--line)}.tci:first-child{border-top:0}
 .tci b{font-weight:600;font-size:.84rem}.tci small{display:block;font-size:.7rem;color:var(--ink3);margin-top:2px}.tci .r{text-align:right;white-space:nowrap}.tci .r b{font:600 .84rem ui-monospace,"SF Mono",Menlo,monospace}.dnc{color:var(--bad)!important}.upc{color:var(--good)!important}
@@ -316,6 +317,10 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .f2:has(.fl:only-child){grid-template-columns:1fr}
 .meta{font-size:.74rem;color:var(--ink3);margin-top:16px}
 .del{display:block;width:100%;margin-top:22px;height:50px;border-radius:14px;background:rgba(200,62,62,.08);border:1px solid rgba(200,62,62,.3);color:var(--bad);font-weight:600}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+#app.anim .wrap>*{animation:rise .4s cubic-bezier(.2,.7,.2,1) both}#app.anim .wrap>*:nth-child(2){animation-delay:.04s}#app.anim .wrap>*:nth-child(3){animation-delay:.08s}#app.anim .wrap>*:nth-child(4){animation-delay:.12s}#app.anim .wrap>*:nth-child(5){animation-delay:.16s}#app.anim .wrap>*:nth-child(n+6){animation-delay:.2s}
+#app.anim .segbar i,#app.anim .lbt i,#app.anim .nobar i,#app.anim .brow .bt i,#app.anim .tw .wb i{transform-origin:left;animation:grow .7s cubic-bezier(.2,.7,.2,1) both .2s}
+#app.anim .cam,#app.anim .sheet .wrap>*{animation:none}
 @media (max-height:700px){.am .pad button{height:44px}.cgb{padding:5px 2px 4px}.am .amt{font-size:2.3rem;margin:2px 0}}
 
 /* bản sáng: bóng mềm cho thẻ, nút nhấn đậm hơn chút khi bấm */
@@ -11215,7 +11220,7 @@ function noView(){const L=noList(),s=noSum(),tab=S.k||'thu';
       <div class="r"><div class="a${noOpen(x)?'':' ns'}">${short(noOpen(x)?l:x.amt)}</div>${noOpen(x)&&l<x.amt?`<div class="s">/ ${short(x.amt)}</div>`:''}</div></button>`;};
   $('app').innerHTML=`<div class="sheet"><div class="wrap">
     <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Sổ nợ</b><button class="back bk2" id="nadd" style="text-align:right">＋ Thêm</button></div>
-    <div class="nosum"><button class="${tab==='thu'?'on':''}" data-k="thu"><span>Người ta nợ mình</span><b>${short(s.thu)||'0'}</b><small>${s.nThu} khoản</small></button>
+    <div class="nosum"><button class="${tab==='thu'?'on':''}" data-k="thu"><span><i class="cib cib-savings sm" style="display:inline-grid;vertical-align:middle;margin-right:6px">${ICO.hand}</i>Người ta nợ mình</span><b>${short(s.thu)||'0'}</b><small>${s.nThu} khoản</small></button>
       <button class="${tab==='tra'?'on':''}" data-k="tra"><span>Mình nợ người ta</span><b>${short(s.tra)||'0'}</b><small>${s.nTra} khoản</small></button></div>
     ${op.length?op.map(row).join(''):`<div class="empty">${tab==='thu'?'Không ai nợ mình. 🎉':'Không nợ ai.'}</div>`}
     ${dn.length?`<div class="lh"><span>Đã xong · ${dn.length}</span></div>${dn.slice(0,20).map(row).join('')}`:''}
@@ -11354,6 +11359,11 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)giaPull(fa
    (không lưu mật khẩu ở đâu). Mở được 5 phút; app chuyển ra nền là khoá lại ngay. */
 let tsCls=null,tsOpenUntil=0,tsPin='',tsWrong=false,tsChecking=false;
 const tsOpen=()=>Date.now()<tsOpenUntil;
+/* ICON LOẠI TÀI SẢN (08/10) — cùng bộ với sổ Mac: nhìn là biết đâu là tiết kiệm / vàng / crypto */
+const _svg=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const ICO={savings:_svg('<path d="M3 10l9-6 9 6"/><path d="M5 10v9M19 10v9M9 10v9M15 10v9M3 19h18"/>'),gold:_svg('<path d="M3 17l2-6h6l2 6z"/><path d="M11 17l2-6h6l2 6z"/><path d="M7 11l2-6h6l2 6"/>'),
+  crypto:_svg('<circle cx="12" cy="12" r="9"/><path d="M9.5 7.5h4a2 2 0 0 1 0 4h-4zM9.5 11.5h4.5a2 2 0 0 1 0 4H9.5z"/><path d="M11 6v1.5M11 15.5V17"/>'),
+  compass:_svg('<circle cx="12" cy="12" r="9"/><path d="M15 9l-2 5-4 2 2-5z"/>'),flag:_svg('<path d="M5 21V4h11l-1.5 3L16 10H5"/>'),wallet:_svg('<rect x="3" y="6" width="18" height="13" rx="3"/><path d="M3 10h18M15 14h3"/>'),hand:_svg('<path d="M7 11V6a2 2 0 0 1 4 0v5M11 11V4a2 2 0 0 1 4 0v7M15 11V6a2 2 0 0 1 4 0v8a7 7 0 0 1-7 7h-1a7 7 0 0 1-6-3.5L4 13a2 2 0 0 1 3-2z"/>')};
 document.addEventListener('visibilitychange',()=>{if(document.hidden){tsOpenUntil=0;tsPin='';}});
 function tsLockView(){const c=syncCfg();
   $('app').innerHTML=`<div class="wrap hm2">
@@ -11414,7 +11424,7 @@ function asfView(){const A=D.as=D.as||{gold:[],sv:[],h:[],u:0};A.gold=A.gold||[]
   const f=n=>n?Math.round(n).toLocaleString('vi-VN'):'',dec=n=>n!=null&&n!==''?String(n).replace('.',','):'';
   $('app').innerHTML=`<div class="sheet"><div class="wrap">
     <div class="bar1"><button class="back bk2" id="bk">‹ Huỷ</button><b>${x?'Sửa':'Thêm tài sản'}</b><span style="width:64px"></span></div>
-    ${x?'':`<div class="seg" style="margin-top:8px"><button class="${kind==='gold'?'on':''}" data-k2="gold" style="flex:1">🟡 Vàng</button><button class="${kind==='sv'?'on':''}" data-k2="sv" style="flex:1">🏦 Sổ tiết kiệm</button></div>`}
+    ${x?'':`<div class="seg" style="margin-top:8px"><button class="${kind==='gold'?'on':''}" data-k2="gold" style="flex:1;display:flex;gap:6px;justify-content:center;align-items:center"><i class="cib cib-gold sm">${ICO.gold}</i>Vàng</button><button class="${kind==='sv'?'on':''}" data-k2="sv" style="flex:1;display:flex;gap:6px;justify-content:center;align-items:center"><i class="cib cib-savings sm">${ICO.savings}</i>Sổ tiết kiệm</button></div>`}
     ${kind==='gold'?`
       <div class="fl">Loại vàng</div><div class="seg" style="margin-top:6px"><button class="${gt==='nhan'?'on':''}" data-gt="nhan" style="flex:1">Nhẫn trơn</button><button class="${gt==='mieng'?'on':''}" data-gt="mieng" style="flex:1">Miếng SJC</button></div>
       <label class="fl">Số chỉ<input id="a_q" inputmode="decimal" value="${x?dec(x.q):''}" placeholder="vd: 5 hoặc 0,5"></label>
@@ -11471,7 +11481,7 @@ function tsView(){const real=VO||tsOpen(),a0=VO?voSummary():tsLive(tsGet()),a=a0
     </div>
     <div class="tkc"><div class="tkh"><span>Danh mục</span><small>chạm để xem từng khoản</small></div>
       ${parts.map(x=>{const its=(a.items||[]).filter(i=>i.c===x[3]).sort((p,q)=>q.v-p.v),op=tsCls===x[3];
-        return `<button class="tcl${op?' on':''}" data-c="${x[3]}"><i style="background:${x[2]}"></i><span>${x[0]}<small>${H?'•••':Math.round(x[1]/a.total*100)+'%'}${its.length?' · '+its.length+' khoản':''}</small></span><b>${Sh(x[1])}</b><em>›</em></button>
+        return `<button class="tcl${op?' on':''}" data-c="${x[3]}"><i class="cib cib-${x[3]}">${ICO[x[3]]}</i><span>${x[0]}<small>${H?'•••':Math.round(x[1]/a.total*100)+'%'}${its.length?' · '+its.length+' khoản':''}</small></span><b>${Sh(x[1])}</b><em>›</em></button>
         ${op?`<div class="tcd">${its.length?its.map(i=>{const pl=i.v-i.k,pp=i.k?pl/i.k*100:0;
           const sub=i.c==='savings'?(i.r?String(i.r).replace('.',',')+'%/năm':'')+(i.m?' · đáo hạn '+i.m.slice(8)+'/'+i.m.slice(5,7)+'/'+i.m.slice(2,4):'')+(i.ef?' · KC':'')
             :(H?'•••':String(i.q).replace('.',','))+(i.g?' · '+i.g:'');
@@ -11479,16 +11489,16 @@ function tsView(){const real=VO||tsOpen(),a0=VO?voSummary():tsLive(tsGet()),a=a0
           return `<div class="tci"${i.aid?` data-as="${i.aid}"`:''}><span><b>${esc(i.n)}</b><small>${esc(sub)}${i.np?' · chưa có giá':''}</small></span><span class="r"><b>${M(i.v)}</b>${right}</span></div>`;}).join('')
           :'<div class="dsub" style="padding:8px 0">Mở sổ trên Mac một lần để gửi chi tiết từng khoản sang đây.</div>'}</div>`:''}`;}).join('')}
     </div>
-    ${VO?'':`<div class="tkc"><div class="tkh"><span>🧭 Nếu mất việc hôm nay</span><small>chi ${Sh(a.spend)}/tháng</small></div>
+    ${VO?'':`<div class="tkc"><div class="tkh"><span><i class="cib cib-lb sm">${ICO.compass}</i>Nếu mất việc hôm nay</span><small>chi ${Sh(a.spend)}/tháng</small></div>
       <div class="lbv">${N(a.runSave)}<small> tháng</small> ${H?'':`<span class="chip2 ${st[0]}">${st[1]}</span>`}</div>
       <div class="dsub">chỉ bằng tiền tiết kiệm · sống tới khoảng <b>${H?'•••':toDate(a.runSave)}</b></div>
       ${H?'<div class="lbt"></div>':`<div class="lbt"><i class="all" style="width:${Math.min(100,a.runAll/scale*100).toFixed(1)}%"></i><i style="width:${Math.min(100,a.runSave/scale*100).toFixed(1)}%"></i><b style="left:${(a.lim/scale*100).toFixed(1)}%"></b></div>`}
       <div class="dsub">Bán cả vàng, crypto: <b>${N(a.runAll)} tháng</b>${H?'':' · vạch trắng = luật '+a.lim+' tháng'}</div></div>
-    <div class="tkc"><div class="tkh"><span>🏁 Tự do tài chính</span><small>đích ${Sh(a.fire.target)}</small></div>
+    <div class="tkc"><div class="tkh"><span><i class="cib cib-lb sm">${ICO.flag}</i>Tự do tài chính</span><small>đích ${Sh(a.fire.target)}</small></div>
       <div class="lbv">${N(a.fire.pct)}<small> %</small></div>
       <div class="lbt"><i style="width:${H?0:a.fire.pct.toFixed(1)}%;background:var(--accent)"></i></div>
       <div class="dsub">${a.fire.years!=null&&isFinite(a.fire.years)?'Giữ nhịp nạp '+Sh(a.fire.contrib)+'/tháng → chạm đích khoảng <b>'+(H?'•••':new Date().getFullYear()+Math.ceil(a.fire.years))+'</b>':'Chưa đủ dữ liệu để ước năm chạm đích'}</div></div>`}
-    <div class="tkc"><div class="tkh"><span>🏦 Tiết kiệm</span><small>${a.sv.n} sổ</small></div>
+    <div class="tkc"><div class="tkh"><span><i class="cib cib-savings sm">${ICO.savings}</i>Tiết kiệm</span><small>${a.sv.n} sổ</small></div>
       ${VO?`<div class="hs3"><div><span>Đang gửi</span><b>${Sh(a.savings)}</b></div><div><span>Lãi tới nay</span><b class="upc">+${Sh(a.sv.dang)}</b></div><div><span>Sắp đáo hạn</span><b>${a.soon.length} sổ</b></div></div>`
         :`<div class="hs3"><div><span>Đang có</span><b>${Sh(a.savings)}</b></div><div><span>Lãi đã nhận</span><b class="upc">+${Sh(a.sv.lai)}</b></div><div><span>Đang dồn</span><b class="upc">+${Sh(a.sv.dang)}</b></div></div>`}
       ${a.soon.length?'<div class="dsub" style="margin:8px 0 4px">Sắp nhận (cả gốc lẫn lãi)</div>':''}
@@ -11545,7 +11555,7 @@ function showCrash(e){try{stopCam();}catch(_){}
       localStorage.setItem(LK,JSON.stringify(v));localStorage.removeItem('quetchi_taisan');}catch(_){localStorage.removeItem('quetchi_taisan');}
     location.reload();};
   document.getElementById('c_home').onclick=()=>{S={v:'home'};render();};}
-const _render=render;render=function(){try{_render();}catch(e){showCrash(e);}};
+let _lastV=null;const _render=render;render=function(){try{_render();const ap=document.getElementById('app');if(ap&&S.v!==_lastV&&!matchMedia('(prefers-reduced-motion: reduce)').matches){ap.classList.add('anim');}_lastV=S.v;}catch(e){showCrash(e);}};
 window.addEventListener('error',e=>{if(!document.querySelector('.tabs')&&!document.querySelector('.sheet'))showCrash(e.error||e.message);});
 window.addEventListener('unhandledrejection',e=>{const m=String(e.reason&&e.reason.message||e.reason||'');if(/Firebase|fetch|network|Load failed/i.test(m))return;
   if(!document.querySelector('.tabs')&&!document.querySelector('.sheet'))showCrash(e.reason);});
