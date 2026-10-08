@@ -331,6 +331,10 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .jar-t span i{font-style:normal;margin-right:5px}.jar.add{border:1px dashed var(--line);border-left:1px dashed var(--line);background:none;color:var(--accent2);font-weight:600;font-size:.84rem;text-align:center}.jar.add small{display:block;font-weight:400;color:var(--ink3);margin-top:3px}
 .jar-t{display:flex;justify-content:space-between;gap:6px;align-items:baseline}.jar-t span{font-weight:600;font-size:.82rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.jar-t b{font:600 .76rem ui-monospace,"SF Mono",Menlo,monospace;color:var(--jc);white-space:nowrap}.jar.g .jar-t b{color:var(--ink)}
 .jar-b{height:6px;border-radius:3px;background:var(--line);margin:6px 0 4px;overflow:hidden}.jar-b i{display:block;height:100%;background:var(--jc);border-radius:3px}.jar small{font-size:.66rem;color:var(--ink3)}
+.jdh{display:flex;gap:16px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:14px 16px;border-top:4px solid var(--jk);box-shadow:0 1px 2px rgba(20,22,24,.04),0 4px 14px rgba(20,22,24,.04)}
+.jdn{flex:1;min-width:0}.jdn small{display:block;font-size:.72rem;color:var(--ink3)}.jdn b{font:700 1.8rem ui-monospace,"SF Mono",Menlo,monospace;letter-spacing:-.03em}.jdn b i{font-style:normal;font-size:.4em;color:var(--ink3)}
+.jds{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0;font-size:.76rem;color:var(--ink2)}.jds b{font:600 .8rem ui-monospace,"SF Mono",Menlo,monospace;color:var(--ink)}
+.jc-v{cursor:pointer}
 .jvs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin:12px -16px 0;padding:10px 16px 2px;border-top:1px solid var(--line)}.jvs::-webkit-scrollbar{display:none}
 .jv{flex:none;width:76px;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:0;padding:4px 0;color:var(--ink);font:inherit}
 .jv b{font-size:.74rem;font-weight:600;max-width:74px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.jv small{font:600 .66rem ui-monospace,"SF Mono",Menlo,monospace;color:var(--ink2)}.jv.over small{color:var(--bad)}
@@ -10713,7 +10717,7 @@ function home(){
     $('askX').onclick=()=>{delete D.ask;save();render();};}
   if($('cho'))$('cho').onclick=()=>{S={v:'cho'};render();};
   if($('budset'))$('budset').onclick=()=>{S={v:budOf(today().slice(0,7))?'chia':'bud'};render();};
-  document.querySelectorAll('[data-jar]').forEach(b=>b.onclick=()=>{S={v:'chia'};render();});
+  document.querySelectorAll('[data-jar]').forEach(b=>b.onclick=()=>{S={v:'jard',id:b.dataset.jar,back:'home'};render();});
   if($('jaradd'))$('jaradd').onclick=()=>{S={v:'jarf',back:'home'};render();};
   if($('nob'))$('nob').onclick=()=>{S={v:'no',back:'home'};render();};
   document.querySelectorAll('[data-nol]').forEach(b=>b.onclick=()=>{const x=D.no.find(y=>y.id===b.dataset.nol);S={v:'nod',id:x.id,k:x.k,back:'home'};render();});
@@ -10728,6 +10732,7 @@ const budOf=m=>{const B=D.bud;if(!B)return 0;return (B.m&&B.m[m]!=null)?B.m[m]:(
 /* LỌ (08/10): chia tiền tháng thành từng lọ, mỗi lọ gắn với vài LOẠI chi → ghi khoản là tự trừ đúng lọ, không phải chọn thêm.
    D.bud.jars=[{id,n,amt,cats:[...]}] — giữ qua các tháng. Phần chưa chia = lọ "Chi khác" cho mọi loại còn lại. */
 const jarsOf=()=>((D.bud&&D.bud.jars)||[]).filter(j=>j&&j.id);
+const jarIdOf=x=>{const J=jarsOf();if(x.jar==='_k')return'_k';if(x.jar&&J.some(j=>j.id===x.jar))return x.jar;const j=J.find(j=>(j.cats||[]).includes(x.cat));return j?j.id:'_k';};
 function jarStats(m){const A=budOf(m),J=jarsOf().map(j=>Object.assign({},j,{sp:0})),other={id:'_k',n:'Chi khác',ic:'…',col:'#8B919A',amt:Math.max(0,A-J.reduce((a,j)=>a+(j.amt||0),0)),sp:0,cats:null,auto:true};
   D.tx.filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===m).forEach(x=>{const j=x.jar==='_k'?null:x.jar?(J.find(j=>j.id===x.jar)||J.find(j=>(j.cats||[]).includes(x.cat))):J.find(j=>(j.cats||[]).includes(x.cat));(j||other).sp+=mineOf(x);});
   return J.length?[...J,other]:[];}
@@ -10757,7 +10762,7 @@ function budCard(s){const m=today().slice(0,7),A=budOf(m);
     :st==='w'?`Đang xài nhanh hơn kế hoạch — tới hôm nay lẽ ra khoảng ${short(plan)}`
     :`Còn ${dl} ngày · mỗi ngày tiêu được <b>~${short(left/dl)}</b>`;
   const J=jarStats(m);
-  const jr2=J.map(j=>{const no=!j.amt&&!j.auto,l=j.amt-j.sp;return `<button class="jv${l<0&&j.amt?' over':''}" ${j.auto?'':`data-jar="${j.id}"`}>${jarSvg(j,58)}<b>${esc(j.n)}</b><small>${D.hide?'•••':no?'chưa nạp':l<0?'lố '+short(-l):'còn '+short(l)}</small></button>`;}).join('');
+  const jr2=J.map(j=>{const no=!j.amt&&!j.auto,l=j.amt-j.sp;return `<button class="jv${l<0&&j.amt?' over':''}" data-jar="${j.id}">${jarSvg(j,58)}<b>${esc(j.n)}</b><small>${D.hide?'•••':no?'chưa nạp':l<0?'lố '+short(-l):'còn '+short(l)}</small></button>`;}).join('');
   const jr=J.map(j=>{const no=!j.amt&&!j.auto,l=j.amt-j.sp,p=j.amt?Math.min(100,j.sp/j.amt*100):0,c=no?'n':l<0?'b':j.sp>j.amt*dn/dim*1.1?'w':'g';
     return `<button class="jar ${c}" ${j.auto?'':`data-jar="${j.id}"`} style="--jk:${j.col||'#8B919A'}"><div class="jar-t"><span><i>${j.ic||'…'}</i>${esc(j.n)}</span><b>${D.hide?'•••':no?'':(l<0?'lố '+short(-l):'còn '+short(l))}</b></div>
       <div class="jar-b"><i style="width:${p.toFixed(1)}%"></i></div><small>${D.hide?'':no?(j.sp?'đã xài '+short(j.sp)+' · ':'')+'chạm để nạp tiền':short(j.sp)+' / '+short(j.amt)}${j.auto?' · loại chưa gán lọ':''}</small></button>`;}).join('');
@@ -10800,7 +10805,7 @@ function chiaView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.redu
     <div class="jl">${J.map(j=>{const st=JS.find(x=>x.id===j.id)||{sp:0},l=(j.amt||0)-st.sp,fp=j.amt?Math.min(100,st.sp/j.amt*100):0,was=chiaAnim&&chiaAnim.id===j.id?chiaAnim.amt:j.amt;
       return `<div class="jc${S.pick===j.id?' on':''}" style="--jk:${j.col||'#8B919A'}">
         <div class="jc-h">${jarSvg(Object.assign({},j,{sp:st.sp}),42)}<span class="jc-n"><b>${esc(j.n)}</b><small>${(j.cats||[]).map(c=>SH[c]||cat(c)[1]).join(' · ')}</small></span><button class="jc-e" data-je="${j.id}" aria-label="sửa lọ">✎</button></div>
-        <div class="jc-v"><div><small>Trong lọ</small><b data-from="${was||0}" data-to="${j.amt||0}">${money(j.amt||0)}</b></div><div class="jc-s"><small>đã xài ${short(st.sp)}</small><small class="${l<0?'dnc':''}">${j.amt?(l<0?'lố '+short(-l):'còn '+short(l)):'chưa nạp'}</small></div></div>
+        <div class="jc-v" data-jd="${j.id}"><div><small>Trong lọ</small><b data-from="${was||0}" data-to="${j.amt||0}">${money(j.amt||0)}</b></div><div class="jc-s"><small>đã xài ${short(st.sp)}</small><small class="${l<0?'dnc':''}">${j.amt?(l<0?'lố '+short(-l):'còn '+short(l)):'chưa nạp'}</small></div></div>
         <div class="jc-bar"><i style="width:${fp.toFixed(1)}%"></i></div>
         <div class="jc-a"><button data-jin="${j.id}">＋ Nạp</button><button class="out" data-jout="${j.id}"${j.amt?'':' disabled'}>− Rút</button></div></div>`;}).join('')}
       <button class="jc add" id="jnew"><span>＋</span>Thêm lọ</button></div>
@@ -10815,6 +10820,7 @@ function chiaView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.redu
   const num=v=>+String(v||'').replace(/\D/g,'')||0;
   $('bk').onclick=()=>{S={v:'home'};render();};$('ctot').onclick=()=>{S={v:'bud'};render();};$('jnew').onclick=()=>{S={v:'jarf',back:'chia'};render();};
   document.querySelectorAll('[data-je]').forEach(b=>b.onclick=()=>{S={v:'jarf',id:b.dataset.je,back:'chia'};render();});
+  document.querySelectorAll('[data-jd]').forEach(b=>b.onclick=()=>{S={v:'jard',id:b.dataset.jd,back:'chia'};render();});
   document.querySelectorAll('[data-jin]').forEach(b=>b.onclick=()=>{S={v:'chia',pick:b.dataset.jin,dir:'in'};chiaAnim=null;render();setTimeout(()=>$('tamt')&&$('tamt').focus(),60);});
   document.querySelectorAll('[data-jout]').forEach(b=>b.onclick=()=>{S={v:'chia',pick:b.dataset.jout,dir:'out'};chiaAnim=null;render();setTimeout(()=>$('tamt')&&$('tamt').focus(),60);});
   /* chạy số + thanh từ trạng thái trước sang sau (sau mỗi lần nạp/rút) */
@@ -10832,6 +10838,29 @@ function chiaView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.redu
     $('tok').onclick=()=>{const a=num(inp.value);if(!a){toast('gõ số tiền');return;}if(S.dir==='out'&&a>(P.amt||0)){toast('lọ chỉ có '+short(P.amt||0));return;}
       chiaAnim={id:P.id,amt:P.amt||0,pool,pct};P.amt=(P.amt||0)+(S.dir==='out'?-a:a);D.bud.u=Date.now();save();
       if(navigator.vibrate)navigator.vibrate(12);const d=S.dir;S={v:'chia'};render();toast((d==='out'?'đã rút ':'đã nạp ')+short(a)+(d==='out'?' từ lọ ':' vào lọ ')+esc(P.n));};}}
+/* CHI TIẾT LỌ (08/10, "muốn xem lọ của con chi gì"): hình lọ + nạp/xài/còn + mọi khoản tháng này trừ vào lọ. Chạm khoản → sửa / đổi lọ. */
+function jardView(){const m=S.m||today().slice(0,7),JS=jarStats(m),j=JS.find(x=>x.id===S.id);if(!j){S={v:'home'};render();return;}
+  const L=D.tx.filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===m&&jarIdOf(x)===j.id).sort((a,b)=>b.ts-a.ts),l=j.amt-j.sp;
+  const pm=mAdd(m,-1),nm=mAdd(m,1),cur=today().slice(0,7);let last='',list='';
+  L.forEach(x=>{if(x.d!==last){list+=`<div class="dh"><span>${dayLab(x.d)}</span></div>`;last=x.d;}const c=cat(x.cat);
+    list+=`<button class="row" data-ed="${x.id}"><div class="ic" style="${icoBg(x.cat)}">${c[2]}</div><div class="mid"><div class="n">${esc(kinName(x))}</div><div class="s">${SH[x.cat]||c[1]}${kinNote(x)?' · '+esc(kinNote(x)):''}</div></div><div class="r"><div class="a">−${short(mineOf(x))}</div></div></button>`;});
+  $('app').innerHTML=`<div class="sheet"><div class="wrap">
+    <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Lọ ${esc(j.n)}</b>${j.auto?'<span style="width:64px"></span>':`<button class="back bk2" id="jde" style="text-align:right">Sửa lọ</button>`}</div>
+    <div class="mnav2"><button id="jpm">‹</button><b>Tháng ${+m.slice(5)} · ${m.slice(0,4)}</b><button id="jnm"${m>=cur?' disabled':''}>›</button></div>
+    <div class="jdh" style="--jk:${j.col||'#8B919A'}">${jarSvg(j,88)}<div class="jdn">
+      <small>${l<0&&j.amt?'Đã lố':'Còn trong lọ'}</small><b class="${l<0&&j.amt?'dnc':''}">${D.hide?'•••':(l<0?'−':'')+money(Math.abs(l))}<i> đ</i></b>
+      <div class="jds"><span>Nạp <b>${short(j.amt)}</b></span><span>Đã xài <b>${short(j.sp)}</b></span><span>${L.length} khoản</span></div>
+      ${j.auto?'<small>các loại chi chưa gán vào lọ nào</small>':`<small>${(j.cats||[]).map(c=>SH[c]||cat(c)[1]).join(' · ')}</small>`}</div></div>
+    ${j.auto||m!==cur?'':`<div class="jc-a" style="margin-top:12px;--jk:${j.col||'#8B919A'}"><button data-jin="${j.id}">＋ Nạp</button><button class="out" data-jout="${j.id}"${j.amt?'':' disabled'}>− Rút</button></div>`}
+    <div class="lh"><span>Đã chi từ lọ</span><small class="lhh">chạm để sửa · đổi lọ</small></div>
+    ${list||'<div class="empty">Tháng này chưa có khoản nào trừ vào lọ này.</div>'}
+  </div></div>`;
+  $('bk').onclick=()=>{S={v:S.back||'home'};render();};
+  if($('jde'))$('jde').onclick=()=>{S={v:'jarf',id:j.id,back:'jard',jid:j.id};render();};
+  $('jpm').onclick=()=>{S.m=pm;render();};$('jnm').onclick=()=>{if(m<cur){S.m=nm;render();}};
+  document.querySelectorAll('[data-jin]').forEach(b=>b.onclick=()=>{S={v:'chia',pick:j.id,dir:'in'};render();});
+  document.querySelectorAll('[data-jout]').forEach(b=>b.onclick=()=>{S={v:'chia',pick:j.id,dir:'out'};render();});
+  document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{S={v:'ed',id:b.dataset.ed,prev:{v:'jard',id:j.id,m,back:S.back}};render();});}
 function jarfView(){const J=jarsOf(),x=S.id?J.find(j=>j.id===S.id):null,used=new Set(J.filter(j=>j!==x).flatMap(j=>j.cats||[]));
   const sel=S.jc||(S.jc=new Set(x?x.cats||[]:[]));
   const CC=CATS.filter(c=>c[0]!=='nap'&&(VO?(c[0]!=='ca'&&c[0]!=='dautu'):(c[0]!=='dodung'&&c[0]!=='rieng')));
@@ -10846,9 +10875,9 @@ function jarfView(){const J=jarsOf(),x=S.id?J.find(j=>j.id===S.id):null,used=new
   const num=v=>+String(v).replace(/\D/g,'')||0;
   $('j_a').oninput=e=>{const n=num(e.target.value);e.target.value=n?n.toLocaleString('vi-VN'):'';};
   document.querySelectorAll('[data-jc]').forEach(b=>b.onclick=()=>{const c=b.dataset.jc;sel.has(c)?sel.delete(c):sel.add(c);b.classList.toggle('on',sel.has(c));});
-  $('bk').onclick=()=>{S={v:S.back||'bud'};render();};
+  $('bk').onclick=()=>{S=S.back==='jard'?{v:'jard',id:S.jid}:{v:S.back||'bud'};render();};
   $('j_ok').onclick=()=>{const n=$('j_n').value.trim(),a=num($('j_a').value);if(!n){toast('cần tên lọ');return;}if(!sel.size){toast('chọn ít nhất một loại chi');return;}
-    D.bud=D.bud||{m:{},def:0};D.bud.jars=D.bud.jars||[];const y=x||{id:'j'+Date.now()};Object.assign(y,{n,amt:a,cats:[...sel]});if(!x){const P=[['#2563EB','🧒'],['#C2410C','🍜'],['#0F8A5F','🧴'],['#C2255C','💄'],['#A16207','◎']];const k=D.bud.jars.length%P.length;y.col=P[k][0];y.ic=P[k][1];D.bud.jars.push(y);}D.bud.u=Date.now();save();S={v:S.back||'bud'};render();toast(x?'đã lưu lọ':'đã thêm lọ '+esc(n));};
+    D.bud=D.bud||{m:{},def:0};D.bud.jars=D.bud.jars||[];const y=x||{id:'j'+Date.now()};Object.assign(y,{n,amt:a,cats:[...sel]});if(!x){const P=[['#2563EB','🧒'],['#C2410C','🍜'],['#0F8A5F','🧴'],['#C2255C','💄'],['#A16207','◎']];const k=D.bud.jars.length%P.length;y.col=P[k][0];y.ic=P[k][1];D.bud.jars.push(y);}D.bud.u=Date.now();save();S=S.back==='jard'?{v:'jard',id:S.jid}:{v:S.back||'bud'};render();toast(x?'đã lưu lọ':'đã thêm lọ '+esc(n));};
   if($('j_x'))$('j_x').onclick=()=>{D.bud.jars=D.bud.jars.filter(j=>j!==x);D.bud.u=Date.now();save();S={v:'bud'};render();toast('đã xoá lọ',()=>{D.bud.jars.push(x);D.bud.u=Date.now();save();render();});};}
 
 /* ── Cài đặt: đồng bộ, ẩn số, chép tay, phiên bản ── */
@@ -11777,7 +11806,7 @@ function tsView(){const real=tsOpen(),a0=VO?voSummary():tsLive(tsGet()),a=VO?(re
   document.querySelectorAll('.tcl').forEach(b=>b.onclick=()=>{tsCls=tsCls===b.dataset.c?null:b.dataset.c;render();});}
 
 function render(){if(S.v!=='scan')stopCam();
-  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else if(S.v==='sync')syncView();else if(S.v==='cai')caiView();else if(S.v==='vi')viView();else if(S.v==='mvf')mvfView();else if(S.v==='rec')recView();else if(S.v==='find')findView();else if(S.v==='ts')tsView();else if(S.v==='tsk')tsLockView();else if(S.v==='asf')asfView();else if(S.v==='bud')budView();else if(S.v==='jarf')jarfView();else if(S.v==='chia')chiaView();else if(S.v==='no')noView();else if(S.v==='nod')nodView();else if(S.v==='nof')nofView();else home();}
+  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else if(S.v==='sync')syncView();else if(S.v==='cai')caiView();else if(S.v==='vi')viView();else if(S.v==='mvf')mvfView();else if(S.v==='rec')recView();else if(S.v==='find')findView();else if(S.v==='ts')tsView();else if(S.v==='tsk')tsLockView();else if(S.v==='asf')asfView();else if(S.v==='bud')budView();else if(S.v==='jarf')jarfView();else if(S.v==='chia')chiaView();else if(S.v==='jard')jardView();else if(S.v==='no')noView();else if(S.v==='nod')nodView();else if(S.v==='nof')nofView();else home();}
 /* ĐƯỜNG TẮT: mở link có #quet → vào thẳng camera; #tay → vào thẳng ghi tay.
    Dùng cho Phím tắt iPhone (chạm 2 lần mặt lưng / nút Tác vụ / Trung tâm điều khiển). Xoá hash ngay
    để tải lại trang không bị bật camera lần nữa. */
