@@ -10795,7 +10795,7 @@ function jarSvg(j,size){const W=size||64,H=Math.round(W*1.18),l=(j.amt||0)-j.sp,
 const jarOnly=()=>VO&&jarsOf().length>0&&budOf(today().slice(0,7))>0;
 const catOfJar=id=>{const j=jarsOf().find(x=>x.id===id);return j&&j.cats&&j.cats[0]||'khac';};
 /* GIA ĐÌNH (08/10, bản vợ): nhà 3 người — Ba, Mẹ, Bé. Tim bay khi ghi / nạp lọ / đặt tiền tháng / chạm cả nhà. Tắt nếu máy bật giảm chuyển động. */
-const LOVE=['Cả nhà khoẻ là vui nhất 💕','Mẹ quản tiền giỏi ghê ✨','Tiết kiệm hôm nay, đi chơi cuối tuần 🎈','Ba thương mẹ, mẹ thương bé 🌷','Bé ngoan, nhà mình hạnh phúc 🏡','Từng đồng nhỏ, góp thành nhà to 🪴','Hôm nay cũng là một ngày đẹp 🌤','Có mẹ lo, cả nhà yên tâm 🤍'];
+const LOVE=['Ngày mới bình an 🌤','Cả nhà khoẻ vui 💕','Thương cả nhà 🤍','Mẹ giỏi ghê ✨','Bé ngoan, nhà vui 🌷','Hôm nay thật đẹp ☀️','Nhà mình hạnh phúc 🏡','Ba thương mẹ con 💗','Cười nhiều hơn nhé 😊','Ngủ ngon, mơ đẹp 🌙','Cuối tuần vui vẻ 🎈','Yêu thương mỗi ngày 💞','Mọi điều suôn sẻ 🍀','Bình yên là đủ 🕊'];   /* ngắn, mỗi ngày 1 câu */
 function hearts(n,x,y){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const E=['💖','💕','🌸','✨','💗','🎀'],W=innerWidth;x=x==null?W/2:x;y=y==null?innerHeight*.4:y;
   for(let i=0;i<(n||14);i++){const e=document.createElement('span');e.className='heart';e.textContent=E[i%E.length];
     const dx=(Math.random()-.5)*W*.7,dy=-(140+Math.random()*220),r=(Math.random()-.5)*80;e.style.cssText=`left:${x}px;top:${y}px;--dx:${dx}px;--dy:${dy}px;--r:${r}deg;animation-delay:${i*25}ms;font-size:${16+Math.random()*14}px`;
