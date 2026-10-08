@@ -11292,7 +11292,27 @@ async function tsPull(){const c=syncCfg();if(!c||tsBusy||FB_PID.startsWith('__')
     else if(!r.ok)throw new Error('Firebase trả '+r.status);
     else{const j=await r.json(),a=await unseal(c.k,j.fields.c.stringValue);localStorage.setItem(TS_KEY,JSON.stringify(a));tsErr='';}}
   catch(e){tsErr=navigator.onLine===false?'mất mạng — đang xem bản lưu':String(e.message||e);}
-  tsBusy=false;if(S.v==='ts')render();}
+  tsBusy=false;if(S.v==='ts')render();giaPull(true);}
+/* GIÁ CRYPTO TỰ CẬP NHẬT (08/10): mỗi lần mở app / vào tab Tài sản, điện thoại tự hỏi CoinGecko (cho phép gọi thẳng từ trình duyệt)
+   theo mã coin Mac gửi kèm bản tóm tắt, rồi tính lại giá trị crypto, tổng, % tự do tài chính, số tháng "bán cả vàng, crypto".
+   Vàng và tiết kiệm vẫn theo bản Mac gửi (trang giá vàng chỉ đọc được từ máy chủ trên Mac). Chỉ gửi mã coin, không gửi số lượng. */
+const GIA_KEY='quetchi_gia';let giaBusy=false;
+function giaGet(){try{return JSON.parse(localStorage.getItem(GIA_KEY)||'null');}catch(e){return null;}}
+async function giaPull(force){const a=tsGet();if(!a||!Array.isArray(a.items)||giaBusy)return;
+  const ids=[...new Set(a.items.filter(i=>i.c==='crypto'&&i.id).map(i=>i.id))];if(!ids.length)return;
+  const g=giaGet();if(!force&&g&&Date.now()-g.t<60000&&ids.every(i=>g.p&&g.p[i]))return;
+  giaBusy=true;try{const r=await fetch('https://api.coingecko.com/api/v3/simple/price?vs_currencies=vnd&ids='+encodeURIComponent(ids.join(',')));
+    if(r.ok){const j=await r.json(),p={};ids.forEach(i=>{if(j[i]&&j[i].vnd>0)p[i]=j[i].vnd;});
+      if(Object.keys(p).length){localStorage.setItem(GIA_KEY,JSON.stringify({t:Date.now(),p}));if(S.v==='ts')render();}}}catch(e){}
+  giaBusy=false;}
+function tsLive(a){const g=giaGet();if(!a||!Array.isArray(a.items)||!g||!g.p||g.t<a.ts)return a;   /* giá cũ hơn bản Mac → dùng bản Mac */
+  let d=0,hit=0;const items=a.items.map(i=>{const px=i.c==='crypto'&&i.id&&g.p[i.id];if(!px||!(i.q>0))return i;hit++;const v=Math.round(i.q*px);d+=v-i.v;return Object.assign({},i,{v});});
+  if(!hit)return a;
+  const total=a.total+d,base=(a.fire&&a.fire.base||0)+d,td=today(),hist=(a.hist||[]).slice();
+  if(hist.length&&hist[hist.length-1][0]===td)hist[hist.length-1]=[td,total];else hist.push([td,total]);
+  return Object.assign({},a,{items,crypto:a.crypto+d,total,runAll:total/(a.spend||1),hist,gt:g.t,
+    fire:Object.assign({},a.fire,{base,pct:a.fire&&a.fire.target?Math.min(100,Math.max(0,base/a.fire.target*100)):0})});}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)giaPull(false);});
 /* KHOÁ TAB TÀI SẢN (06/10): phải gõ MẬT KHẨU ĐỒNG BỘ mới xem — sinh lại khoá từ mật khẩu gõ vào, so với khoá đang lưu
    (không lưu mật khẩu ở đâu). Mở được 5 phút; app chuyển ra nền là khoá lại ngay. */
 let tsCls=null,tsOpenUntil=0,tsPin='',tsWrong=false,tsChecking=false;
@@ -11333,7 +11353,7 @@ function tsFake(a){const td=new Date(),doy=Math.floor((td-new Date(td.getFullYea
     hist,items:[{c:'savings',n:'Sổ 3 tháng',v:2000000,k:2000000,r:4.2,t:3,m:ds(12),ef:true},{c:'savings',n:'Sổ 6 tháng',v:1550000,k:1550000,r:5.1,t:6,m:ds(47)},
       {c:'savings',n:'Sổ 12 tháng',v:savings-3550000,k:savings-3550000,r:5.6,t:12,m:ds(95)},{c:'gold',n:'Vàng nhẫn',v:gold,k:gold-140000,q:0.08,g:'nhẫn'},
       {c:'crypto',n:'Bitcoin',v:Math.round(crypto*0.7),k:Math.round(crypto*0.7)-90000,q:0.0007},{c:'crypto',n:'Ethereum',v:crypto-Math.round(crypto*0.7),k:crypto-Math.round(crypto*0.7)-30000,q:0.009}],fake:true};}
-function tsView(){const real=tsOpen(),a0=tsGet(),a=a0&&!real?tsFake(a0):a0,H=D.hide,c=syncCfg();
+function tsView(){const real=tsOpen(),a0=tsLive(tsGet()),a=a0&&!real?tsFake(a0):a0,H=D.hide,c=syncCfg();
   const M=n=>H?'•••':money(n),Sh=n=>H?'•••':short(n),N=(v,d)=>H?'•••':(Math.round(v*10)/10).toFixed(d==null?1:d).replace('.',',');
   const toDate=m=>{const d=new Date();d.setMonth(d.getMonth()+Math.floor(m));return pad2(d.getMonth()+1)+'/'+d.getFullYear();};
   let body;
@@ -11378,7 +11398,7 @@ function tsView(){const real=tsOpen(),a0=tsGet(),a=a0&&!real?tsFake(a0):a0,H=D.h
       <div class="dsub" style="margin:8px 0 4px">Sắp nhận</div>
       ${a.soon.map(x=>{const dd=Math.round((new Date(x.d)-new Date(today()))/864e5);return `<div class="tli"><span>${x.d.slice(8)}/${x.d.slice(5,7)}</span><span class="n">${esc(x.name)}${x.ef?' <small>· KC</small>':''}<small> · còn ${dd} ngày</small></span><b>${Sh(x.v)}</b></div>`;}).join('')}
     </div>
-    <div class="note">${a.fake?'Cập nhật lúc '+new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'Cập nhật từ sổ trên Mac '+(ago<60?ago+' phút':ago<1440?Math.round(ago/60)+' giờ':Math.round(ago/1440)+' ngày')+' trước'+(tsErr?' · '+esc(tsErr):'')+'. Muốn mới hơn: mở khoá sổ trên Mac.'}</div>`;}
+    <div class="note">${a.fake?'Cập nhật lúc '+new Date().toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'Cập nhật từ sổ trên Mac '+(ago<60?ago+' phút':ago<1440?Math.round(ago/60)+' giờ':Math.round(ago/1440)+' ngày')+' trước'+(a.gt?' · giá crypto lúc '+new Date(a.gt).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'}):'')+(tsErr?' · '+esc(tsErr):'')+'. Vàng, tiết kiệm mới hơn: mở khoá sổ trên Mac.'}</div>`;}
   $('app').innerHTML=`<div class="wrap hm2">
     <div class="topb"><div><div class="hi">Tiền riêng</div><b>Tài sản</b></div>
       <span style="display:flex;gap:8px;align-items:center"><button class="eye2" id="tsr" aria-label="tải lại">↻</button></span></div>
@@ -11389,6 +11409,7 @@ function tsView(){const real=tsOpen(),a0=tsGet(),a=a0&&!real?tsFake(a0):a0,H=D.h
     hv.addEventListener('pointerdown',()=>{go();tm=setTimeout(()=>{tm=null;if(!tsOpen()){S={v:'tsk'};render();}else{tsOpenUntil=0;render();}},800);});
     ['pointerup','pointerleave','pointercancel'].forEach(ev=>hv.addEventListener(ev,go));hv.style.webkitUserSelect='none';hv.style.userSelect='none';}
   $('tsr').onclick=()=>{tsPull();toast('đang tải…');};
+  giaPull(false);
   document.querySelectorAll('.tcl').forEach(b=>b.onclick=()=>{tsCls=tsCls===b.dataset.c?null:b.dataset.c;render();});}
 
 function render(){if(S.v!=='scan')stopCam();
@@ -11431,6 +11452,7 @@ window.addEventListener('error',e=>{if(!document.querySelector('.tabs')&&!docume
 window.addEventListener('unhandledrejection',e=>{const m=String(e.reason&&e.reason.message||e.reason||'');if(/Firebase|fetch|network|Load failed/i.test(m))return;
   if(!document.querySelector('.tabs')&&!document.querySelector('.sheet'))showCrash(e.reason);});
 try{noInit();}catch(e){}
+setTimeout(()=>{try{giaPull(false);}catch(e){}},1500);   /* mở app → lấy giá crypto mới */
 try{if(!fromHash())render();}catch(e){showCrash(e);}
 syncSoon();
 </script></body></html>
