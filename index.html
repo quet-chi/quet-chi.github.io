@@ -370,6 +370,8 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .spg-h{display:flex;align-items:center;gap:8px;padding:6px 0}.spg-h span{flex:1;font-weight:700;font-size:.88rem}.spg-h i{font-style:normal;margin-right:5px}.spg-h b{font:700 .9rem ui-monospace,"SF Mono",Menlo,monospace}
 .spg-h button{background:var(--jk);color:#fff;border-radius:10px;padding:6px 10px;font-size:.74rem;font-weight:700}.spg .row{min-height:52px}
 .chipb.spc{border-color:#5C6BC0;color:#3949AB}.chipb.spc b{color:#3949AB}
+.opts2{display:flex;gap:6px;justify-content:center;margin:6px 0 2px}.op.more{min-width:44px;font-size:1rem;letter-spacing:1px}
+.jarh.solo{margin-top:8px;padding:8px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--line);text-align:left}
 .jsel{margin-top:8px}.jsel.big .jsc{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;overflow:visible;margin:0;padding:0}
 .jsel.big .jch{align-items:center;text-align:center;padding:10px 4px 8px;border-radius:16px;font-size:.8rem}.jsel.big .jch i{font-size:1.5rem;line-height:1.2}.jsel.big .jsl{font-size:.78rem;color:var(--ink2);margin:4px 0 6px}.jsl{display:block;font-size:.68rem;color:var(--ink3);font-weight:600;margin-bottom:4px}
 .jsc{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}.jsc::-webkit-scrollbar{display:none}
@@ -11055,7 +11057,7 @@ function edView(){
     <div class="f2"><label class="fl">Ngày<input id="e_d" type="date" value="${x.d}" max="${today()}"></label>
       <label class="fl">Trả bằng<select id="e_v" class="fsel">${VIA.map(v=>`<option value="${v[0]}"${(x.via||'mb')===v[0]?' selected':''}>${v[1]}</option>`).join('')}</select></label></div>
     ${jarOnly()?'':'<div class="fl">Loại</div>'+catGrid(x.cat)}
-    ${jarRow(x.jar||jarAuto(x.cat))}
+    ${jarOnly()?jarRow(x.jar||jarAuto(x.cat)):''}
     <div class="meta">${x.src==='qr'?'quét QR':'ghi tay'} lúc ${new Date(x.ts).toLocaleString('vi-VN',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'})}</div>
     <button class="cta" id="e_ok" style="margin-top:14px">Lưu</button>
     ${x.synced?'<div class="note">Khoản này đã chép sang máy tính — sửa ở đây không tự sửa bên đó.</div>':''}
@@ -11169,11 +11171,12 @@ function amtView(){
     ${S.dum?`<div class="split"><button id="amtT" class="sp"></button><button id="mineT" class="sp"></button></div><div class="waitl" id="wl"></div>`
       :`<button class="amt" id="amtT"></button>`}
     <div class="opts"><div class="seg">${VIA.map(v=>`<button data-via="${v[0]}" class="${S.via===v[0]?'on':''}">${v[1]}</button>`).join('')}</div>
-      ${VO?'':`<button class="op${S.dum?' on':''}" id="dumT">👥 Trả dùm</button>`}<button class="op${S.once?' on':''}" id="onceT" title="Khoản lớn một lần — học phí, bảo hiểm năm…">1 lần</button><button class="op${S.later?' on':''}" id="laterT" title="Mua trả sau (SPayLater…) — ghi nợ, chưa trừ tiền">💳 Trả sau</button></div>
+      <button class="op more${S.optOpen||S.dum||S.once||S.later?' on':''}" id="optT" aria-label="tuỳ chọn khác">${S.dum||S.once||S.later?[S.dum?'👥':'',S.once?'1×':'',S.later?'💳':''].join(''):'⋯'}</button></div>
+    ${S.optOpen||S.dum||S.once||S.later?`<div class="opts2">${VO?'':`<button class="op${S.dum?' on':''}" id="dumT">👥 Trả dùm</button>`}<button class="op${S.once?' on':''}" id="onceT" title="Khoản lớn một lần — học phí, bảo hiểm năm…">1 lần</button><button class="op${S.later?' on':''}" id="laterT" title="Mua trả sau (SPayLater…) — ghi nợ, chưa trừ tiền">💳 Trả sau</button></div>`:''}
     <div class="ntr"><label class="dpk${S.d&&S.d!==today()?' on':''}" id="dpkl"><span id="dpkt">📅 ${(S.d&&S.d!==today())?dayLab(S.d):'Hôm nay'}</span><input type="date" id="dpk" value="${S.d||today()}" max="${today()}"></label>
     <input id="nt" class="nt" value="${esc(S.note||'')}" placeholder="${jarOnly()?'✎ Mua gì, cho ai… (không bắt buộc)':'✎ Mua gì? (không bắt buộc)'}" enterkeyhint="done"></div>
     ${jarOnly()?'':catGrid(S.cat)}
-    ${jarRow(jarOnly()?(S.jar||(S.cat?jarAuto(S.cat):'_k')):(S.jar||jarAuto(S.cat)))}
+    ${jarOnly()?jarRow(S.jar||(S.cat?jarAuto(S.cat):'_k')):jarsOf().length&&budOf(today().slice(0,7))?'<div class="jarh solo" id="jarh">Chọn loại chi — app báo nhóm còn bao nhiêu</div>':''}
     ${khongNapas?'<div class="warn">🏪 <b>QR thanh toán cửa hàng</b> — ngân hàng không cho tự điền loại này. Bấm nút: khoản được ghi, MB mở ra → <b>quét lại mã ở quầy bằng MB</b>.</div>':''}
     <div class="padw"><div class="pad">${['1','2','3','4','5','6','7','8','9','000','0','⌫'].map(k=>`<button data-k="${k}">${k}</button>`).join('')}</div>
       <button class="cta" id="go">${goLabel()}</button><div class="hint" id="hint">${hintTxt()}</div></div>
@@ -11187,15 +11190,16 @@ function amtView(){
   /* bấm số / chọn loại: sửa tại chỗ, không vẽ lại cả màn — vẽ lại làm trang nhảy về đầu */
   const f=n=>n?n.toLocaleString('vi-VN'):'0';
   const sync=()=>{const n=+S.amt||0,m=+S.mine||0;
-    if(jarOnly()){if(!S.jar){S.jar=S.cat?jarAuto(S.cat):'_k';}if(!S.cat)S.cat=catOfJar(S.jar);}else if(!S.jarTay)S.jar=jarAuto(S.cat);if(jarOnly()&&!S.jar){const h=$('jarh');if(h)h.innerHTML='Chạm một lọ để ghi';}document.querySelectorAll('[data-jsel]').forEach(b=>b.classList.toggle('on',b.dataset.jsel===S.jar));if(S.jar){if(S.later){const h=$('jarh'),ji=jarStats(today().slice(0,7)).find(x=>x.id===S.jar);if(h)h.innerHTML=ji?'Nợ trả sau của <b>'+esc(ji.n)+'</b> · chưa trừ tiền':'&nbsp;';}else jarHint(S.jar,S.dum?m:n);}
+    if(jarOnly()){if(!S.jar){S.jar=S.cat?jarAuto(S.cat):'_k';}if(!S.cat)S.cat=catOfJar(S.jar);}else S.jar=S.cat?jarAuto(S.cat):null;if(jarOnly()&&!S.jar){const h=$('jarh');if(h)h.innerHTML='Chạm một lọ để ghi';}document.querySelectorAll('[data-jsel]').forEach(b=>b.classList.toggle('on',b.dataset.jsel===S.jar));if(!jarOnly()&&S.jar&&!S.later){const ji=jarInfo({jar:S.jar,cat:S.cat});const h=$('jarh');jarHint(S.jar,S.dum?m:n);if(h&&S.jar!=='_k')h.innerHTML=ji.ic+' '+h.innerHTML.replace('Lọ ','');}else if(S.jar){if(S.later){const h=$('jarh'),ji=jarStats(today().slice(0,7)).find(x=>x.id===S.jar);if(h)h.innerHTML=ji?'Nợ trả sau của <b>'+esc(ji.n)+'</b> · chưa trừ tiền':'&nbsp;';}else jarHint(S.jar,S.dum?m:n);}
     if(S.dum){$('amtT').innerHTML=`<span class="cap">Tổng chuyển</span>${f(n)}`;$('mineT').innerHTML=`<span class="cap">Phần của mình</span>${f(m)}`;
       $('amtT').classList.toggle('tgt',S.tgt==='amt');$('mineT').classList.toggle('tgt',S.tgt==='mine');
       $('wl').innerHTML=n>m?`Chờ mọi người trả lại <b>${f(n-m)} đ</b>`:'&nbsp;';}
     else $('amtT').innerHTML=f(n)+'<small> đ</small>';
     $('go').classList.toggle('off',!(n>0&&S.cat));};
   sync();
-  $('onceT').onclick=()=>{S.once=!S.once;$('onceT').classList.toggle('on',S.once);};
-  $('laterT').onclick=()=>{S.later=!S.later;$('laterT').classList.toggle('on',S.later);$('go').textContent=goLabel();const h=$('hint');if(h)h.innerHTML=S.later?'Khoản này vào <b>nợ trả sau</b> của lọ đang chọn — chưa trừ tiền. Lúc trả mới trừ vào lọ đó.':hintTxt();sync();};
+  $('optT').onclick=()=>{S.optOpen=!(S.optOpen||S.dum||S.once||S.later);render();};
+  if($('onceT'))$('onceT').onclick=()=>{S.once=!S.once;$('onceT').classList.toggle('on',S.once);};
+  if($('laterT'))$('laterT').onclick=()=>{S.later=!S.later;$('laterT').classList.toggle('on',S.later);$('go').textContent=goLabel();const h=$('hint');if(h)h.innerHTML=S.later?'Khoản này vào <b>nợ trả sau</b> của lọ đang chọn — chưa trừ tiền. Lúc trả mới trừ vào lọ đó.':hintTxt();sync();};
   if($('dumT'))$('dumT').onclick=()=>{S.dum=!S.dum;S.tgt=S.dum?'mine':'amt';if(!S.dum)S.mine='';render();};
   $('amtT').onclick=()=>{if(S.dum){S.tgt='amt';sync();}};
   if($('mineT'))$('mineT').onclick=()=>{S.tgt='mine';sync();};
@@ -11222,7 +11226,7 @@ function amtView(){
     const nt=(S.note||'').trim();if(nt)x.note=nt;
     if(S.dum&&mine<amt){x.mine=mine;x.nhan=false;}
     if(S.once)x.once=true;
-    if(jarsOf().length&&budOf(today().slice(0,7))){const jj=S.jar||jarAuto(S.cat);if(jj!==jarAuto(S.cat)||jj!=='_k')x.jar=jj;}
+    if(jarOnly()){const jj=S.jar||jarAuto(S.cat);if(jj!==jarAuto(S.cat)||jj!=='_k')x.jar=jj;}
     /* QR không kèm tên → nhớ hỏi tên khi quay lại (MB vừa hiện tên người nhận); hỏi một lần cho mỗi tài khoản */
     if(!x.name&&q&&q.napas)D.ask=x.id;
     D.via=x.via;
