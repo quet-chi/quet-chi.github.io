@@ -374,7 +374,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .jarh.solo{margin-top:8px;padding:8px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--line);text-align:left}
 .icp{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.icp button{width:42px;height:42px;border-radius:12px;background:var(--panel);border:1.5px solid var(--line);font-size:1.25rem}.icp button.on{border-color:var(--accent);background:rgba(15,157,138,.1)}
 .overb{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(200,62,62,.08);border:1px solid rgba(200,62,62,.3);color:var(--bad);font-size:.8rem;line-height:1.45}.overb b{font-family:ui-monospace,"SF Mono",Menlo,monospace}.overb.sm{padding:6px 10px;font-size:.74rem}
-.overl{font-size:.76rem;color:var(--ink3);margin-top:6px;min-height:18px}.overl.bad{color:var(--bad)}.overl .lnk{margin-top:6px;border:0;background:none;color:var(--acc);font:inherit;font-weight:600;padding:2px 0;cursor:pointer}#j_ok.dim{opacity:.45}.overl b{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.overl{font-size:.76rem;color:var(--ink3);margin-top:6px;min-height:18px}.overl.bad{color:var(--bad)}.lnk2{display:block;margin:14px auto 0;border:0;background:none;color:var(--ink3);font:inherit;font-size:.8rem;text-decoration:underline;cursor:pointer}.overl .lnk{margin-top:6px;border:0;background:none;color:var(--acc);font:inherit;font-weight:600;padding:2px 0;cursor:pointer}#j_ok.dim{opacity:.45}.overl b{font-family:ui-monospace,"SF Mono",Menlo,monospace}
 .jsel{margin-top:8px}.jsel.big .jsc{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;overflow:visible;margin:0;padding:0}
 .jsel.big .jch{align-items:center;text-align:center;padding:10px 4px 8px;border-radius:16px;font-size:.8rem}.jsel.big .jch i{font-size:1.5rem;line-height:1.2}.jsel.big .jsl{font-size:.78rem;color:var(--ink2);margin:4px 0 6px}.jsl{display:block;font-size:.68rem;color:var(--ink3);font-weight:600;margin-bottom:4px}
 .jsc{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}.jsc::-webkit-scrollbar{display:none}
@@ -11839,7 +11839,32 @@ function voLockView(){const has=D.as&&D.as.pin,setting=!has,step2=setting&&voPin
     D.as=D.as||{gold:[],sv:[],h:[]};D.as.pin=await voPinHash(p);asTouch();voPin1=null;tsWrong=false;tsOpenUntil=Date.now()+5*60000;S={v:'ts'};render();toast('đã đặt mã — lần sau mở bằng mã này');};
   document.querySelectorAll('[data-pk]').forEach(b=>b.onpointerdown=e=>{e.preventDefault();const k=b.dataset.pk;tsWrong=false;
     if(k==='⌫')tsPin=tsPin.slice(0,-1);else if(tsPin.length<4)tsPin+=k;render();if(tsPin.length===4)setTimeout(done,120);});}
-function tsLockView(){if(VO)return voLockView();const c=syncCfg();
+/* MÃ 4 SỐ APP MAU (09/10): mở Tài sản + phần Đầu tư. Mau tự đặt lần đầu (AI không cài sẵn mã). Băm SHA-256 trong D.pinM.
+   Quên mã → "Dùng mật khẩu đồng bộ" (8 số); mở bằng đường đó thì mã cũ bị xoá để đặt lại. */
+async function mauPinHash(p){const c=syncCfg(),b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('quetchi-mau-pin|'+(c?c.vid:'')+'|'+p));return b64(b);}
+function pinLockView(){const has=!!D.pinM,setting=!has,step2=setting&&voPin1!=null,back=S.ret==='home'?{v:'home'}:{v:'ts'};
+  const title=has?'Nhập mã':step2?'Nhập lại mã':'Đặt mã 4 số';
+  $('app').innerHTML=`<div class="wrap hm2">
+    <div class="topb"><div><button class="back bk2" id="tsb" style="padding:0">‹ ${S.ret==='home'?'Sổ':'Tài sản'}</button><b style="display:block">Bảo mật</b></div></div>
+    <div class="lockw"><div class="lockic">🔒</div><div class="lockt">${title}</div>
+      <div class="dsub">${setting&&!step2?'Mã này mở Tài sản và phần Đầu tư':'&nbsp;'}</div>
+      <div class="pdots${tsWrong?' wrong':''}">${[...Array(4)].map((_,i)=>`<i class="${i<tsPin.length?'on':''}"></i>`).join('')}</div>
+      <div class="dsub" style="min-height:18px;color:var(--bad)">${tsWrong?(setting?'Hai lần không khớp — đặt lại':'Mã không đúng'):''}</div></div>
+    <div class="lockpad">${['1','2','3','4','5','6','7','8','9','','0','⌫'].map(k=>k?`<button data-pk="${k}" class="${k==='⌫'?'fn':''}">${k==='⌫'?'Xoá':k}</button>`:'<span></span>').join('')}</div>
+    ${has?'<button class="lnk2" id="pfull">Quên mã? Dùng mật khẩu đồng bộ</button>':''}
+  </div>${tabbar('ts')}`;
+  bindTabs();
+  $('tsb').onclick=()=>{tsPin='';tsWrong=false;voPin1=null;S=back;render();};
+  if($('pfull'))$('pfull').onclick=()=>{tsPin='';tsWrong=false;S=Object.assign({},S,{full:1});render();};
+  const open=()=>{tsOpenUntil=Date.now()+5*60000;tsWrong=false;S=back;render();if(back.v==='ts')tsPull();};
+  const done=async()=>{const p=tsPin;tsPin='';
+    if(has){if(await mauPinHash(p)===D.pinM)open();else{tsWrong=true;render();}return;}
+    if(!step2){voPin1=p;tsWrong=false;render();return;}
+    if(p!==voPin1){voPin1=null;tsWrong=true;render();return;}
+    D.pinM=await mauPinHash(p);voPin1=null;save();open();toast('đã đặt mã — lần sau mở bằng mã này');};
+  document.querySelectorAll('[data-pk]').forEach(b=>b.onpointerdown=e=>{e.preventDefault();const k=b.dataset.pk;tsWrong=false;
+    if(k==='⌫')tsPin=tsPin.slice(0,-1);else if(tsPin.length<4)tsPin+=k;render();if(tsPin.length===4)setTimeout(done,120);});}
+function tsLockView(){if(VO)return voLockView();const c=syncCfg();if(c&&!S.full)return pinLockView();
   $('app').innerHTML=`<div class="wrap hm2">
     <div class="topb"><div><button class="back bk2" id="tsb" style="padding:0">‹ ${S.ret==='home'?'Sổ':'Tài sản'}</button><b style="display:block">Bảo mật</b></div></div>
     <div class="lockw"><div class="lockic">🔒</div><div class="lockt">Nhập mã</div>
@@ -11855,7 +11880,7 @@ function tsLockView(){if(VO)return voLockView();const c=syncCfg();
   $('tsb').onclick=()=>{tsPin='';tsWrong=false;S=back;render();};
   const tryOpen=async()=>{if(tsPin.length<8||tsChecking)return;tsChecking=true;tsWrong=false;render();
     let ok=false;try{const r=await deriveSync(tsPin);ok=r.k===syncCfg().k;}catch(e){}
-    tsChecking=false;if(ok){tsOpenUntil=Date.now()+5*60000;tsPin='';S=back;render();if(back.v==='ts')tsPull();}else{tsWrong=true;tsPin='';render();}};
+    tsChecking=false;if(ok){tsOpenUntil=Date.now()+5*60000;tsPin='';if(D.pinM){delete D.pinM;save();toast('đã mở — lần sau đặt mã 4 số mới');}S=back;render();if(back.v==='ts')tsPull();}else{tsWrong=true;tsPin='';render();}};
   document.querySelectorAll('[data-pk]').forEach(b=>b.onpointerdown=e=>{e.preventDefault();if(tsChecking)return;const k=b.dataset.pk;tsWrong=false;
     if(k==='⌫')tsPin=tsPin.slice(0,-1);else if(k==='✓'){tryOpen();return;}else if(tsPin.length<20)tsPin+=k;
     render();if(tsPin.length===8&&k!=='⌫')tryOpen();});}
