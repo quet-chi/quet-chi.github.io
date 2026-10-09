@@ -10818,9 +10818,12 @@ const jTitle=x=>jarOnly()&&noName(x)&&!kin(x)?(x.note||jarInfo(x).n):kinName(x);
 const jSub=x=>{const ji=jarInfo(x),t=jTitle(x);return [ji.n,kinNote(x)&&kinNote(x)!==t?esc(kinNote(x)):''].filter(Boolean).join(' · ');};
 const jarAuto=c=>{const j=c&&jarOfCat(c);return j?j.id:'_k';};
 function jarRow(sel,amtNow,exceptId){const m=today().slice(0,7);if(!jarsOf().length||!budOf(m))return'';const JS=jarStats(m),big=jarOnly();
-  return `<div class="jsel${big?' big':''}"><span class="jsl">${big?'Chi từ lọ nào?':'Trừ vào lọ'}</span><div class="jsc">${JS.map(j=>{const l=j.amt-j.sp;return `<button type="button" class="jch${sel===j.id?' on':''}" data-jsel="${j.id}" style="--jk:${j.col||'#8B919A'}"><i>${j.ic||'…'}</i>${esc(j.n)}<small>${D.hide?'':j.amt||j.auto?(l<0?'lố '+short(-l):'còn '+short(l)):'chưa nạp'}</small></button>`;}).join('')}</div>
+  const allSp=D.tx.filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===m).reduce((a,x)=>a+mineOf(x),0);
+  return `<div class="jsel${big?' big':''}"><span class="jsl">${big?'Chi từ lọ nào?':VO?'Trừ vào lọ':'Nhóm hạn mức'}</span><div class="jsc">${JS.map(j=>{const l=!VO&&j.auto?budOf(m)-allSp:j.amt-j.sp,nm=!VO&&j.auto?'Ngoài nhóm':j.n;return `<button type="button" class="jch${sel===j.id?' on':''}" data-jsel="${j.id}" style="--jk:${j.col||'#8B919A'}"><i>${j.ic||'…'}</i>${esc(nm)}<small>${D.hide?'':j.amt||j.auto?(l<0?'lố '+short(-l):'còn '+short(l)):(VO?'chưa nạp':'chưa đặt')}</small></button>`;}).join('')}</div>
     <div class="jarh" id="jarh">&nbsp;</div></div>`;}
-function jarHint(sel,amt,ownId){const h=$('jarh');if(!h)return;const m=today().slice(0,7),js=jarStats(m).find(j=>j.id===sel);if(!js||D.hide){h.innerHTML='&nbsp;';return;}
+function jarHint(sel,amt,ownId){const h=$('jarh');if(!h)return;
+  if(!VO&&sel==='_k'){const m=today().slice(0,7),all=D.tx.filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===m&&x.id!==ownId).reduce((a,x)=>a+mineOf(x),0),l=budOf(m)-all-amt;
+    h.innerHTML=D.hide?'&nbsp;':l<0?`<span style="color:var(--bad)">Tiền tháng sẽ âm ${short(-l)}</span>`:`Ngoài nhóm · tiền tháng còn ${short(l)} sau khoản này`;return;}const m=today().slice(0,7),js=jarStats(m).find(j=>j.id===sel);if(!js||D.hide){h.innerHTML='&nbsp;';return;}
   const own=ownId?D.tx.find(t=>t.id===ownId):null,base=own&&(own.jar||jarAuto(own.cat))===sel?mineOf(own):0,l=js.amt-js.sp+base-amt;
   h.innerHTML=!js.amt&&!js.auto?`Lọ <b>${esc(js.n)}</b> chưa nạp tiền — vào Chia tiền để nạp`:l<0?`<span style="color:var(--bad)">Lọ <b>${esc(js.n)}</b> sẽ lố ${short(-l)}</span>`:`Lọ <b>${esc(js.n)}</b> còn ${short(l)} sau khoản này`;}
 function budCard(s){const m=today().slice(0,7),A=budOf(m);
@@ -10835,16 +10838,16 @@ function budCard(s){const m=today().slice(0,7),A=budOf(m);
   const jr=J.map(j=>{const no=!j.amt&&!j.auto,l=j.amt-j.sp,p=j.amt?Math.min(100,j.sp/j.amt*100):0,c=no?'n':l<0?'b':j.sp>j.amt*dn/dim*1.1?'w':'g';
     return `<button class="jar ${c}" ${j.auto?'':`data-jar="${j.id}"`} style="--jk:${j.col||'#8B919A'}"><div class="jar-t"><span><i>${j.ic||'…'}</i>${esc(j.n)}</span><b>${D.hide?'•••':no?'':(l<0?'lố '+short(-l):'còn '+short(l))}</b></div>
       <div class="jar-b"><i style="width:${p.toFixed(1)}%"></i></div><small>${D.hide?'':no?(j.sp?'đã xài '+short(j.sp)+' · ':'')+'chạm để nạp tiền':short(j.sp)+' / '+short(j.amt)}${j.auto?' · chi thẳng từ tiền tổng':''}</small></button>`;}).join('');
-  return `<div class="bud ${st}"><button class="bud-hd" id="budset"><div class="bud-t"><span>Tiền tháng ${+m.slice(5)}</span><small>chia tiền ›</small></div>
+  return `<div class="bud ${st}"><button class="bud-hd" id="budset"><div class="bud-t"><span>Tiền tháng ${+m.slice(5)}</span><small>${VO?'chia tiền':'hạn mức'} ›</small></div>
     <div class="bud-n"><div><small>Còn lại</small><b>${left<0?'−':''}${money(Math.abs(left))}<i> đ</i></b></div><div class="bud-r"><small>Có ${short(A)}</small><small>Đã xài ${short(sp)}</small></div></div>
     <div class="bud-bar"><i style="width:${pct.toFixed(1)}%"></i><b style="left:${Math.min(100,dn/dim*100).toFixed(1)}%"></b></div>
-    <div class="bud-m">${D.hide?'đang ẩn số':msg}</div>${(()=>{const pl=A-jarsOf().reduce((a,j)=>a+(j.amt||0),0);return jarsOf().length&&pl>0&&!D.hide?`<div class="bud-pool">💰 Còn <b>${short(pl)}</b> chưa chia vào lọ <span>Chia ›</span></div>`:'';})()}</button>${J.length?`<div class="jvs">${jr2}<button class="jv add" id="jaradd"><span>＋</span><b>Lọ mới</b><small>&nbsp;</small></button></div>`:''}</div>`;}
+    <div class="bud-m">${D.hide?'đang ẩn số':msg}</div>${(()=>{const pl=A-jarsOf().reduce((a,j)=>a+(j.amt||0),0);return VO&&jarsOf().length&&pl>0&&!D.hide?`<div class="bud-pool">💰 Còn <b>${short(pl)}</b> chưa chia vào lọ <span>Chia ›</span></div>`:'';})()}</button>${J.length?`<div class="jvs">${jr2}<button class="jv add" id="jaradd"><span>＋</span><b>Lọ mới</b><small>&nbsp;</small></button></div>`:''}</div>`;}
 function budView(){const m=today().slice(0,7),A=budOf(m)-budAdd(m).reduce((a,x)=>a+x.amt,0),J=jarsOf(),sumJ=J.reduce((a,j)=>a+(j.amt||0),0),JS=jarStats(m);
   $('app').innerHTML=`<div class="sheet"><div class="wrap">
     <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Tiền tháng ${+m.slice(5)}</b><span style="width:64px"></span></div>
     <label class="fl">Tháng này có bao nhiêu tiền để xài?<input id="b_a" inputmode="numeric" value="${A?Math.round(A).toLocaleString('vi-VN'):''}" placeholder="vd: 40.000.000"></label>
     <button class="cta" id="b_ok" style="margin-top:10px">Lưu số tiền</button>
-    <div class="lh"><span>Chia lọ</span><small class="lhh">mỗi lọ gắn vài loại chi — ghi khoản là tự trừ đúng lọ</small></div>
+    <div class="lh"><span>${VO?'Chia lọ':'Hạn mức theo nhóm'}</span><small class="lhh">${VO?'mỗi lọ gắn vài loại chi — ghi khoản là tự trừ đúng lọ':'mỗi nhóm gắn vài loại chi — chỉ để theo dõi, không trừ tiền tổng'}</small></div>
     ${J.map(j=>{const st=JS.find(x=>x.id===j.id)||{sp:0};return `<button class="srow" data-jx="${j.id}"><span class="sic">◎</span><span class="st"><b>${esc(j.n)}</b><small>${(j.cats||[]).map(c=>SH[c]||cat(c)[1]).join(' · ')||'chưa gán loại'}</small></span><span class="sr mono">${short(j.amt)}<br><small class="dim">đã xài ${short(st.sp)}</small></span></button>`;}).join('')}
     ${J.length&&A?`<div class="srow" style="cursor:default"><span class="sic">💰</span><span class="st"><b>Tiền tổng</b><small>phần chưa chia vào lọ = tiền tháng − các lọ</small></span><span class="sr mono" style="${A-sumJ<0?'color:var(--bad)':''}">${A-sumJ<0?'−':''}${short(Math.abs(A-sumJ))}</span></div>`:''}
     ${A&&sumJ>A?`<div class="warn">Các lọ cộng lại ${short(sumJ)} — nhiều hơn tiền tháng ${short(A)}. Bớt lọ hoặc tăng tiền tháng.</div>`:''}
@@ -10868,7 +10871,8 @@ function budView(){const m=today().slice(0,7),A=budOf(m)-budAdd(m).reduce((a,x)=
 /* ══ CHIA TIỀN (08/10, vợ Mau): nguồn tiền tổng → NẠP dần vào từng lọ, như chuyển từ ví chính sang các hũ.
    jar.amt = số đã nạp vào lọ (giữ qua các tháng, tháng mới chi tiêu tính lại từ 0). Chưa chia = tổng − Σ lọ. Rút = trả từ lọ về ví tổng. ══ */
 let chiaAnim=null;
-function chiaView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduce((a,j)=>a+(j.amt||0),0),JS=jarStats(m),tSp=(JS.find(j=>j.auto)||{sp:0}).sp,pool=A-sumJ-tSp;
+function chiaView(){if(!VO)return hanmucView();
+const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduce((a,j)=>a+(j.amt||0),0),JS=jarStats(m),tSp=(JS.find(j=>j.auto)||{sp:0}).sp,pool=A-sumJ-tSp;
   const pct=A?Math.min(100,(sumJ+tSp)/A*100):0,P=S.pick&&J.find(j=>j.id===S.pick);
   $('app').innerHTML=`<div class="sheet chia"><div class="wrap">
     <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Chia tiền tháng ${+m.slice(5)}</b><button class="back bk2" id="ctot" style="text-align:right">Sửa tổng</button></div>
@@ -10936,26 +10940,59 @@ function jardView(){const m=S.m||today().slice(0,7),JS=jarStats(m),j=JS.find(x=>
     <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Lọ ${esc(j.n)}</b>${j.auto?'<span style="width:64px"></span>':`<button class="back bk2" id="jde" style="text-align:right">Sửa lọ</button>`}</div>
     <div class="mnav2"><button id="jpm">‹</button><b>Tháng ${+m.slice(5)} · ${m.slice(0,4)}</b><button id="jnm"${m>=cur?' disabled':''}>›</button></div>
     <div class="jdh" style="--jk:${j.col||'#8B919A'}">${jarSvg(j,88)}<div class="jdn">
-      <small>${l<0&&j.amt?'Đã lố':'Còn trong lọ'}</small><b class="${l<0&&j.amt?'dnc':''}">${D.hide?'•••':(l<0?'−':'')+money(Math.abs(l))}<i> đ</i></b>
-      <div class="jds"><span>Nạp <b>${short(j.amt)}</b></span><span>Đã xài <b>${short(j.sp)}</b></span><span>${L.length} khoản</span></div>
+      <small>${l<0&&j.amt?'Đã lố':VO?'Còn trong lọ':'Còn trong hạn mức'}</small><b class="${l<0&&j.amt?'dnc':''}">${D.hide?'•••':(l<0?'−':'')+money(Math.abs(l))}<i> đ</i></b>
+      <div class="jds"><span>${VO?'Nạp':'Hạn mức'} <b>${short(j.amt)}</b></span><span>Đã xài <b>${short(j.sp)}</b></span><span>${L.length} khoản</span></div>
       ${j.auto?'<small>tiền tháng chưa chia vào lọ — chi không chọn lọ thì trừ ở đây</small>':jarOnly()?'':`<small>${(j.cats||[]).map(c=>SH[c]||cat(c)[1]).join(' · ')}</small>`}</div></div>
-    ${j.auto||m!==cur?'':`<div class="jc-a" style="margin-top:12px;--jk:${j.col||'#8B919A'}"><button data-jin="${j.id}">＋ Nạp</button><button class="out" data-jout="${j.id}"${j.amt?'':' disabled'}>− Rút</button></div>`}
+    ${j.auto||m!==cur?'':!VO?`<div class="jc-a" style="margin-top:12px;grid-template-columns:1fr;--jk:${j.col||'#8B919A'}"><button id="jhm">Sửa hạn mức</button></div>`:`<div class="jc-a" style="margin-top:12px;--jk:${j.col||'#8B919A'}"><button data-jin="${j.id}">＋ Nạp</button><button class="out" data-jout="${j.id}"${j.amt?'':' disabled'}>− Rút</button></div>`}
     <div class="lh"><span>Đã chi từ lọ</span><small class="lhh">chạm để sửa · đổi lọ</small></div>
     ${list||'<div class="empty">Tháng này chưa có khoản nào trừ vào lọ này.</div>'}
   </div></div>`;
   $('bk').onclick=()=>{S=S.back==='tk'?{v:'tk',m}:{v:S.back||'home'};render();};
+  if($('jhm'))$('jhm').onclick=()=>{S={v:'jarf',id:j.id,back:'jard',jid:j.id};render();};
   if($('jde'))$('jde').onclick=()=>{S={v:'jarf',id:j.id,back:'jard',jid:j.id};render();};
   $('jpm').onclick=()=>{S.m=pm;render();};$('jnm').onclick=()=>{if(m<cur){S.m=nm;render();}};
   document.querySelectorAll('[data-jin]').forEach(b=>b.onclick=()=>{S={v:'chia',pick:j.id,dir:'in'};render();});
   document.querySelectorAll('[data-jout]').forEach(b=>b.onclick=()=>{S={v:'chia',pick:j.id,dir:'out'};render();});
   document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{S={v:'ed',id:b.dataset.ed,prev:{v:'jard',id:j.id,m,back:S.back}};render();});}
+/* ══ HẠN MỨC (09/10, app Mau) — lọ chỉ là MỨC TRẦN theo nhóm loại chi, KHÔNG giữ tiền. Tiền tổng = tiền tháng (+ tiền thêm) − mọi khoản chi.
+   App vợ giữ kiểu phong bì (chiaView). ══ */
+function hanmucView(){const m=today().slice(0,7),A=budOf(m),JS=jarStats(m).filter(j=>!j.auto),all=D.tx.filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===m).reduce((a,x)=>a+mineOf(x),0),left=A-all,sumL=JS.reduce((a,j)=>a+(j.amt||0),0);
+  $('app').innerHTML=`<div class="sheet chia"><div class="wrap">
+    <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Hạn mức tháng ${+m.slice(5)}</b><button class="back bk2" id="ctot" style="text-align:right">Sửa tổng</button></div>
+    <div class="pool"><div class="pool-t"><span>Tiền tháng ${+m.slice(5)}${budAdd(m).length?' (gồm tiền thêm)':''}</span><b>${money(A)}</b></div>
+      <div class="pool-big"><small>Còn lại</small><b>${left<0?'−':''}${money(Math.abs(left))}<i> đ</i></b></div>
+      <div class="pool-bar"><i style="width:${A?Math.min(100,all/A*100).toFixed(1):0}%"></i></div>
+      <div class="pool-m">Đã chi <b>${short(all)}</b>${sumL?` · hạn mức các nhóm cộng lại <b>${short(sumL)}</b>${sumL>A?' — <b>nhiều hơn tiền tháng</b>':''}`:''}</div></div>
+    <div class="addm"><button id="addin">＋ Có thêm tiền</button>${budAdd(m).map((x,i)=>`<span class="addt">+${short(x.amt)}${x.note?' · '+esc(x.note):''}<button data-addx="${i}" aria-label="bỏ">×</button></span>`).join('')}</div>
+    <div class="jl">${JS.map(j=>{const l=(j.amt||0)-j.sp,fp=j.amt?Math.min(100,j.sp/j.amt*100):0;
+      return `<div class="jc" style="--jk:${j.col||'#8B919A'}"><div class="jc-h">${jarSvg(j,42)}<span class="jc-n"><b>${esc(j.n)}</b><small>${(j.cats||[]).map(c=>SH[c]||cat(c)[1]).join(' · ')}</small></span></div>
+        <div class="jc-v" data-jd="${j.id}"><div><small>Đã xài / hạn mức</small><b>${short(j.sp)} <span style="color:var(--ink3);font-size:.7em">/ ${j.amt?short(j.amt):'—'}</span></b></div><div class="jc-s"><small>&nbsp;</small><small class="${l<0?'dnc':''}">${j.amt?(l<0?'lố '+short(-l):'còn '+short(l)):'chưa đặt'}</small></div></div>
+        <div class="jc-bar"><i style="width:${fp.toFixed(1)}%;${l<0?'background:var(--bad)':''}"></i></div>
+        <div class="jc-a" style="grid-template-columns:1fr"><button data-je="${j.id}">Sửa hạn mức</button></div></div>`;}).join('')}
+      <button class="jc add" id="jnew"><span>＋</span>Thêm nhóm</button></div>
+    ${!JS.length?'<div class="note">Chưa có nhóm nào. Bấm <b>Thêm nhóm</b> — ví dụ Cá 1tr, Ăn &amp; cà phê 2tr.</div>':''}
+  </div>
+  ${S.addin?`<div class="ash on" id="ash2"><div class="ashb tup"><div class="tup-h"><span class="jc-ic" style="--jk:#0F8A5F">💵</span><span><small>Cộng vào tiền tháng ${+m.slice(5)}</small><b>Có thêm tiền</b></span></div>
+    <div class="tup-v"><input id="ainp" inputmode="numeric" placeholder="0"><i>đ</i></div>
+    <input id="anote" class="nt" placeholder="Từ đâu? vd: thưởng, affiliate (không bắt buộc)" style="margin:6px 0 10px">
+    <div class="tup-m">Chỉ cộng cho tháng này — tháng sau về số cố định.</div>
+    <button class="cta" id="aok">Cộng vào tiền tháng</button><button class="c" id="acx">Huỷ</button></div></div>`:''}</div>`;
+  const num2=v=>+String(v||'').replace(/\D/g,'')||0;
+  $('bk').onclick=()=>{S={v:'home'};render();};$('ctot').onclick=()=>{S={v:'bud'};render();};$('jnew').onclick=()=>{S={v:'jarf',back:'chia'};render();};
+  document.querySelectorAll('[data-je]').forEach(b=>b.onclick=()=>{S={v:'jarf',id:b.dataset.je,back:'chia'};render();});
+  document.querySelectorAll('[data-jd]').forEach(b=>b.onclick=()=>{S={v:'jard',id:b.dataset.jd,back:'chia'};render();});
+  $('addin').onclick=()=>{S={v:'chia',addin:1};render();setTimeout(()=>$('ainp')&&$('ainp').focus(),60);};
+  document.querySelectorAll('[data-addx]').forEach(b=>b.onclick=()=>{const L=D.bud.add[m],i=+b.dataset.addx,x=L.splice(i,1)[0];D.bud.u=Date.now();save();render();toast('đã bỏ '+short(x.amt),()=>{L.splice(i,0,x);D.bud.u=Date.now();save();render();});});
+  if($('aok')){$('ainp').oninput=e=>{const n=num2(e.target.value);e.target.value=n?n.toLocaleString('vi-VN'):'';};
+    $('acx').onclick=()=>{S={v:'chia'};render();};$('ash2').onclick=e=>{if(e.target.id==='ash2'){S={v:'chia'};render();}};
+    $('aok').onclick=()=>{const a=num2($('ainp').value);if(!a){toast('gõ số tiền');return;}D.bud.add=D.bud.add||{};(D.bud.add[m]=D.bud.add[m]||[]).push({amt:a,note:$('anote').value.trim()||undefined,ts:Date.now()});D.bud.u=Date.now();save();S={v:'chia'};render();toast('đã cộng '+short(a)+' vào tiền tháng '+(+m.slice(5)));};}}
 function jarfView(){const J=jarsOf(),x=S.id?J.find(j=>j.id===S.id):null,used=new Set(J.filter(j=>j!==x).flatMap(j=>j.cats||[]));
   const sel=S.jc||(S.jc=new Set(x?x.cats||[]:[]));
   const CC=CATS.filter(c=>c[0]!=='nap'&&(VO?(c[0]!=='ca'&&c[0]!=='dautu'):(c[0]!=='dodung'&&c[0]!=='rieng')));
   $('app').innerHTML=`<div class="sheet"><div class="wrap">
     <div class="bar1"><button class="back bk2" id="bk">‹ Huỷ</button><b>${x?'Sửa lọ':'Thêm lọ'}</b><span style="width:64px"></span></div>
     <label class="fl">Tên lọ<input id="j_n" value="${x?esc(x.n):''}" placeholder="vd: Ăn uống, Con cái"></label>
-    <label class="fl">Mỗi tháng bỏ vào lọ (để trống nếu chưa biết)<input id="j_a" inputmode="numeric" value="${x?Math.round(x.amt).toLocaleString('vi-VN'):''}" placeholder="vd: 15.000.000"></label>
+    <label class="fl">${VO?'Mỗi tháng bỏ vào lọ (để trống nếu chưa biết)':'Hạn mức mỗi tháng'}<input id="j_a" inputmode="numeric" value="${x?Math.round(x.amt).toLocaleString('vi-VN'):''}" placeholder="vd: 15.000.000"></label>
     <div class="fl">Những loại chi trừ vào lọ này</div>
     <div class="cg">${CC.map(c=>{const u=used.has(c[0]);return `<button class="cgb${sel.has(c[0])?' on':''}${u?' off':''}" data-jc="${c[0]}"${u?' disabled':''}><i>${c[2]}</i>${SH[c[0]]||c[1]}</button>`;}).join('')}</div>
     <div class="note" style="text-align:left">Loại mờ là đã thuộc lọ khác. Mỗi loại chỉ nằm trong một lọ.</div>
