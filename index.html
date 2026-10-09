@@ -363,7 +363,9 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .ntr{display:flex;gap:8px;align-items:stretch;margin-top:10px}.ntr .nt{margin-top:0;flex:1;min-width:0}
 .dpk{position:relative;flex:none;display:flex;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:0 12px;font-size:.84rem;font-weight:600;color:var(--ink2);white-space:nowrap}
 .dpk.on{border-color:var(--accent);color:var(--accent2)}.dpk input{position:absolute;inset:0;opacity:0;width:100%;height:100%;font-size:16px}
-.spl{background:linear-gradient(135deg,#5C6BC0,#3949AB 55%,#283593)!important;box-shadow:0 12px 30px rgba(57,73,171,.28)!important}.spl-g{display:flex;flex-wrap:wrap;gap:6px 12px;margin:-4px 0 8px;font-size:.78rem;opacity:.95}.spl-g i{font-style:normal;margin-right:3px}.spl-g b{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.spl{background:linear-gradient(135deg,#5C6BC0,#3949AB 55%,#283593)!important;box-shadow:0 12px 30px rgba(57,73,171,.28)!important}.addm{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center}.addm>button{background:var(--panel);border:1.5px dashed var(--accent);color:var(--accent2);border-radius:99px;padding:7px 12px;font-weight:700;font-size:.8rem}
+.addt{display:inline-flex;align-items:center;gap:4px;background:rgba(15,138,95,.1);color:var(--good);border-radius:99px;padding:5px 4px 5px 10px;font:600 .74rem ui-monospace,"SF Mono",Menlo,monospace}.addt button{background:none;color:var(--ink3);font-size:.9rem;padding:0 6px}
+.spl-g{display:flex;flex-wrap:wrap;gap:6px 12px;margin:-4px 0 8px;font-size:.78rem;opacity:.95}.spl-g i{font-style:normal;margin-right:3px}.spl-g b{font-family:ui-monospace,"SF Mono",Menlo,monospace}
 .spg{margin-top:14px;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--jk);border-radius:16px;padding:6px 12px}
 .spg-h{display:flex;align-items:center;gap:8px;padding:6px 0}.spg-h span{flex:1;font-weight:700;font-size:.88rem}.spg-h i{font-style:normal;margin-right:5px}.spg-h b{font:700 .9rem ui-monospace,"SF Mono",Menlo,monospace}
 .spg-h button{background:var(--jk);color:#fff;border-radius:10px;padding:6px 10px;font-size:.74rem;font-weight:700}.spg .row{min-height:52px}
@@ -10761,7 +10763,8 @@ function home(){
 
 /* ══ TIỀN THÁNG NÀY (08/10) — cho vợ Mau: "có bao nhiêu, xài bao nhiêu, lố hông". Một hạn mức tổng, mỗi tháng tính lại từ đầu.
    D.bud={def:số mặc định, m:{'YYYY-MM':số}, u}. Tháng chưa gõ thì lấy số mặc định (số gần nhất đã gõ). Đồng bộ qua doc "z-bud". ══ */
-const budOf=m=>{const B=D.bud;if(!B)return 0;return (B.m&&B.m[m]!=null)?B.m[m]:(B.def||0);};
+const budAdd=m=>((D.bud&&D.bud.add&&D.bud.add[m])||[]).filter(x=>x&&x.amt>0);
+const budOf=m=>{const B=D.bud;if(!B)return 0;return ((B.m&&B.m[m]!=null)?B.m[m]:(B.def||0))+budAdd(m).reduce((a,x)=>a+x.amt,0);};   /* + tiền thêm trong tháng (09/10) */
 /* LỌ (08/10): chia tiền tháng thành từng lọ, mỗi lọ gắn với vài LOẠI chi → ghi khoản là tự trừ đúng lọ, không phải chọn thêm.
    D.bud.jars=[{id,n,amt,cats:[...]}] — giữ qua các tháng. Phần chưa chia = lọ "Chi khác" cho mọi loại còn lại. */
 const jarsOf=()=>((D.bud&&D.bud.jars)||[]).filter(j=>j&&j.id);
@@ -10836,7 +10839,7 @@ function budCard(s){const m=today().slice(0,7),A=budOf(m);
     <div class="bud-n"><div><small>Còn lại</small><b>${left<0?'−':''}${money(Math.abs(left))}<i> đ</i></b></div><div class="bud-r"><small>Có ${short(A)}</small><small>Đã xài ${short(sp)}</small></div></div>
     <div class="bud-bar"><i style="width:${pct.toFixed(1)}%"></i><b style="left:${Math.min(100,dn/dim*100).toFixed(1)}%"></b></div>
     <div class="bud-m">${D.hide?'đang ẩn số':msg}</div>${(()=>{const pl=A-jarsOf().reduce((a,j)=>a+(j.amt||0),0);return jarsOf().length&&pl>0&&!D.hide?`<div class="bud-pool">💰 Còn <b>${short(pl)}</b> chưa chia vào lọ <span>Chia ›</span></div>`:'';})()}</button>${J.length?`<div class="jvs">${jr2}<button class="jv add" id="jaradd"><span>＋</span><b>Lọ mới</b><small>&nbsp;</small></button></div>`:''}</div>`;}
-function budView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduce((a,j)=>a+(j.amt||0),0),JS=jarStats(m);
+function budView(){const m=today().slice(0,7),A=budOf(m)-budAdd(m).reduce((a,x)=>a+x.amt,0),J=jarsOf(),sumJ=J.reduce((a,j)=>a+(j.amt||0),0),JS=jarStats(m);
   $('app').innerHTML=`<div class="sheet"><div class="wrap">
     <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Tiền tháng ${+m.slice(5)}</b><span style="width:64px"></span></div>
     <label class="fl">Tháng này có bao nhiêu tiền để xài?<input id="b_a" inputmode="numeric" value="${A?Math.round(A).toLocaleString('vi-VN'):''}" placeholder="vd: 40.000.000"></label>
@@ -10847,7 +10850,7 @@ function budView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduc
     ${A&&sumJ>A?`<div class="warn">Các lọ cộng lại ${short(sumJ)} — nhiều hơn tiền tháng ${short(A)}. Bớt lọ hoặc tăng tiền tháng.</div>`:''}
     <button class="cta ghost" id="b_jar">＋ Thêm lọ</button>
     ${!VO&&!J.length?`<button class="cta" id="b_sug" style="margin-top:10px">✨ Dùng bộ lọ gợi ý</button>
-      <div class="note" style="text-align:left">Tiền tháng <b>30tr</b> · 👪 Gia đình 20tr · 🍜 Ăn &amp; cà phê 3tr · 🐠 Cá 2tr · 🛵 Đi lại 1,5tr · 🛍 Riêng 1,5tr · còn 2tr ở Tiền tổng. Sửa từng lọ sau được.</div>`:''}
+      <div class="note" style="text-align:left">Tiền tháng <b>5tr</b> · 🍜 Ăn &amp; cà phê 2tr · 🐠 Cá 1tr · 🛵 Đi lại 1tr · 🛍 Riêng 500K · còn 500K ở Tiền tổng. Có thêm tiền thì bấm <b>＋ Có thêm tiền</b> ở màn Chia tiền. Sửa từng lọ sau được.</div>`:''}
     ${!J.length?`<div class="note" style="text-align:left">Ví dụ: <b>Ăn uống 15tr</b> (Ăn uống, Cà phê) · <b>Con cái 10tr</b> (Con cái). Phần còn lại tự vào <b>Tiền tổng</b>.</div>`:''}
     ${A?'<button class="del" id="b_x">Bỏ theo dõi tiền tháng</button>':''}</div></div>`;
   const num=v=>+String(v).replace(/\D/g,'')||0;
@@ -10856,10 +10859,10 @@ function budView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduc
   $('b_ok').onclick=()=>{const a=num($('b_a').value);if(!a){toast('gõ số tiền');return;}D.bud=D.bud||{m:{}};D.bud.m=D.bud.m||{};D.bud.m[m]=a;D.bud.def=a;D.bud.u=Date.now();save();S={v:'chia'};render();if(VO)hearts(18);toast('đã lưu tiền tháng '+(+m.slice(5))+' — giờ nạp vào từng lọ');};
   $('b_jar').onclick=()=>{S={v:'jarf'};render();};
   /* BỘ LỌ GỢI Ý (08/10, app của Mau): 10tr chi riêng + 20tr gia đình như La bàn. Một chạm, chỉ khi chưa có lọ. */
-  if($('b_sug'))$('b_sug').onclick=()=>{D.bud=D.bud||{m:{}};D.bud.m=D.bud.m||{};D.bud.m[m]=30e6;D.bud.def=30e6;
-    D.bud.jars=[{id:'j-gd',n:'Gia đình',amt:20e6,cats:['giadinh','con','bieu'],col:'#2563EB',ic:'👪'},{id:'j-an',n:'Ăn & cà phê',amt:3e6,cats:['an','giaitri'],col:'#C2410C',ic:'🍜'},
-      {id:'j-ca',n:'Cá',amt:2e6,cats:['ca'],col:'#0F8A5F',ic:'🐠'},{id:'j-dl',n:'Đi lại',amt:1.5e6,cats:['dilai'],col:'#A16207',ic:'🛵'},{id:'j-rg',n:'Riêng',amt:1.5e6,cats:['muasam','suckhoe'],col:'#C2255C',ic:'🛍'}];
-    D.bud.u=Date.now();save();S={v:'home'};render();toast('đã cài 5 lọ · tiền tháng 30tr');};
+  if($('b_sug'))$('b_sug').onclick=()=>{D.bud=D.bud||{m:{}};D.bud.m=D.bud.m||{};D.bud.m[m]=5e6;D.bud.def=5e6;
+    D.bud.jars=[{id:'j-an',n:'Ăn & cà phê',amt:2e6,cats:['an','giaitri'],col:'#C2410C',ic:'🍜'},{id:'j-ca',n:'Cá',amt:1e6,cats:['ca'],col:'#0F8A5F',ic:'🐠'},
+      {id:'j-dl',n:'Đi lại',amt:1e6,cats:['dilai'],col:'#A16207',ic:'🛵'},{id:'j-rg',n:'Riêng',amt:5e5,cats:['muasam','suckhoe'],col:'#C2255C',ic:'🛍'}];
+    D.bud.u=Date.now();save();S={v:'home'};render();toast('đã cài 4 lọ · tiền tháng 5tr');};
   document.querySelectorAll('[data-jx]').forEach(b=>b.onclick=()=>{S={v:'jarf',id:b.dataset.jx};render();});
   if($('b_x'))$('b_x').onclick=()=>{const old=D.bud;D.bud={m:{},def:0,jars:old.jars,u:Date.now()};save();S={v:'home'};render();toast('đã bỏ',()=>{D.bud=Object.assign(old,{u:Date.now()});save();render();});};}
 /* ══ CHIA TIỀN (08/10, vợ Mau): nguồn tiền tổng → NẠP dần vào từng lọ, như chuyển từ ví chính sang các hũ.
@@ -10870,11 +10873,12 @@ function chiaView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.redu
   $('app').innerHTML=`<div class="sheet chia"><div class="wrap">
     <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Chia tiền tháng ${+m.slice(5)}</b><button class="back bk2" id="ctot" style="text-align:right">Sửa tổng</button></div>
     <div class="pool">
-      <div class="pool-t"><span>Tiền tháng ${+m.slice(5)}</span><b data-cnt="${A}">${money(A)}</b></div>
+      <div class="pool-t"><span>Tiền tháng ${+m.slice(5)}${budAdd(m).length?' (gồm tiền thêm)':''}</span><b data-cnt="${A}">${money(A)}</b></div>
       <div class="pool-big"><small>💰 Tiền tổng còn</small><b id="poolv" data-from="${chiaAnim?chiaAnim.pool:pool}" data-to="${pool}">${pool<0?'−':''}${money(Math.abs(pool))}<i> đ</i></b></div>
       <div class="pool-bar"><i id="poolbar" style="width:${(chiaAnim?Math.min(100,chiaAnim.pct):pct).toFixed(1)}%" data-to="${pct.toFixed(1)}"></i></div>
       <div class="pool-m">${pool<0?`Tiền tổng đang âm <b>${short(-pool)}</b> — rút bớt từ lọ hoặc sửa tiền tháng`:`Đã nạp vào lọ <b>${short(sumJ)}</b>${tSp?' · chi từ tổng <b>'+short(tSp)+'</b>':''}`}</div>
     </div>
+    <div class="addm"><button id="addin">＋ Có thêm tiền</button>${budAdd(m).map((x,i)=>`<span class="addt">+${short(x.amt)}${x.note?' · '+esc(x.note):''}<button data-addx="${i}" aria-label="bỏ">×</button></span>`).join('')}</div>
     <div class="jl">${J.map(j=>{const st=JS.find(x=>x.id===j.id)||{sp:0},l=(j.amt||0)-st.sp,fp=j.amt?Math.min(100,st.sp/j.amt*100):0,was=chiaAnim&&chiaAnim.id===j.id?chiaAnim.amt:j.amt;
       return `<div class="jc${S.pick===j.id?' on':''}" style="--jk:${j.col||'#8B919A'}">
         <div class="jc-h">${jarSvg(Object.assign({},j,{sp:st.sp}),42)}<span class="jc-n"><b>${esc(j.n)}</b><small>${(j.cats||[]).map(c=>SH[c]||cat(c)[1]).join(' · ')}</small></span><button class="jc-e" data-je="${j.id}" aria-label="sửa lọ">✎</button></div>
@@ -10884,6 +10888,11 @@ function chiaView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.redu
       <button class="jc add" id="jnew"><span>＋</span>Thêm lọ</button></div>
     ${!J.length?'<div class="note">Chưa có lọ nào. Bấm <b>Thêm lọ</b> — ví dụ Con, Ăn uống, Đồ dùng nhà.</div>':''}
   </div>
+  ${S.addin?`<div class="ash on" id="ash2"><div class="ashb tup"><div class="tup-h"><span class="jc-ic" style="--jk:#0F8A5F">💵</span><span><small>Cộng vào tiền tổng tháng ${+m.slice(5)}</small><b>Có thêm tiền</b></span></div>
+    <div class="tup-v"><input id="ainp" inputmode="numeric" placeholder="0"><i>đ</i></div>
+    <input id="anote" class="nt" placeholder="Từ đâu? vd: thưởng, affiliate (không bắt buộc)" style="margin:6px 0 10px">
+    <div class="tup-m">Chỉ cộng cho tháng này — tháng sau tiền tháng về số cố định.</div>
+    <button class="cta" id="aok">Cộng vào tiền tổng</button><button class="c" id="acx">Huỷ</button></div></div>`:''}
   ${P?`<div class="ash on" id="tsh"><div class="ashb tup">
     <div class="tup-h"><span class="jc-ic" style="--jk:${P.col}">${P.ic||'◎'}</span><span><small>${S.dir==='out'?'Rút từ lọ về tiền tổng':'Nạp vào lọ'}</small><b>${esc(P.n)}</b></span></div>
     <div class="tup-v"><input id="tamt" inputmode="numeric" placeholder="0" value="${S.tamt?Number(S.tamt).toLocaleString('vi-VN'):''}"><i>đ</i></div>
@@ -10891,7 +10900,12 @@ function chiaView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.redu
     <div class="tup-m" id="tmsg"></div>
     <button class="cta" id="tok">${S.dir==='out'?'Rút về tiền tổng':'Nạp vào lọ'}</button><button class="c" id="tcx">Huỷ</button></div></div>`:''}</div>`;
   const num=v=>+String(v||'').replace(/\D/g,'')||0;
-  $('bk').onclick=()=>{S={v:'home'};render();};$('ctot').onclick=()=>{S={v:'bud'};render();};$('jnew').onclick=()=>{S={v:'jarf',back:'chia'};render();};
+  $('bk').onclick=()=>{S={v:'home'};render();};$('ctot').onclick=()=>{S={v:'bud'};render();};
+  $('addin').onclick=()=>{S={v:'chia',addin:1};render();setTimeout(()=>$('ainp')&&$('ainp').focus(),60);};
+  document.querySelectorAll('[data-addx]').forEach(b=>b.onclick=()=>{const L=D.bud.add[m],i=+b.dataset.addx,x=L.splice(i,1)[0];D.bud.u=Date.now();save();render();toast('đã bỏ '+short(x.amt),()=>{L.splice(i,0,x);D.bud.u=Date.now();save();render();});});
+  if($('aok')){const num2=v=>+String(v||'').replace(/\D/g,'')||0;$('ainp').oninput=e=>{const n=num2(e.target.value);e.target.value=n?n.toLocaleString('vi-VN'):'';};
+    $('acx').onclick=()=>{S={v:'chia'};render();};$('ash2').onclick=e=>{if(e.target.id==='ash2'){S={v:'chia'};render();}};
+    $('aok').onclick=()=>{const a=num2($('ainp').value);if(!a){toast('gõ số tiền');return;}chiaAnim={id:null,amt:0,pool,pct};D.bud.add=D.bud.add||{};(D.bud.add[m]=D.bud.add[m]||[]).push({amt:a,note:$('anote').value.trim()||undefined,ts:Date.now()});D.bud.u=Date.now();save();S={v:'chia'};render();if(VO)hearts(12);toast('đã cộng '+short(a)+' vào tiền tổng tháng '+(+m.slice(5)));};}$('jnew').onclick=()=>{S={v:'jarf',back:'chia'};render();};
   document.querySelectorAll('[data-je]').forEach(b=>b.onclick=()=>{S={v:'jarf',id:b.dataset.je,back:'chia'};render();});
   document.querySelectorAll('[data-jd]').forEach(b=>b.onclick=()=>{S={v:'jard',id:b.dataset.jd,back:'chia'};render();});
   document.querySelectorAll('[data-jin]').forEach(b=>b.onclick=()=>{S={v:'chia',pick:b.dataset.jin,dir:'in'};chiaAnim=null;render();setTimeout(()=>$('tamt')&&$('tamt').focus(),60);});
