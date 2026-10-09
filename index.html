@@ -10823,12 +10823,12 @@ function jarHint(sel,amt,ownId){const h=$('jarh');if(!h)return;const m=today().s
 function budCard(s){const m=today().slice(0,7),A=budOf(m);
   if(!A)return VO?`<button class="bud set" id="budset"><span class="bud-ic">${ICO.wallet}</span><span><b>Đặt tiền tháng này</b><small>gõ số tiền đang có để xài trong tháng, chia lọ nếu muốn — app báo còn bao nhiêu, có lố không</small></span><em>›</em></button>`:'';
   const sp=s.mo,left=A-sp,now=new Date(),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),dn=now.getDate(),dl=dim-dn+1;
-  const pct=Math.min(100,sp/A*100),plan=A*dn/dim,st=left<0?'b':sp>plan*1.1?'w':'g';
+  const pct=Math.min(100,sp/A*100),plan=A*dn/dim,st=left<0?'b':'g';   /* 09/10: bỏ cảnh báo nhịp — khoản lớn đầu tháng (đưa vợ, học phí) làm nó báo nhầm */
   const msg=left<0?`Đã <b>lố ${short(-left)}</b> so với tiền tháng này`
     :st==='w'?`Đang xài nhanh hơn kế hoạch — tới hôm nay lẽ ra khoảng ${short(plan)}`
     :`Còn ${dl} ngày · mỗi ngày tiêu được <b>~${short(left/dl)}</b>`;
   const J=jarStats(m);
-  const jr2=J.map(j=>{const no=!j.amt&&!j.auto,l=j.amt-j.sp;return `<button class="jv${l<0&&j.amt?' over':''}" data-jar="${j.id}">${jarSvg(j,58)}<b>${esc(j.n)}</b><small>${D.hide?'•••':no?'chưa nạp':l<0?'lố '+short(-l):'còn '+short(l)}</small></button>`;}).join('');
+  const jr2=J.filter(j=>!j.auto).map(j=>{const no=!j.amt&&!j.auto,l=j.amt-j.sp;return `<button class="jv${l<0&&j.amt?' over':''}" data-jar="${j.id}">${jarSvg(j,58)}<b>${esc(j.n)}</b><small>${D.hide?'•••':no?'chưa nạp':l<0?'lố '+short(-l):'còn '+short(l)}</small></button>`;}).join('');
   const jr=J.map(j=>{const no=!j.amt&&!j.auto,l=j.amt-j.sp,p=j.amt?Math.min(100,j.sp/j.amt*100):0,c=no?'n':l<0?'b':j.sp>j.amt*dn/dim*1.1?'w':'g';
     return `<button class="jar ${c}" ${j.auto?'':`data-jar="${j.id}"`} style="--jk:${j.col||'#8B919A'}"><div class="jar-t"><span><i>${j.ic||'…'}</i>${esc(j.n)}</span><b>${D.hide?'•••':no?'':(l<0?'lố '+short(-l):'còn '+short(l))}</b></div>
       <div class="jar-b"><i style="width:${p.toFixed(1)}%"></i></div><small>${D.hide?'':no?(j.sp?'đã xài '+short(j.sp)+' · ':'')+'chạm để nạp tiền':short(j.sp)+' / '+short(j.amt)}${j.auto?' · chi thẳng từ tiền tổng':''}</small></button>`;}).join('');
@@ -10846,6 +10846,8 @@ function budView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduc
     ${J.length&&A?`<div class="srow" style="cursor:default"><span class="sic">💰</span><span class="st"><b>Tiền tổng</b><small>phần chưa chia vào lọ = tiền tháng − các lọ</small></span><span class="sr mono" style="${A-sumJ<0?'color:var(--bad)':''}">${A-sumJ<0?'−':''}${short(Math.abs(A-sumJ))}</span></div>`:''}
     ${A&&sumJ>A?`<div class="warn">Các lọ cộng lại ${short(sumJ)} — nhiều hơn tiền tháng ${short(A)}. Bớt lọ hoặc tăng tiền tháng.</div>`:''}
     <button class="cta ghost" id="b_jar">＋ Thêm lọ</button>
+    ${!VO&&!J.length?`<button class="cta" id="b_sug" style="margin-top:10px">✨ Dùng bộ lọ gợi ý</button>
+      <div class="note" style="text-align:left">Tiền tháng <b>30tr</b> · 👪 Gia đình 20tr · 🍜 Ăn &amp; cà phê 3tr · 🐠 Cá 2tr · 🛵 Đi lại 1,5tr · 🛍 Riêng 1,5tr · còn 2tr ở Tiền tổng. Sửa từng lọ sau được.</div>`:''}
     ${!J.length?`<div class="note" style="text-align:left">Ví dụ: <b>Ăn uống 15tr</b> (Ăn uống, Cà phê) · <b>Con cái 10tr</b> (Con cái). Phần còn lại tự vào <b>Tiền tổng</b>.</div>`:''}
     ${A?'<button class="del" id="b_x">Bỏ theo dõi tiền tháng</button>':''}</div></div>`;
   const num=v=>+String(v).replace(/\D/g,'')||0;
@@ -10853,6 +10855,11 @@ function budView(){const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduc
   $('bk').onclick=()=>{const a=num($('b_a').value);if(a&&a!==A){D.bud=D.bud||{m:{}};D.bud.m=D.bud.m||{};D.bud.m[m]=a;D.bud.def=a;D.bud.u=Date.now();save();}S={v:'home'};render();};
   $('b_ok').onclick=()=>{const a=num($('b_a').value);if(!a){toast('gõ số tiền');return;}D.bud=D.bud||{m:{}};D.bud.m=D.bud.m||{};D.bud.m[m]=a;D.bud.def=a;D.bud.u=Date.now();save();S={v:'chia'};render();if(VO)hearts(18);toast('đã lưu tiền tháng '+(+m.slice(5))+' — giờ nạp vào từng lọ');};
   $('b_jar').onclick=()=>{S={v:'jarf'};render();};
+  /* BỘ LỌ GỢI Ý (08/10, app của Mau): 10tr chi riêng + 20tr gia đình như La bàn. Một chạm, chỉ khi chưa có lọ. */
+  if($('b_sug'))$('b_sug').onclick=()=>{D.bud=D.bud||{m:{}};D.bud.m=D.bud.m||{};D.bud.m[m]=30e6;D.bud.def=30e6;
+    D.bud.jars=[{id:'j-gd',n:'Gia đình',amt:20e6,cats:['giadinh','con','bieu'],col:'#2563EB',ic:'👪'},{id:'j-an',n:'Ăn & cà phê',amt:3e6,cats:['an','giaitri'],col:'#C2410C',ic:'🍜'},
+      {id:'j-ca',n:'Cá',amt:2e6,cats:['ca'],col:'#0F8A5F',ic:'🐠'},{id:'j-dl',n:'Đi lại',amt:1.5e6,cats:['dilai'],col:'#A16207',ic:'🛵'},{id:'j-rg',n:'Riêng',amt:1.5e6,cats:['muasam','suckhoe'],col:'#C2255C',ic:'🛍'}];
+    D.bud.u=Date.now();save();S={v:'home'};render();toast('đã cài 5 lọ · tiền tháng 30tr');};
   document.querySelectorAll('[data-jx]').forEach(b=>b.onclick=()=>{S={v:'jarf',id:b.dataset.jx};render();});
   if($('b_x'))$('b_x').onclick=()=>{const old=D.bud;D.bud={m:{},def:0,jars:old.jars,u:Date.now()};save();S={v:'home'};render();toast('đã bỏ',()=>{D.bud=Object.assign(old,{u:Date.now()});save();render();});};}
 /* ══ CHIA TIỀN (08/10, vợ Mau): nguồn tiền tổng → NẠP dần vào từng lọ, như chuyển từ ví chính sang các hũ.
