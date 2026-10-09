@@ -374,7 +374,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .jarh.solo{margin-top:8px;padding:8px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--line);text-align:left}
 .icp{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.icp button{width:42px;height:42px;border-radius:12px;background:var(--panel);border:1.5px solid var(--line);font-size:1.25rem}.icp button.on{border-color:var(--accent);background:rgba(15,157,138,.1)}
 .overb{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(200,62,62,.08);border:1px solid rgba(200,62,62,.3);color:var(--bad);font-size:.8rem;line-height:1.45}.overb b{font-family:ui-monospace,"SF Mono",Menlo,monospace}.overb.sm{padding:6px 10px;font-size:.74rem}
-.overl{font-size:.76rem;color:var(--ink3);margin-top:6px;min-height:18px}.overl.bad{color:var(--bad)}.jc.jout{background:var(--panel2,#F7F6F2);border-style:dashed}.lnk2{display:block;margin:14px auto 0;border:0;background:none;color:var(--ink3);font:inherit;font-size:.8rem;text-decoration:underline;cursor:pointer}.overl .lnk{margin-top:6px;border:0;background:none;color:var(--acc);font:inherit;font-weight:600;padding:2px 0;cursor:pointer}#j_ok.dim{opacity:.45}.overl b{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.overl{font-size:.76rem;color:var(--ink3);margin-top:6px;min-height:18px}.overl.bad{color:var(--bad)}.nadd{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:2px 0 10px;font-size:.8rem;color:var(--ink3)}.nadd button{border:1px solid var(--line,#E7E4DD);background:var(--panel,#fff);color:var(--ink2);border-radius:999px;padding:7px 12px;font:inherit;font-size:.8rem;cursor:pointer}.nadd button.on{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}.jc.jout{background:var(--panel2,#F7F6F2);border-style:dashed}.lnk2{display:block;margin:14px auto 0;border:0;background:none;color:var(--ink3);font:inherit;font-size:.8rem;text-decoration:underline;cursor:pointer}.overl .lnk{margin-top:6px;border:0;background:none;color:var(--acc);font:inherit;font-weight:600;padding:2px 0;cursor:pointer}#j_ok.dim{opacity:.45}.overl b{font-family:ui-monospace,"SF Mono",Menlo,monospace}
 .jsel{margin-top:8px}.jsel.big .jsc{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;overflow:visible;margin:0;padding:0}
 .jsel.big .jch{align-items:center;text-align:center;padding:10px 4px 8px;border-radius:16px;font-size:.8rem}.jsel.big .jch i{font-size:1.5rem;line-height:1.2}.jsel.big .jsl{font-size:.78rem;color:var(--ink2);margin:4px 0 6px}.jsl{display:block;font-size:.68rem;color:var(--ink3);font-weight:600;margin-bottom:4px}
 .jsc{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}.jsc::-webkit-scrollbar{display:none}
@@ -11696,26 +11696,32 @@ function nodView(){const x=(D.no||[]).find(y=>y.id===S.id);if(!x||x.del){S={v:'n
       <div class="dsub" style="margin-top:8px">${x.k==='thu'?'Đã nhận':'Đã trả'} ${short(x.amt-l)||'0'} / ${short(x.amt)} · từ ${ddmm(x.d)}/${x.d.slice(2,4)}${x.due?' · hẹn '+ddmm(x.due):''}</div>
       ${x.note?`<div class="dsub">${esc(x.note)}</div>`:''}</div>
     ${o?`<label class="fl">${x.k==='thu'?'Vừa nhận':'Vừa trả'} bao nhiêu?<input id="n_p" inputmode="numeric" placeholder="${Math.round(l).toLocaleString('vi-VN')} (trả đủ)"></label>
+      ${x.k==='thu'&&budOf(today().slice(0,7))?`<div class="nadd"><span>Tiền này</span><button data-na="1" class="${D.noAdd?'on':''}">＋ Cộng vào tiền tháng</button><button data-na="0" class="${D.noAdd?'':'on'}">Để ngoài</button></div>`:''}
       <button class="cta" id="n_pay">${x.k==='thu'?'⬇ Ghi đã nhận':'⬆ Ghi đã trả'}</button>
       <div class="wact" style="grid-template-columns:1fr 1fr"><button id="n_msg">📋 Chép tin nhắc</button><button id="n_snz">⏰ Nhắc lại sau 7 ngày</button></div>`
       :`<button class="cta ghost" id="n_re">↺ Mở lại khoản này</button>`}
     <div class="lh"><span>Lịch sử</span></div>
     <div class="row" style="cursor:default"><div class="ic">${x.k==='thu'?'🤝':'↩'}</div><div class="mid"><div class="n">${x.k==='thu'?'Cho nợ':'Mượn'}</div><div class="s">${dayLab(x.d)}</div></div><div class="r"><div class="a">${short(x.amt)}</div></div></div>
-    ${(x.pays||[]).slice().sort((a,b)=>a.d<b.d?1:-1).map((p,i)=>`<div class="row" style="cursor:default"><div class="ic">${x.k==='thu'?'⬇':'⬆'}</div><div class="mid"><div class="n">${x.k==='thu'?'Đã nhận':'Đã trả'}</div><div class="s">${dayLab(p.d)}</div></div>
+    ${(x.pays||[]).slice().sort((a,b)=>a.d<b.d?1:-1).map((p,i)=>`<div class="row" style="cursor:default"><div class="ic">${x.k==='thu'?'⬇':'⬆'}</div><div class="mid"><div class="n">${x.k==='thu'?'Đã nhận':'Đã trả'}</div><div class="s">${dayLab(p.d)}${p.add?' · đã cộng vào tiền tháng':''}</div></div>
       <div class="r"><div class="a inc">${x.k==='thu'?'+':'−'}${short(p.amt)}</div><button class="x" data-px="${p.d}|${p.amt}">bỏ</button></div></div>`).join('')}
     <button class="del" id="n_del">Xoá khoản này</button>
   </div></div>`;
   const back=()=>{S={v:'no',k:x.k,back:S.back};render();};
   $('bk').onclick=back;$('ned').onclick=()=>{S={v:'nof',id:x.id,k:x.k,back:S.back};render();};
   if($('n_p'))$('n_p').oninput=noFmt;
-  if($('n_pay'))$('n_pay').onclick=()=>{const a=Math.min(noNum($('n_p').value)||l,l);x.pays=x.pays||[];const p={d:today(),amt:a};x.pays.push(p);
+  /* nhận tiền trả nợ (09/10): chọn cộng vào tiền tháng (thành 1 dòng "tiền thêm", gắn p.add=ts để bỏ/hoàn tác gỡ đúng dòng đó) hoặc để ngoài */
+  const addRm=p=>{if(!p.add||!D.bud||!D.bud.add)return;for(const k in D.bud.add){const L=D.bud.add[k],i=L.findIndex(y=>y&&y.ts===p.add);if(i>=0){L.splice(i,1);D.bud.u=Date.now();save();}}};
+  const addPut=p=>{const m=today().slice(0,7);D.bud.add=D.bud.add||{};(D.bud.add[m]=D.bud.add[m]||[]).push({amt:p.amt,note:'Nợ · '+x.name,ts:p.add});D.bud.u=Date.now();save();};
+  document.querySelectorAll('[data-na]').forEach(b=>b.onclick=()=>{D.noAdd=b.dataset.na==='1';save();document.querySelectorAll('[data-na]').forEach(y=>y.classList.toggle('on',y===b));});
+  if($('n_pay'))$('n_pay').onclick=()=>{const a=Math.min(noNum($('n_p').value)||l,l);x.pays=x.pays||[];const p={d:today(),amt:a};
+    const ad=x.k==='thu'&&!!$('n_p').closest('.wrap').querySelector('[data-na="1"].on');if(ad){p.add=Date.now();addPut(p);}x.pays.push(p);
     if(noLeft(x)<=0)x.done=true;delete x.snz;noTouch(x);render();
-    toast((noLeft(x)?'ghi '+short(a)+' · còn '+short(noLeft(x)):'✓ '+esc(x.name)+' đã '+(x.k==='thu'?'trả đủ':'được trả đủ')),()=>{x.pays=x.pays.filter(y=>y!==p);x.done=false;noTouch(x);render();});};
+    toast((noLeft(x)?'ghi '+short(a)+' · còn '+short(noLeft(x)):'✓ '+esc(x.name)+' đã '+(x.k==='thu'?'trả đủ':'được trả đủ'))+(ad?' · +'+short(a)+' vào tiền tháng':''),()=>{x.pays=x.pays.filter(y=>y!==p);addRm(p);x.done=false;noTouch(x);render();});};
   if($('n_msg'))$('n_msg').onclick=()=>noCopy(x);
   if($('n_snz'))$('n_snz').onclick=()=>{const d=new Date();d.setDate(d.getDate()+7);x.snz=d.toISOString().slice(0,10);noTouch(x);toast('sẽ nhắc lại '+ddmm(x.snz));};
   if($('n_re'))$('n_re').onclick=()=>{x.done=false;noTouch(x);render();};
   document.querySelectorAll('[data-px]').forEach(b=>b.onclick=()=>{const [d,a]=b.dataset.px.split('|');const i=x.pays.findIndex(p=>p.d===d&&p.amt===+a);
-    if(i>=0){const p=x.pays.splice(i,1)[0];x.done=false;noTouch(x);render();toast('đã bỏ lần '+short(p.amt),()=>{x.pays.push(p);if(noLeft(x)<=0)x.done=true;noTouch(x);render();});}});
+    if(i>=0){const p=x.pays.splice(i,1)[0];addRm(p);x.done=false;noTouch(x);render();toast('đã bỏ lần '+short(p.amt)+(p.add?' · đã trừ khỏi tiền tháng':''),()=>{x.pays.push(p);if(p.add)addPut(p);if(noLeft(x)<=0)x.done=true;noTouch(x);render();});}});
   $('n_del').onclick=()=>{x.del=true;noTouch(x);back();toast('đã xoá '+esc(x.name),()=>{x.del=false;noTouch(x);render();});};}
 
 /* ── thêm / sửa ── */
