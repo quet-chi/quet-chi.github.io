@@ -10720,14 +10720,14 @@ function home(){
       <span style="display:flex;gap:8px"><button class="eye2 add" data-tab="tay" aria-label="ghi tay">＋</button><button class="eye2" id="fnd" aria-label="tìm kiếm">🔍</button><button class="eye2" id="eye" aria-label="ẩn số">${D.hide?'🙈':'👁'}</button></span></div>`}
     ${location.host==='quet-chi.github.io'?`<div class="warn" style="margin:0 0 12px;line-height:1.55">📍 <b>Địa chỉ cũ</b> — mạng nhà hay chặn trang này.
       Bật <b>☁ Tự đồng bộ</b> ở Cài đặt (cùng mật khẩu) để các khoản cũ lên Mac, rồi dùng <b>quet-chi-sync.web.app</b>.</div>`:''}
-    ${jarOnly()?voHero(s):`<button class="hcard" data-tab="tk">
+    ${VO&&jarOnly()?voHero(s):`<button class="hcard" data-tab="tk">
       <div class="hcl">Tháng ${now.getMonth()+1} đã chi</div>
       <div class="hcv">${money(s.mo)}<small> đ</small></div>
       <div class="hcd">${dl!=null?`<span class="dchip ${dl>=0?'up':'dn'}">${dl>=0?'▲':'▼'} ${Math.abs(dl).toFixed(0)}%</span><span class="dsub">so cùng kỳ tháng trước</span>`:'<span class="dsub">chạm để xem thống kê ›</span>'}</div>
       <div class="spark">${d7.map(x=>`<div class="sb${x.k===T?' td':''}"><i style="height:${x.v?Math.max(6,x.v/m7*100):0}%"></i><span>${x.lab}</span></div>`).join('')}</div>
       <div class="hcs"><span>Hôm nay <b>${short(s.to)}</b></span><span>${s.toN} khoản</span><span>7 ngày <b>${short(d7.reduce((a,x)=>a+x.v,0))}</b></span></div>
     </button>`}
-    ${jarOnly()?'':budCard(s)}
+    ${VO&&jarOnly()?'':budCard(s)}
     ${(()=>{const a=D.ask&&D.tx.find(t=>t.id===D.ask);if(!a||!noName(a)||Date.now()-a.ts>2*864e5)return'';
       return `<div class="askn"><div class="tiny">Khoản <b>${short(a.amt)}</b> vừa rồi chuyển cho ai? <span class="dim">MB vừa hiện tên — gõ một lần, lần sau tự điền</span></div>
         <div class="askr"><input id="askN" placeholder="Tên người nhận / quán" enterkeyhint="done"><button id="askOk">Lưu</button><button id="askX" aria-label="bỏ qua">×</button></div></div>`;})()}
@@ -10820,7 +10820,7 @@ function jarSvg(j,size){const W=size||64,H=Math.round(W*1.18),l=(j.amt||0)-j.sp,
     <rect x="${W*.2}" y="2" width="${W*.6}" height="7" rx="3" fill="${c}" fill-opacity="${none?.25:.9}"/>
     <text x="${W/2}" y="${H*.62}" text-anchor="middle" font-size="${W*.3}">${j.ic||'…'}</text>${over?`<circle cx="${W-8}" cy="16" r="8" fill="#C83E3E"/><text x="${W-8}" y="20" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">!</text>`:''}</svg>`;}
 /* CHỈ CHỌN LỌ (08/10, Mau: "dùng note là được"): bản vợ có lọ → bỏ lưới loại, chọn lọ + ghi chú. Loại tự gán = loại đầu của lọ (Chi khác → Khác) để Thống kê vẫn chạy. */
-const jarOnly=()=>VO&&jarsOf().length>0&&budOf(today().slice(0,7))>0;
+const jarOnly=()=>jarsOf().length>0&&budOf(today().slice(0,7))>0;   /* 09/10: app Mau cũng chỉ chọn lọ (bỏ lưới danh mục); hero/thẻ vẫn theo mô hình riêng */
 const catOfJar=id=>{const j=jarsOf().find(x=>x.id===id);return j&&j.cats&&j.cats[0]||'khac';};
 /* GIA ĐÌNH (08/10, bản vợ): nhà 3 người — Ba, Mẹ, Bé. Tim bay khi ghi / nạp lọ / đặt tiền tháng / chạm cả nhà. Tắt nếu máy bật giảm chuyển động. */
 const LOVE=['Ngày mới bình an 🌤','Cả nhà khoẻ vui 💕','Thương cả nhà 🤍','Mẹ giỏi ghê ✨','Bé ngoan, nhà vui 🌷','Hôm nay thật đẹp ☀️','Nhà mình hạnh phúc 🏡','Ba thương mẹ con 💗','Cười nhiều hơn nhé 😊','Ngủ ngon, mơ đẹp 🌙','Cuối tuần vui vẻ 🎈','Yêu thương mỗi ngày 💞','Mọi điều suôn sẻ 🍀','Bình yên là đủ 🕊'];   /* ngắn, mỗi ngày 1 câu */
@@ -10847,7 +10847,7 @@ function jarRow(sel,amtNow,exceptId){const m=today().slice(0,7);if(!jarsOf().len
     <div class="jarh" id="jarh">&nbsp;</div></div>`;}
 function jarHint(sel,amt,ownId){const h=$('jarh');if(!h)return;
   if(!VO&&sel==='_k'){const m=today().slice(0,7),all=TXV().filter(x=>inBud(x,m)&&x.id!==ownId).reduce((a,x)=>a+mineOf(x),0),l=budOf(m)-all-amt;
-    h.innerHTML=D.hide?'&nbsp;':l<0?`<span style="color:var(--bad)">Tiền tháng sẽ âm ${short(-l)}</span>`:`Ngoài lọ · tiền tháng còn ${short(l)} sau khoản này`;return;}const m=today().slice(0,7),js=jarStats(m).find(j=>j.id===sel);if(!js||D.hide){h.innerHTML='&nbsp;';return;}
+    h.innerHTML=D.hide?'&nbsp;':l<0?`<span style="color:var(--bad)">Tiền tháng sẽ âm ${short(-l)}</span>`:(()=>{const k=jarStats(m).find(j=>j.auto),own=ownId?D.tx.find(t=>t.id===ownId):null,b=own&&jarIdOf(own)==='_k'?mineOf(own):0,lo=k?k.amt-k.sp+b-amt:0;return `Ngoài lọ ${lo<0?'<span style="color:var(--bad)">lố '+short(-lo)+'</span>':'còn '+short(lo)} · tiền tháng còn ${short(l)} sau khoản này`;})();return;}const m=today().slice(0,7),js=jarStats(m).find(j=>j.id===sel);if(!js||D.hide){h.innerHTML='&nbsp;';return;}
   const own=ownId?D.tx.find(t=>t.id===ownId):null,base=own&&(own.jar||jarAuto(own.cat))===sel?mineOf(own):0,l=js.amt-js.sp+base-amt;
   h.innerHTML=!js.amt&&!js.auto?`Lọ <b>${esc(js.n)}</b> chưa nạp tiền — vào Chia tiền để nạp`:l<0?`<span style="color:var(--bad)">Lọ <b>${esc(js.n)}</b> sẽ lố ${short(-l)}</span>`:`Lọ <b>${esc(js.n)}</b> còn ${short(l)} sau khoản này`;}
 function budCard(s){const m=today().slice(0,7),A=budOf(m);
