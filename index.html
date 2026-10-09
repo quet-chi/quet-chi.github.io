@@ -374,7 +374,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .jarh.solo{margin-top:8px;padding:8px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--line);text-align:left}
 .icp{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.icp button{width:42px;height:42px;border-radius:12px;background:var(--panel);border:1.5px solid var(--line);font-size:1.25rem}.icp button.on{border-color:var(--accent);background:rgba(15,157,138,.1)}
 .overb{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(200,62,62,.08);border:1px solid rgba(200,62,62,.3);color:var(--bad);font-size:.8rem;line-height:1.45}.overb b{font-family:ui-monospace,"SF Mono",Menlo,monospace}.overb.sm{padding:6px 10px;font-size:.74rem}
-.overl{font-size:.76rem;color:var(--ink3);margin-top:6px;min-height:18px}.overl.bad{color:var(--bad)}.overl b{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.overl{font-size:.76rem;color:var(--ink3);margin-top:6px;min-height:18px}.overl.bad{color:var(--bad)}.overl .lnk{margin-top:6px;border:0;background:none;color:var(--acc);font:inherit;font-weight:600;padding:2px 0;cursor:pointer}#j_ok.dim{opacity:.45}.overl b{font-family:ui-monospace,"SF Mono",Menlo,monospace}
 .jsel{margin-top:8px}.jsel.big .jsc{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;overflow:visible;margin:0;padding:0}
 .jsel.big .jch{align-items:center;text-align:center;padding:10px 4px 8px;border-radius:16px;font-size:.8rem}.jsel.big .jch i{font-size:1.5rem;line-height:1.2}.jsel.big .jsl{font-size:.78rem;color:var(--ink2);margin:4px 0 6px}.jsl{display:block;font-size:.68rem;color:var(--ink3);font-weight:600;margin-bottom:4px}
 .jsc{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}.jsc::-webkit-scrollbar{display:none}
@@ -11016,15 +11016,16 @@ function jarfView(){const J=jarsOf(),x=S.id?J.find(j=>j.id===S.id):null,used=new
     <div class="note" style="text-align:left">Loại mờ là đã thuộc lọ khác. Mỗi loại chỉ nằm trong một lọ.</div>
     <button class="cta" id="j_ok">Lưu lọ</button>${x?'<button class="del" id="j_x">Xoá lọ</button>':''}</div></div>`;
   const num=v=>+String(v).replace(/\D/g,'')||0;
-  const mth=today().slice(0,7),others=J.filter(j=>j!==x).reduce((a,j)=>a+(j.amt||0),0),capA=budOf(mth);let confirmOver=false;
-  const chk=()=>{const o=$('j_over');if(!o)return 0;const v=num($('j_a').value),tot=others+v,over=tot-capA;confirmOver=false;$('j_ok').textContent='Lưu lọ';
-    o.innerHTML=over>0?`Tổng hạn mức sẽ là <b>${short(tot)}</b> — vượt tiền tháng ${short(capA)}: <b>${short(over)}</b>`:v?`Tổng hạn mức ${short(tot)} / tiền tháng ${short(capA)}`:'';o.classList.toggle('bad',over>0);return over;};
+  const mth=today().slice(0,7),others=J.filter(j=>j!==x).reduce((a,j)=>a+(j.amt||0),0),capA=budOf(mth),old=x?(x.amt||0):0,free=Math.max(0,capA-others);
+  const chk=()=>{const o=$('j_over');if(!o)return 0;const v=num($('j_a').value),over=others+v-capA,blk=over>0&&v>old;$('j_ok').classList.toggle('dim',blk);
+    o.innerHTML=blk?`Tiền tháng ${short(capA)} chỉ còn trống <b>${short(free)}</b> cho nhóm này — thiếu <b>${short(over)}</b>.<br>Muốn đặt cao hơn thì thêm tiền trước. <button class="lnk" id="j_add">＋ Thêm tiền</button>`:`Còn trống <b>${short(Math.max(0,free-v))}</b> chưa đặt hạn mức · tiền tháng ${short(capA)}`;
+    o.classList.toggle('bad',blk);const b=$('j_add');if(b)b.onclick=()=>{S={v:'chia',addin:1};render();setTimeout(()=>$('ainp')&&$('ainp').focus(),60);};return blk?over:0;};
   $('j_a').oninput=e=>{const n=num(e.target.value);e.target.value=n?n.toLocaleString('vi-VN'):'';chk();};chk();
   document.querySelectorAll('[data-jic]').forEach(b=>b.onclick=()=>{S.jic=b.dataset.jic;document.querySelectorAll('[data-jic]').forEach(y=>y.classList.toggle('on',y===b));});
   document.querySelectorAll('[data-jc]').forEach(b=>b.onclick=()=>{const c=b.dataset.jc;sel.has(c)?sel.delete(c):sel.add(c);b.classList.toggle('on',sel.has(c));});
   $('bk').onclick=()=>{S=S.back==='jard'?{v:'jard',id:S.jid}:{v:S.back||'bud'};render();};
   $('j_ok').onclick=()=>{const n=$('j_n').value.trim(),a=num($('j_a').value);if(!n){toast('cần tên lọ');return;}
-    if(!VO){const ov=chk();if(ov>0&&!confirmOver){confirmOver=true;$('j_ok').textContent='Vẫn lưu (vượt '+short(ov)+')';toast('hạn mức vượt tiền tháng '+short(ov)+' — bấm lần nữa để vẫn lưu');return;}}if(!sel.size){toast('chọn ít nhất một loại chi');return;}
+    if(!VO){const ov=chk();if(ov>0){toast('thiếu '+short(ov)+' — thêm tiền trước rồi mới đặt hạn mức cao hơn');return;}}if(!sel.size){toast('chọn ít nhất một loại chi');return;}
     D.bud=D.bud||{m:{},def:0};D.bud.jars=D.bud.jars||[];const y=x||{id:'j'+Date.now()};Object.assign(y,{n,amt:a,cats:[...sel]});if(S.jic)y.ic=S.jic;if(!x){const P=[['#2563EB','🧒'],['#C2410C','🍜'],['#0F8A5F','🧴'],['#C2255C','💄'],['#A16207','◎']];const k=D.bud.jars.length%P.length;y.col=P[k][0];y.ic=P[k][1];D.bud.jars.push(y);}D.bud.u=Date.now();save();S=S.back==='jard'?{v:'jard',id:S.jid}:{v:S.back||'bud'};render();toast(x?'đã lưu lọ':'đã thêm lọ '+esc(n));};
   if($('j_x'))$('j_x').onclick=()=>{D.bud.jars=D.bud.jars.filter(j=>j!==x);D.bud.u=Date.now();save();S={v:'bud'};render();toast('đã xoá lọ',()=>{D.bud.jars.push(x);D.bud.u=Date.now();save();render();});};}
 
