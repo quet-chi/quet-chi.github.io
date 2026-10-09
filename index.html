@@ -10763,6 +10763,10 @@ function home(){
 
 /* ══ TIỀN THÁNG NÀY (08/10) — cho vợ Mau: "có bao nhiêu, xài bao nhiêu, lố hông". Một hạn mức tổng, mỗi tháng tính lại từ đầu.
    D.bud={def:số mặc định, m:{'YYYY-MM':số}, u}. Tháng chưa gõ thì lấy số mặc định (số gần nhất đã gõ). Đồng bộ qua doc "z-bud". ══ */
+/* BẮT ĐẦU TỪ HÔM NAY (09/10): D.bud.from={'YYYY-MM':'YYYY-MM-DD'} — tháng đó chỉ trừ các khoản từ ngày này (khoản cũ vẫn trong sổ, Thống kê vẫn thấy) */
+const budFrom=m=>(D.bud&&D.bud.from&&D.bud.from[m])||m+'-01';
+const inBud=(x,m)=>!notSpend(x.cat)&&x.d.slice(0,7)===m&&x.d>=budFrom(m);
+const monthSp=m=>D.tx.filter(x=>inBud(x,m)).reduce((a,x)=>a+mineOf(x),0);
 const budAdd=m=>((D.bud&&D.bud.add&&D.bud.add[m])||[]).filter(x=>x&&x.amt>0);
 const budOf=m=>{const B=D.bud;if(!B)return 0;return ((B.m&&B.m[m]!=null)?B.m[m]:(B.def||0))+budAdd(m).reduce((a,x)=>a+x.amt,0);};   /* + tiền thêm trong tháng (09/10) */
 /* LỌ (08/10): chia tiền tháng thành từng lọ, mỗi lọ gắn với vài LOẠI chi → ghi khoản là tự trừ đúng lọ, không phải chọn thêm.
@@ -10782,7 +10786,7 @@ function voHero(s){const m=today().slice(0,7),A=budOf(m),H=D.hide,J=jarStats(m),
       ${left<0&&!H?`<div class="vh-pool">⚠️ Tiền tổng đã âm ${short(-left)} — rút bớt từ lọ về <span>Chia ›</span></div>`:LJ.length&&!H?`<div class="vh-pool">Nạp thêm vào lọ <span>Chia ›</span></div>`:''}</button>
     <div class="tkc vjars"><div class="tkh"><span>Các lọ</span><small id="vchia">chia tiền ›</small></div><div class="jvs">${jr}<button class="jv add" id="jaradd"><span>＋</span><b>Lọ mới</b><small>&nbsp;</small></button></div></div>`;}
 function jarStats(m){const A=budOf(m),J=jarsOf().map(j=>Object.assign({},j,{sp:0})),other={id:'_k',n:'Tiền tổng',ic:'💰',col:'#8B919A',amt:Math.max(0,A-J.reduce((a,j)=>a+(j.amt||0),0)),sp:0,cats:null,auto:true};
-  D.tx.filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===m).forEach(x=>{const j=x.jar==='_k'?null:x.jar?(J.find(j=>j.id===x.jar)||J.find(j=>(j.cats||[]).includes(x.cat))):J.find(j=>(j.cats||[]).includes(x.cat));(j||other).sp+=mineOf(x);});
+  D.tx.filter(x=>inBud(x,m)).forEach(x=>{const j=x.jar==='_k'?null:x.jar?(J.find(j=>j.id===x.jar)||J.find(j=>(j.cats||[]).includes(x.cat))):J.find(j=>(j.cats||[]).includes(x.cat));(j||other).sp+=mineOf(x);});
   return J.length?[...J,other]:[];}
 const jarOfCat=c=>jarsOf().find(j=>(j.cats||[]).includes(c));
 /* CHỌN LỌ khi ghi (08/10): chọn loại → tự chọn lọ của loại đó; bấm chip khác để trừ vào lọ khác. x.jar='_k' = Chi khác. */
@@ -10818,17 +10822,17 @@ const jTitle=x=>jarOnly()&&noName(x)&&!kin(x)?(x.note||jarInfo(x).n):kinName(x);
 const jSub=x=>{const ji=jarInfo(x),t=jTitle(x);return [ji.n,kinNote(x)&&kinNote(x)!==t?esc(kinNote(x)):''].filter(Boolean).join(' · ');};
 const jarAuto=c=>{const j=c&&jarOfCat(c);return j?j.id:'_k';};
 function jarRow(sel,amtNow,exceptId){const m=today().slice(0,7);if(!jarsOf().length||!budOf(m))return'';const JS=jarStats(m),big=jarOnly();
-  const allSp=D.tx.filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===m).reduce((a,x)=>a+mineOf(x),0);
+  const allSp=monthSp(m);
   return `<div class="jsel${big?' big':''}"><span class="jsl">${big?'Chi từ lọ nào?':VO?'Trừ vào lọ':'Nhóm hạn mức'}</span><div class="jsc">${JS.map(j=>{const l=!VO&&j.auto?budOf(m)-allSp:j.amt-j.sp,nm=!VO&&j.auto?'Ngoài nhóm':j.n;return `<button type="button" class="jch${sel===j.id?' on':''}" data-jsel="${j.id}" style="--jk:${j.col||'#8B919A'}"><i>${j.ic||'…'}</i>${esc(nm)}<small>${D.hide?'':j.amt||j.auto?(l<0?'lố '+short(-l):'còn '+short(l)):(VO?'chưa nạp':'chưa đặt')}</small></button>`;}).join('')}</div>
     <div class="jarh" id="jarh">&nbsp;</div></div>`;}
 function jarHint(sel,amt,ownId){const h=$('jarh');if(!h)return;
-  if(!VO&&sel==='_k'){const m=today().slice(0,7),all=D.tx.filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===m&&x.id!==ownId).reduce((a,x)=>a+mineOf(x),0),l=budOf(m)-all-amt;
+  if(!VO&&sel==='_k'){const m=today().slice(0,7),all=D.tx.filter(x=>inBud(x,m)&&x.id!==ownId).reduce((a,x)=>a+mineOf(x),0),l=budOf(m)-all-amt;
     h.innerHTML=D.hide?'&nbsp;':l<0?`<span style="color:var(--bad)">Tiền tháng sẽ âm ${short(-l)}</span>`:`Ngoài nhóm · tiền tháng còn ${short(l)} sau khoản này`;return;}const m=today().slice(0,7),js=jarStats(m).find(j=>j.id===sel);if(!js||D.hide){h.innerHTML='&nbsp;';return;}
   const own=ownId?D.tx.find(t=>t.id===ownId):null,base=own&&(own.jar||jarAuto(own.cat))===sel?mineOf(own):0,l=js.amt-js.sp+base-amt;
   h.innerHTML=!js.amt&&!js.auto?`Lọ <b>${esc(js.n)}</b> chưa nạp tiền — vào Chia tiền để nạp`:l<0?`<span style="color:var(--bad)">Lọ <b>${esc(js.n)}</b> sẽ lố ${short(-l)}</span>`:`Lọ <b>${esc(js.n)}</b> còn ${short(l)} sau khoản này`;}
 function budCard(s){const m=today().slice(0,7),A=budOf(m);
   if(!A)return VO?`<button class="bud set" id="budset"><span class="bud-ic">${ICO.wallet}</span><span><b>Đặt tiền tháng này</b><small>gõ số tiền đang có để xài trong tháng, chia lọ nếu muốn — app báo còn bao nhiêu, có lố không</small></span><em>›</em></button>`:'';
-  const sp=s.mo,left=A-sp,now=new Date(),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),dn=now.getDate(),dl=dim-dn+1;
+  const sp=monthSp(m),left=A-sp,now=new Date(),dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(),dn=now.getDate(),dl=dim-dn+1;
   const pct=Math.min(100,sp/A*100),plan=A*dn/dim,st=left<0?'b':'g';   /* 09/10: bỏ cảnh báo nhịp — khoản lớn đầu tháng (đưa vợ, học phí) làm nó báo nhầm */
   const msg=left<0?`Đã <b>lố ${short(-left)}</b> so với tiền tháng này`
     :st==='w'?`Đang xài nhanh hơn kế hoạch — tới hôm nay lẽ ra khoảng ${short(plan)}`
@@ -10847,6 +10851,8 @@ function budView(){const m=today().slice(0,7),A=budOf(m)-budAdd(m).reduce((a,x)=
     <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Tiền tháng ${+m.slice(5)}</b><span style="width:64px"></span></div>
     <label class="fl">Tháng này có bao nhiêu tiền để xài?<input id="b_a" inputmode="numeric" value="${A?Math.round(A).toLocaleString('vi-VN'):''}" placeholder="vd: 40.000.000"></label>
     <button class="cta" id="b_ok" style="margin-top:10px">Lưu số tiền</button>
+    ${VO?'':`<div class="card" style="margin-top:14px;padding:14px"><b>Bắt đầu tính từ hôm nay</b><div class="note" style="text-align:left;margin-top:4px">Gõ số tiền <b>thật đang có</b> ở ô trên rồi bấm nút dưới. Tháng này chỉ trừ các khoản từ hôm nay (khoản cũ vẫn trong sổ). Tháng sau dùng số cố định${D.bud&&D.bud.def?' <b>'+short(D.bud.def)+'</b>':''}.${D.bud&&D.bud.from&&D.bud.from[m]?' Đang tính từ <b>'+ddmm(D.bud.from[m])+'</b>.':''}</div>
+      <button class="cta ghost" id="b_from" style="margin-top:8px">▶ Bắt đầu từ hôm nay với số này</button></div>`}
     <div class="lh"><span>${VO?'Chia lọ':'Hạn mức theo nhóm'}</span><small class="lhh">${VO?'mỗi lọ gắn vài loại chi — ghi khoản là tự trừ đúng lọ':'mỗi nhóm gắn vài loại chi — chỉ để theo dõi, không trừ tiền tổng'}</small></div>
     ${J.map(j=>{const st=JS.find(x=>x.id===j.id)||{sp:0};return `<button class="srow" data-jx="${j.id}"><span class="sic">◎</span><span class="st"><b>${esc(j.n)}</b><small>${(j.cats||[]).map(c=>SH[c]||cat(c)[1]).join(' · ')||'chưa gán loại'}</small></span><span class="sr mono">${short(j.amt)}<br><small class="dim">đã xài ${short(st.sp)}</small></span></button>`;}).join('')}
     ${J.length&&A?`<div class="srow" style="cursor:default"><span class="sic">💰</span><span class="st"><b>Tiền tổng</b><small>phần chưa chia vào lọ = tiền tháng − các lọ</small></span><span class="sr mono" style="${A-sumJ<0?'color:var(--bad)':''}">${A-sumJ<0?'−':''}${short(Math.abs(A-sumJ))}</span></div>`:''}
@@ -10861,6 +10867,8 @@ function budView(){const m=today().slice(0,7),A=budOf(m)-budAdd(m).reduce((a,x)=
   $('bk').onclick=()=>{const a=num($('b_a').value);if(a&&a!==A){D.bud=D.bud||{m:{}};D.bud.m=D.bud.m||{};D.bud.m[m]=a;D.bud.def=a;D.bud.u=Date.now();save();}S={v:'home'};render();};
   $('b_ok').onclick=()=>{const a=num($('b_a').value);if(!a){toast('gõ số tiền');return;}D.bud=D.bud||{m:{}};D.bud.m=D.bud.m||{};D.bud.m[m]=a;D.bud.def=a;D.bud.u=Date.now();save();S={v:'chia'};render();if(VO)hearts(18);toast('đã lưu tiền tháng '+(+m.slice(5))+' — giờ nạp vào từng lọ');};
   $('b_jar').onclick=()=>{S={v:'jarf'};render();};
+  if($('b_from'))$('b_from').onclick=()=>{const a=num($('b_a').value);if(!a){toast('gõ số tiền đang có');return;}D.bud=D.bud||{m:{}};D.bud.m=D.bud.m||{};D.bud.from=D.bud.from||{};
+    if(!D.bud.def)D.bud.def=a;D.bud.m[m]=a;D.bud.from[m]=today();if(D.bud.add)delete D.bud.add[m];D.bud.u=Date.now();save();S={v:'home'};render();toast('bắt đầu từ hôm nay · còn '+short(a));};
   /* BỘ LỌ GỢI Ý (08/10, app của Mau): 10tr chi riêng + 20tr gia đình như La bàn. Một chạm, chỉ khi chưa có lọ. */
   if($('b_sug'))$('b_sug').onclick=()=>{D.bud=D.bud||{m:{}};D.bud.m=D.bud.m||{};D.bud.m[m]=5e6;D.bud.def=5e6;
     D.bud.jars=[{id:'j-an',n:'Ăn & cà phê',amt:2e6,cats:['an','giaitri'],col:'#C2410C',ic:'🍜'},{id:'j-ca',n:'Cá',amt:1e6,cats:['ca'],col:'#0F8A5F',ic:'🐠'},
@@ -10931,7 +10939,7 @@ const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduce((a,j)=>a+(j.amt||
       if(VO&&S.dir!=='out')setTimeout(()=>hearts(12),120);if(navigator.vibrate)navigator.vibrate(12);const d=S.dir;S={v:'chia'};render();toast((d==='out'?'đã rút ':'đã nạp ')+short(a)+(d==='out'?' từ lọ ':' vào lọ ')+esc(P.n));};}}
 /* CHI TIẾT LỌ (08/10, "muốn xem lọ của con chi gì"): hình lọ + nạp/xài/còn + mọi khoản tháng này trừ vào lọ. Chạm khoản → sửa / đổi lọ. */
 function jardView(){const m=S.m||today().slice(0,7),JS=jarStats(m),j=JS.find(x=>x.id===S.id);if(!j){S={v:'home'};render();return;}
-  const L=D.tx.filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===m&&jarIdOf(x)===j.id).sort((a,b)=>b.ts-a.ts),l=j.amt-j.sp;
+  const L=D.tx.filter(x=>inBud(x,m)&&jarIdOf(x)===j.id).sort((a,b)=>b.ts-a.ts),l=j.amt-j.sp;
   const pm=mAdd(m,-1),nm=mAdd(m,1),cur=today().slice(0,7);let last='',list='';
   const dT={};L.forEach(x=>{dT[x.d]=(dT[x.d]||0)+mineOf(x);});
   L.forEach(x=>{if(x.d!==last){list+=`<div class="dh"><span>${dayLab(x.d)}</span><span class="dsum">−${short(dT[x.d])}</span></div>`;last=x.d;}const c=cat(x.cat),jo=jarOnly(),t=jTitle(x);
@@ -10956,7 +10964,7 @@ function jardView(){const m=S.m||today().slice(0,7),JS=jarStats(m),j=JS.find(x=>
   document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{S={v:'ed',id:b.dataset.ed,prev:{v:'jard',id:j.id,m,back:S.back}};render();});}
 /* ══ HẠN MỨC (09/10, app Mau) — lọ chỉ là MỨC TRẦN theo nhóm loại chi, KHÔNG giữ tiền. Tiền tổng = tiền tháng (+ tiền thêm) − mọi khoản chi.
    App vợ giữ kiểu phong bì (chiaView). ══ */
-function hanmucView(){const m=today().slice(0,7),A=budOf(m),JS=jarStats(m).filter(j=>!j.auto),all=D.tx.filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===m).reduce((a,x)=>a+mineOf(x),0),left=A-all,sumL=JS.reduce((a,j)=>a+(j.amt||0),0);
+function hanmucView(){const m=today().slice(0,7),A=budOf(m),JS=jarStats(m).filter(j=>!j.auto),all=monthSp(m),left=A-all,sumL=JS.reduce((a,j)=>a+(j.amt||0),0);
   $('app').innerHTML=`<div class="sheet chia"><div class="wrap">
     <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Hạn mức tháng ${+m.slice(5)}</b><button class="back bk2" id="ctot" style="text-align:right">Sửa tổng</button></div>
     <div class="pool"><div class="pool-t"><span>Tiền tháng ${+m.slice(5)}${budAdd(m).length?' (gồm tiền thêm)':''}</span><b>${money(A)}</b></div>
