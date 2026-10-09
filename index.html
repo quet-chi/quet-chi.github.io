@@ -374,7 +374,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .jarh.solo{margin-top:8px;padding:8px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--line);text-align:left}
 .icp{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.icp button{width:42px;height:42px;border-radius:12px;background:var(--panel);border:1.5px solid var(--line);font-size:1.25rem}.icp button.on{border-color:var(--accent);background:rgba(15,157,138,.1)}
 .overb{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(200,62,62,.08);border:1px solid rgba(200,62,62,.3);color:var(--bad);font-size:.8rem;line-height:1.45}.overb b{font-family:ui-monospace,"SF Mono",Menlo,monospace}.overb.sm{padding:6px 10px;font-size:.74rem}
-.overl{font-size:.76rem;color:var(--ink3);margin-top:6px;min-height:18px}.overl.bad{color:var(--bad)}.lnk2{display:block;margin:14px auto 0;border:0;background:none;color:var(--ink3);font:inherit;font-size:.8rem;text-decoration:underline;cursor:pointer}.overl .lnk{margin-top:6px;border:0;background:none;color:var(--acc);font:inherit;font-weight:600;padding:2px 0;cursor:pointer}#j_ok.dim{opacity:.45}.overl b{font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.overl{font-size:.76rem;color:var(--ink3);margin-top:6px;min-height:18px}.overl.bad{color:var(--bad)}.jc.jout{background:var(--panel2,#F7F6F2);border-style:dashed}.lnk2{display:block;margin:14px auto 0;border:0;background:none;color:var(--ink3);font:inherit;font-size:.8rem;text-decoration:underline;cursor:pointer}.overl .lnk{margin-top:6px;border:0;background:none;color:var(--acc);font:inherit;font-weight:600;padding:2px 0;cursor:pointer}#j_ok.dim{opacity:.45}.overl b{font-family:ui-monospace,"SF Mono",Menlo,monospace}
 .jsel{margin-top:8px}.jsel.big .jsc{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;overflow:visible;margin:0;padding:0}
 .jsel.big .jch{align-items:center;text-align:center;padding:10px 4px 8px;border-radius:16px;font-size:.8rem}.jsel.big .jch i{font-size:1.5rem;line-height:1.2}.jsel.big .jsl{font-size:.78rem;color:var(--ink2);margin:4px 0 6px}.jsl{display:block;font-size:.68rem;color:var(--ink3);font-weight:600;margin-bottom:4px}
 .jsc{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}.jsc::-webkit-scrollbar{display:none}
@@ -10984,7 +10984,7 @@ function jardView(){const m=S.m||today().slice(0,7),JS=jarStats(m),j=JS.find(x=>
   document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>{S={v:'ed',id:b.dataset.ed,prev:{v:'jard',id:j.id,m,back:S.back}};render();});}
 /* ══ HẠN MỨC (09/10, app Mau) — lọ chỉ là MỨC TRẦN theo nhóm loại chi, KHÔNG giữ tiền. Tiền tổng = tiền tháng (+ tiền thêm) − mọi khoản chi.
    App vợ giữ kiểu phong bì (chiaView). ══ */
-function hanmucView(){const m=today().slice(0,7),A=budOf(m),JS=jarStats(m).filter(j=>!j.auto),all=monthSp(m),left=A-all,sumL=JS.reduce((a,j)=>a+(j.amt||0),0);
+function hanmucView(){const m=today().slice(0,7),A=budOf(m),JA=jarStats(m),OUT=(JA.find(j=>j.auto)||{sp:0}).sp,JS=JA.filter(j=>!j.auto),all=monthSp(m),left=A-all,sumL=JS.reduce((a,j)=>a+(j.amt||0),0);
   $('app').innerHTML=`<div class="sheet chia"><div class="wrap">
     <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Hạn mức tháng ${+m.slice(5)}</b><button class="back bk2" id="ctot" style="text-align:right">Sửa tổng</button></div>
     <div class="pool"><div class="pool-t"><span>Tiền tháng ${+m.slice(5)}${budAdd(m).length?' (gồm tiền thêm)':''}</span><b>${money(A)}</b></div>
@@ -10998,6 +10998,9 @@ function hanmucView(){const m=today().slice(0,7),A=budOf(m),JS=jarStats(m).filte
         <div class="jc-v" data-jd="${j.id}"><div><small>Đã xài / hạn mức</small><b>${short(j.sp)} <span style="color:var(--ink3);font-size:.7em">/ ${j.amt?short(j.amt):'—'}</span></b></div><div class="jc-s"><small>&nbsp;</small><small class="${l<0?'dnc':''}">${j.amt?(l<0?'lố '+short(-l):'còn '+short(l)):'chưa đặt'}</small></div></div>
         <div class="jc-bar"><i style="width:${fp.toFixed(1)}%;${l<0?'background:var(--bad)':''}"></i></div>
         <div class="jc-a" style="grid-template-columns:1fr"><button data-je="${j.id}">Sửa hạn mức</button></div></div>`;}).join('')}
+      ${JS.length?(()=>{const free=Math.max(0,A-sumL),l=free-OUT;return `<div class="jc jout" style="--jk:#8B919A"><div class="jc-h"><span class="jc-ic" style="--jk:#8B919A">💰</span><span class="jc-n"><b>Ngoài lọ</b><small>chi không thuộc lọ nào</small></span></div>
+        <div class="jc-v"><div><small>Đã chi ngoài lọ / chưa đặt hạn mức</small><b>${short(OUT)} <span style="color:var(--ink3);font-size:.7em">/ ${short(free)}</span></b></div><div class="jc-s"><small>&nbsp;</small><small class="${l<0?'dnc':''}">${l<0?'lố '+short(-l):'còn '+short(l)}</small></div></div>
+        <div class="jc-bar"><i style="width:${free?Math.min(100,OUT/free*100).toFixed(1):OUT?100:0}%;${l<0?'background:var(--bad)':''}"></i></div></div>`;})():''}
       <button class="jc add" id="jnew"><span>＋</span>Thêm nhóm</button></div>
     ${!JS.length?'<div class="note">Chưa có nhóm nào. Bấm <b>Thêm nhóm</b> — ví dụ Cá 1tr, Ăn &amp; cà phê 2tr.</div>':''}
   </div>
