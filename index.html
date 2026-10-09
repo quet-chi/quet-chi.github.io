@@ -10843,11 +10843,11 @@ const jSub=x=>{const ji=jarInfo(x),t=jTitle(x);return [ji.n,kinNote(x)&&kinNote(
 const jarAuto=c=>{const j=c&&jarOfCat(c);return j?j.id:'_k';};
 function jarRow(sel,amtNow,exceptId){const m=today().slice(0,7);if(!jarsOf().length||!budOf(m))return'';const JS=jarStats(m),big=jarOnly();
   const allSp=monthSp(m);
-  return `<div class="jsel${big?' big':''}"><span class="jsl">${big?'Chi từ lọ nào?':VO?'Trừ vào lọ':'Nhóm hạn mức'}</span><div class="jsc">${JS.map(j=>{const l=!VO&&j.auto?budOf(m)-allSp:j.amt-j.sp,nm=!VO&&j.auto?'Ngoài nhóm':j.n;return `<button type="button" class="jch${sel===j.id?' on':''}" data-jsel="${j.id}" style="--jk:${j.col||'#8B919A'}"><i>${j.ic||'…'}</i>${esc(nm)}<small>${D.hide?'':j.amt||j.auto?(l<0?'lố '+short(-l):'còn '+short(l)):(VO?'chưa nạp':'chưa đặt')}</small></button>`;}).join('')}</div>
+  return `<div class="jsel${big?' big':''}"><span class="jsl">${big?'Chi từ lọ nào?':VO?'Trừ vào lọ':'Lọ'}</span><div class="jsc">${JS.map(j=>{const l=j.amt-j.sp,nm=!VO&&j.auto?'Ngoài lọ':j.n;return `<button type="button" class="jch${sel===j.id?' on':''}" data-jsel="${j.id}" style="--jk:${j.col||'#8B919A'}"><i>${j.ic||'…'}</i>${esc(nm)}<small>${D.hide?'':j.amt||j.auto?(l<0?'lố '+short(-l):'còn '+short(l)):(VO?'chưa nạp':'chưa đặt')}</small></button>`;}).join('')}</div>
     <div class="jarh" id="jarh">&nbsp;</div></div>`;}
 function jarHint(sel,amt,ownId){const h=$('jarh');if(!h)return;
   if(!VO&&sel==='_k'){const m=today().slice(0,7),all=TXV().filter(x=>inBud(x,m)&&x.id!==ownId).reduce((a,x)=>a+mineOf(x),0),l=budOf(m)-all-amt;
-    h.innerHTML=D.hide?'&nbsp;':l<0?`<span style="color:var(--bad)">Tiền tháng sẽ âm ${short(-l)}</span>`:`Ngoài nhóm · tiền tháng còn ${short(l)} sau khoản này`;return;}const m=today().slice(0,7),js=jarStats(m).find(j=>j.id===sel);if(!js||D.hide){h.innerHTML='&nbsp;';return;}
+    h.innerHTML=D.hide?'&nbsp;':l<0?`<span style="color:var(--bad)">Tiền tháng sẽ âm ${short(-l)}</span>`:`Ngoài lọ · tiền tháng còn ${short(l)} sau khoản này`;return;}const m=today().slice(0,7),js=jarStats(m).find(j=>j.id===sel);if(!js||D.hide){h.innerHTML='&nbsp;';return;}
   const own=ownId?D.tx.find(t=>t.id===ownId):null,base=own&&(own.jar||jarAuto(own.cat))===sel?mineOf(own):0,l=js.amt-js.sp+base-amt;
   h.innerHTML=!js.amt&&!js.auto?`Lọ <b>${esc(js.n)}</b> chưa nạp tiền — vào Chia tiền để nạp`:l<0?`<span style="color:var(--bad)">Lọ <b>${esc(js.n)}</b> sẽ lố ${short(-l)}</span>`:`Lọ <b>${esc(js.n)}</b> còn ${short(l)} sau khoản này`;}
 function budCard(s){const m=today().slice(0,7),A=budOf(m);
@@ -11202,12 +11202,12 @@ function amtView(){
     ${S.dum?`<div class="split"><button id="amtT" class="sp"></button><button id="mineT" class="sp"></button></div><div class="waitl" id="wl"></div>`
       :`<button class="amt" id="amtT"></button>`}
     <div class="opts"><div class="seg">${VIA.map(v=>`<button data-via="${v[0]}" class="${S.via===v[0]?'on':''}">${v[1]}</button>`).join('')}</div>
-      <button class="op more${S.optOpen||S.dum||S.once||S.later?' on':''}" id="optT" aria-label="tuỳ chọn khác">${S.dum||S.once||S.later?[S.dum?'👥':'',S.once?'1×':'',S.later?'💳':''].join(''):'⋯'}</button></div>
-    ${S.optOpen||S.dum||S.once||S.later?`<div class="opts2">${VO?'':`<button class="op${S.dum?' on':''}" id="dumT">👥 Trả dùm</button>`}<button class="op${S.once?' on':''}" id="onceT" title="Khoản lớn một lần — học phí, bảo hiểm năm…">1 lần</button><button class="op${S.later?' on':''}" id="laterT" title="Mua trả sau (SPayLater…) — ghi nợ, chưa trừ tiền">💳 Trả sau</button></div>`:''}
+      ${!VO?'':`<button class="op more${S.optOpen||S.dum||S.once||S.later?' on':''}" id="optT" aria-label="tuỳ chọn khác">${S.dum||S.once||S.later?[S.dum?'👥':'',S.once?'1×':'',S.later?'💳':''].join(''):'⋯'}</button>`}</div>
+    ${!VO||S.optOpen||S.dum||S.once||S.later?`<div class="opts2">${VO?'':`<button class="op${S.dum?' on':''}" id="dumT">👥 Trả dùm</button>`}<button class="op${S.once?' on':''}" id="onceT" title="Khoản lớn một lần — học phí, bảo hiểm năm…">1 lần</button><button class="op${S.later?' on':''}" id="laterT" title="Mua trả sau (SPayLater…) — ghi nợ, chưa trừ tiền">💳 Trả sau</button></div>`:''}
     <div class="ntr"><label class="dpk${S.d&&S.d!==today()?' on':''}" id="dpkl"><span id="dpkt">📅 ${(S.d&&S.d!==today())?dayLab(S.d):'Hôm nay'}</span><input type="date" id="dpk" value="${S.d||today()}" max="${today()}"></label>
     <input id="nt" class="nt" value="${esc(S.note||'')}" placeholder="${jarOnly()?'✎ Mua gì, cho ai… (không bắt buộc)':'✎ Mua gì? (không bắt buộc)'}" enterkeyhint="done"></div>
     ${jarOnly()?'':catGrid(S.cat)}
-    ${jarOnly()?jarRow(S.jar||(S.cat?jarAuto(S.cat):'_k')):jarsOf().length&&budOf(today().slice(0,7))?'<div class="jarh solo" id="jarh">Chọn loại chi — app báo nhóm còn bao nhiêu</div>':''}
+    ${jarOnly()?jarRow(S.jar||(S.cat?jarAuto(S.cat):'_k')):!VO?jarRow(S.jar||(S.cat?jarAuto(S.cat):'')):jarsOf().length&&budOf(today().slice(0,7))?'<div class="jarh solo" id="jarh">Chọn loại chi — app báo nhóm còn bao nhiêu</div>':''}
     ${khongNapas?'<div class="warn">🏪 <b>QR thanh toán cửa hàng</b> — ngân hàng không cho tự điền loại này. Bấm nút: khoản được ghi, MB mở ra → <b>quét lại mã ở quầy bằng MB</b>.</div>':''}
     <div class="padw"><div class="pad">${['1','2','3','4','5','6','7','8','9','000','0','⌫'].map(k=>`<button data-k="${k}">${k}</button>`).join('')}</div>
       <button class="cta" id="go">${goLabel()}</button><div class="hint" id="hint">${hintTxt()}</div></div>
@@ -11221,14 +11221,14 @@ function amtView(){
   /* bấm số / chọn loại: sửa tại chỗ, không vẽ lại cả màn — vẽ lại làm trang nhảy về đầu */
   const f=n=>n?n.toLocaleString('vi-VN'):'0';
   const sync=()=>{const n=+S.amt||0,m=+S.mine||0;
-    if(jarOnly()){if(!S.jar){S.jar=S.cat?jarAuto(S.cat):'_k';}if(!S.cat)S.cat=catOfJar(S.jar);}else S.jar=S.cat?jarAuto(S.cat):null;if(jarOnly()&&!S.jar){const h=$('jarh');if(h)h.innerHTML='Chạm một lọ để ghi';}document.querySelectorAll('[data-jsel]').forEach(b=>b.classList.toggle('on',b.dataset.jsel===S.jar));if(!jarOnly()&&S.jar&&!S.later){const ji=jarInfo({jar:S.jar,cat:S.cat});const h=$('jarh');jarHint(S.jar,S.dum?m:n);if(h&&S.jar!=='_k')h.innerHTML=ji.ic+' '+h.innerHTML.replace('Lọ ','');}else if(S.jar){if(S.later){const h=$('jarh'),ji=jarStats(today().slice(0,7)).find(x=>x.id===S.jar);if(h)h.innerHTML=ji?'Nợ trả sau của <b>'+esc(ji.n)+'</b> · chưa trừ tiền':'&nbsp;';}else jarHint(S.jar,S.dum?m:n);}
+    if(jarOnly()){if(!S.jar){S.jar=S.cat?jarAuto(S.cat):'_k';}if(!S.cat)S.cat=catOfJar(S.jar);}else if(!(S.jarTay&&S.jar))S.jar=S.cat?jarAuto(S.cat):null;if(jarOnly()&&!S.jar){const h=$('jarh');if(h)h.innerHTML='Chạm một lọ để ghi';}document.querySelectorAll('[data-jsel]').forEach(b=>b.classList.toggle('on',b.dataset.jsel===S.jar));if(!jarOnly()&&S.jar&&!S.later){const ji=jarInfo({jar:S.jar,cat:S.cat});const h=$('jarh');jarHint(S.jar,S.dum?m:n);if(h&&S.jar!=='_k')h.innerHTML=ji.ic+' '+h.innerHTML.replace('Lọ ','');}else if(S.jar){if(S.later){const h=$('jarh'),ji=jarStats(today().slice(0,7)).find(x=>x.id===S.jar);if(h)h.innerHTML=ji?'Nợ trả sau của <b>'+esc(ji.n)+'</b> · chưa trừ tiền':'&nbsp;';}else jarHint(S.jar,S.dum?m:n);}
     if(S.dum){$('amtT').innerHTML=`<span class="cap">Tổng chuyển</span>${f(n)}`;$('mineT').innerHTML=`<span class="cap">Phần của mình</span>${f(m)}`;
       $('amtT').classList.toggle('tgt',S.tgt==='amt');$('mineT').classList.toggle('tgt',S.tgt==='mine');
       $('wl').innerHTML=n>m?`Chờ mọi người trả lại <b>${f(n-m)} đ</b>`:'&nbsp;';}
     else $('amtT').innerHTML=f(n)+'<small> đ</small>';
     $('go').classList.toggle('off',!(n>0&&S.cat));};
   sync();
-  $('optT').onclick=()=>{S.optOpen=!(S.optOpen||S.dum||S.once||S.later);render();};
+  if($('optT'))$('optT').onclick=()=>{S.optOpen=!(S.optOpen||S.dum||S.once||S.later);render();};
   if($('onceT'))$('onceT').onclick=()=>{S.once=!S.once;$('onceT').classList.toggle('on',S.once);};
   if($('laterT'))$('laterT').onclick=()=>{S.later=!S.later;$('laterT').classList.toggle('on',S.later);$('go').textContent=goLabel();const h=$('hint');if(h)h.innerHTML=S.later?'Khoản này vào <b>nợ trả sau</b> của lọ đang chọn — chưa trừ tiền. Lúc trả mới trừ vào lọ đó.':hintTxt();sync();};
   if($('dumT'))$('dumT').onclick=()=>{S.dum=!S.dum;S.tgt=S.dum?'mine':'amt';if(!S.dum)S.mine='';render();};
@@ -11236,7 +11236,7 @@ function amtView(){
   if($('mineT'))$('mineT').onclick=()=>{S.tgt='mine';sync();};
   document.querySelectorAll('[data-via]').forEach(b=>b.onclick=()=>{S.via=b.dataset.via;
     document.querySelectorAll('[data-via]').forEach(x=>x.classList.toggle('on',x===b));$('go').textContent=goLabel();$('hint').innerHTML=hintTxt();});
-  document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{S.cat=b.dataset.c;
+  document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{S.cat=b.dataset.c;if(!VO)S.jarTay=false;
     document.querySelectorAll('[data-c]').forEach(x=>x.classList.toggle('on',x===b));sync();});
   document.querySelectorAll('[data-jsel]').forEach(b=>b.onclick=()=>{S.jar=b.dataset.jsel;S.jarTay=true;if(jarOnly())S.cat=catOfJar(S.jar);sync();});
   /* BÀN PHÍM: nhận phím lúc ngón chạm xuống (pointerdown) — mỗi chạm đúng một số. Trước đây "chống phóng to" tự
@@ -11258,6 +11258,7 @@ function amtView(){
     if(S.dum&&mine<amt){x.mine=mine;x.nhan=false;}
     if(S.once)x.once=true;
     if(jarOnly()){const jj=S.jar||jarAuto(S.cat);if(jj!==jarAuto(S.cat)||jj!=='_k')x.jar=jj;}
+    else if(!VO&&S.jarTay&&S.jar&&S.jar!==jarAuto(S.cat)){x.jar=S.jar;x.jarTay=true;}
     /* QR không kèm tên → nhớ hỏi tên khi quay lại (MB vừa hiện tên người nhận); hỏi một lần cho mỗi tài khoản */
     if(!x.name&&q&&q.napas)D.ask=x.id;
     D.via=x.via;
