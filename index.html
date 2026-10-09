@@ -10641,7 +10641,7 @@ let S={v:'home',q:null,amt:'',cat:null,name:'',tay:false};
    nên mở thẳng app bằng momo:// (không điền được). */
 const VIA_ALL=[['mb','MB'],['tcb','Techcom'],['momo','Momo'],['cash','Tiền mặt']];
 /* bản vợ (08/10): chỉ MB + Tiền mặt */
-const VIA=VIA_ALL.filter(v=>!/^\/vo\/?$/.test(location.pathname)||v[0]==='mb'||v[0]==='cash');
+const VIA=VIA_ALL.filter(v=>/^\/vo\/?$/.test(location.pathname)?(v[0]==='mb'||v[0]==='cash'):v[0]==='mb');   /* 09/10: Mau chỉ dùng thẻ MB */
 const AUTOFILL={mb:1};
 const viaName=k=>(VIA_ALL.find(v=>v[0]===k)||VIA_ALL[0])[1];
 /* luôn mặc định MB (ví chính, tự điền được) — nhớ ví lần trước dễ mở nhầm Momo */
@@ -11201,7 +11201,7 @@ function amtView(){
     ${S.tay&&!S.name?quickPicks():''}
     ${S.dum?`<div class="split"><button id="amtT" class="sp"></button><button id="mineT" class="sp"></button></div><div class="waitl" id="wl"></div>`
       :`<button class="amt" id="amtT"></button>`}
-    <div class="opts"><div class="seg">${VIA.map(v=>`<button data-via="${v[0]}" class="${S.via===v[0]?'on':''}">${v[1]}</button>`).join('')}</div>
+    <div class="opts">${VIA.length<2?'':`<div class="seg">${VIA.map(v=>`<button data-via="${v[0]}" class="${S.via===v[0]?'on':''}">${v[1]}</button>`).join('')}</div>`}
       ${!VO?'':`<button class="op more${S.optOpen||S.dum||S.once||S.later?' on':''}" id="optT" aria-label="tuỳ chọn khác">${S.dum||S.once||S.later?[S.dum?'👥':'',S.once?'1×':'',S.later?'💳':''].join(''):'⋯'}</button>`}</div>
     ${!VO||S.optOpen||S.dum||S.once||S.later?`<div class="opts2">${VO?'':`<button class="op${S.dum?' on':''}" id="dumT">👥 Trả dùm</button>`}<button class="op${S.once?' on':''}" id="onceT" title="Khoản lớn một lần — học phí, bảo hiểm năm…">1 lần</button><button class="op${S.later?' on':''}" id="laterT" title="Mua trả sau (SPayLater…) — ghi nợ, chưa trừ tiền">💳 Trả sau</button></div>`:''}
     <div class="ntr"><label class="dpk${S.d&&S.d!==today()?' on':''}" id="dpkl"><span id="dpkt">📅 ${(S.d&&S.d!==today())?dayLab(S.d):'Hôm nay'}</span><input type="date" id="dpk" value="${S.d||today()}" max="${today()}"></label>
