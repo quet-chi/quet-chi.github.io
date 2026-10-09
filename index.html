@@ -372,6 +372,7 @@ input,textarea{-webkit-user-select:text;user-select:text}
 .chipb.spc{border-color:#5C6BC0;color:#3949AB}.chipb.spc b{color:#3949AB}
 .opts2{display:flex;gap:6px;justify-content:center;margin:6px 0 2px}.op.more{min-width:44px;font-size:1rem;letter-spacing:1px}
 .jarh.solo{margin-top:8px;padding:8px 12px;border-radius:12px;background:var(--panel);border:1px solid var(--line);text-align:left}
+.icp{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.icp button{width:42px;height:42px;border-radius:12px;background:var(--panel);border:1.5px solid var(--line);font-size:1.25rem}.icp button.on{border-color:var(--accent);background:rgba(15,157,138,.1)}
 .jsel{margin-top:8px}.jsel.big .jsc{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;overflow:visible;margin:0;padding:0}
 .jsel.big .jch{align-items:center;text-align:center;padding:10px 4px 8px;border-radius:16px;font-size:.8rem}.jsel.big .jch i{font-size:1.5rem;line-height:1.2}.jsel.big .jsl{font-size:.78rem;color:var(--ink2);margin:4px 0 6px}.jsl{display:block;font-size:.68rem;color:var(--ink3);font-weight:600;margin-bottom:4px}
 .jsc{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}.jsc::-webkit-scrollbar{display:none}
@@ -10582,7 +10583,8 @@ function load(){try{const v=JSON.parse(localStorage.getItem(LK)||'{}');D=Object.
   D.tx.forEach(x=>{if(x.cat==='suckhoe'&&x.d<'2026-10-08')x.cat='dautu';});
   if(!D.migSK){(D.rec||[]).forEach(r=>{if(r&&r.cat==='suckhoe')r.cat='dautu';});
     if(D.who&&typeof D.who==='object')Object.values(D.who).forEach(w=>{if(w&&w.cat==='suckhoe')w.cat='dautu';});D.migSK=1;}
-  if(D.rec)D.rec=D.rec.filter(r=>r&&r.id&&isFinite(r.amt)&&isFinite(r.day));if(D.no!=null&&!Array.isArray(D.no))delete D.no;if(D.bud!=null&&(typeof D.bud!=='object'||Array.isArray(D.bud)))delete D.bud;if(D.no)D.no=D.no.filter(x=>x&&typeof x.id==='string'&&isFinite(x.amt)&&x.amt>0&&typeof x.d==='string');if(D.mv)D.mv=D.mv.filter(m=>m&&m.id&&isFinite(m.amt));}
+  if(D.rec)D.rec=D.rec.filter(r=>r&&r.id&&isFinite(r.amt)&&isFinite(r.day));if(D.no!=null&&!Array.isArray(D.no))delete D.no;if(D.bud!=null&&(typeof D.bud!=='object'||Array.isArray(D.bud)))delete D.bud;
+  if(D.bud&&Array.isArray(D.bud.jars))D.bud.jars.forEach(j=>{if(j&&j.ic==='🛵'&&/đầu tư/i.test(j.n||'')){j.ic='📈';D.bud.u=Date.now();}});if(D.no)D.no=D.no.filter(x=>x&&typeof x.id==='string'&&isFinite(x.amt)&&x.amt>0&&typeof x.d==='string');if(D.mv)D.mv=D.mv.filter(m=>m&&m.id&&isFinite(m.amt));}
   catch(e){D={tx:[],who:{},hide:false};}}
 load();
 function save(){try{
@@ -10731,7 +10733,7 @@ function home(){
       return spc||nob||s.cho||syncPill?`<div class="chips2">${spc}${nob}${s.cho?`<button class="chipb" id="cho">👥 Chờ trả lại <b>${short(s.cho)}</b></button>`:''}${syncPill}</div>`:'';})()}
     ${(()=>{const nd=noDue();return nd.length?`<div class="due"><div class="dueh">🤝 Nhắc nợ</div>${nd.map(x=>`<div class="duer"><span>${x.k==='thu'?'🤝':'↩'}</span><button class="n nolk" data-nol="${x.id}">${esc(x.name)}<small>${x.k==='thu'?'nợ mình':'mình nợ'} · ${noWhy(x)}</small></button><b>${short(noLeft(x))}</b><button data-nm="${x.id}">${x.k==='thu'?'Nhắc':'Xem'}</button><button class="sk" data-ns="${x.id}">Để sau</button></div>`).join('')}</div>`:'';})()}
     ${(()=>{const due=recDue();return due.length?`<div class="due"><div class="dueh">⏰ Đến hạn</div>${due.map(r=>`<div class="duer"><span>${cat(r.cat)[2]}</span><span class="n">${esc(D.hide&&(r.cat==='giadinh'||r.cat==='bieu')?SH[r.cat]:r.name)}<small>ngày ${r.day} · ${wName(r.via||'mb')}</small></span><b>${short(r.amt)}</b><button data-rw="${r.id}">Ghi</button><button class="sk" data-rs="${r.id}">Bỏ</button></div>`).join('')}</div>`:'';})()}
-    ${VO?'':(()=>{const ws=WALLETS.map(([k,n,ic])=>({k,n,ic,i:wInfo(k)})).filter(w=>w.i);
+    ${true?'':(()=>{const ws=WALLETS.map(([k,n,ic])=>({k,n,ic,i:wInfo(k)})).filter(w=>w.i);
       return `<div class="wstrip">${ws.map(w=>`<button class="wcard" data-wv="${w.k}"><span>${w.ic} ${w.n}</span><b>${money(w.i.bal)}</b></button>`).join('')}<button class="wcard add" data-wv="">${ws.length?'＋':'💼 Thêm số dư ví'}</button></div>`;})()}
     <div class="lh"><span>Giao dịch gần đây</span>${L.length?'<small class="lhh">chạm để sửa · vuốt trái để xoá</small>':''}</div>
     ${L.length?list:syncCfg()?'<div class="empty">Chưa có khoản nào.<br>Lần tới trả tiền, bấm nút <b>Quét</b> ở giữa thanh dưới.</div>'
@@ -10996,6 +10998,7 @@ function hanmucView(){const m=today().slice(0,7),A=budOf(m),JS=jarStats(m).filte
   if($('aok')){$('ainp').oninput=e=>{const n=num2(e.target.value);e.target.value=n?n.toLocaleString('vi-VN'):'';};
     $('acx').onclick=()=>{S={v:'chia'};render();};$('ash2').onclick=e=>{if(e.target.id==='ash2'){S={v:'chia'};render();}};
     $('aok').onclick=()=>{const a=num2($('ainp').value);if(!a){toast('gõ số tiền');return;}D.bud.add=D.bud.add||{};(D.bud.add[m]=D.bud.add[m]||[]).push({amt:a,note:$('anote').value.trim()||undefined,ts:Date.now()});D.bud.u=Date.now();save();S={v:'chia'};render();toast('đã cộng '+short(a)+' vào tiền tháng '+(+m.slice(5)));};}}
+const JIC=['🍜','☕','🐠','🛵','🛍','📈','💰','🏠','🧒','👪','🎁','💊','🧴','💄','✈️','🎮','📚','🐶','🌱','◎'];
 function jarfView(){const J=jarsOf(),x=S.id?J.find(j=>j.id===S.id):null,used=new Set(J.filter(j=>j!==x).flatMap(j=>j.cats||[]));
   const sel=S.jc||(S.jc=new Set(x?x.cats||[]:[]));
   const CC=CATS.filter(c=>c[0]!=='nap'&&(VO?(c[0]!=='ca'&&c[0]!=='dautu'):(c[0]!=='dodung'&&c[0]!=='rieng')));
@@ -11003,16 +11006,18 @@ function jarfView(){const J=jarsOf(),x=S.id?J.find(j=>j.id===S.id):null,used=new
     <div class="bar1"><button class="back bk2" id="bk">‹ Huỷ</button><b>${x?'Sửa lọ':'Thêm lọ'}</b><span style="width:64px"></span></div>
     <label class="fl">Tên lọ<input id="j_n" value="${x?esc(x.n):''}" placeholder="vd: Ăn uống, Con cái"></label>
     <label class="fl">${VO?'Mỗi tháng bỏ vào lọ (để trống nếu chưa biết)':'Hạn mức mỗi tháng'}<input id="j_a" inputmode="numeric" value="${x?Math.round(x.amt).toLocaleString('vi-VN'):''}" placeholder="vd: 15.000.000"></label>
+    <div class="fl">Biểu tượng</div><div class="icp">${JIC.map(e=>`<button type="button" class="${(S.jic||(x&&x.ic))===e?'on':''}" data-jic="${e}">${e}</button>`).join('')}</div>
     <div class="fl">Những loại chi trừ vào lọ này</div>
     <div class="cg">${CC.map(c=>{const u=used.has(c[0]);return `<button class="cgb${sel.has(c[0])?' on':''}${u?' off':''}" data-jc="${c[0]}"${u?' disabled':''}><i>${c[2]}</i>${SH[c[0]]||c[1]}</button>`;}).join('')}</div>
     <div class="note" style="text-align:left">Loại mờ là đã thuộc lọ khác. Mỗi loại chỉ nằm trong một lọ.</div>
     <button class="cta" id="j_ok">Lưu lọ</button>${x?'<button class="del" id="j_x">Xoá lọ</button>':''}</div></div>`;
   const num=v=>+String(v).replace(/\D/g,'')||0;
   $('j_a').oninput=e=>{const n=num(e.target.value);e.target.value=n?n.toLocaleString('vi-VN'):'';};
+  document.querySelectorAll('[data-jic]').forEach(b=>b.onclick=()=>{S.jic=b.dataset.jic;document.querySelectorAll('[data-jic]').forEach(y=>y.classList.toggle('on',y===b));});
   document.querySelectorAll('[data-jc]').forEach(b=>b.onclick=()=>{const c=b.dataset.jc;sel.has(c)?sel.delete(c):sel.add(c);b.classList.toggle('on',sel.has(c));});
   $('bk').onclick=()=>{S=S.back==='jard'?{v:'jard',id:S.jid}:{v:S.back||'bud'};render();};
   $('j_ok').onclick=()=>{const n=$('j_n').value.trim(),a=num($('j_a').value);if(!n){toast('cần tên lọ');return;}if(!sel.size){toast('chọn ít nhất một loại chi');return;}
-    D.bud=D.bud||{m:{},def:0};D.bud.jars=D.bud.jars||[];const y=x||{id:'j'+Date.now()};Object.assign(y,{n,amt:a,cats:[...sel]});if(!x){const P=[['#2563EB','🧒'],['#C2410C','🍜'],['#0F8A5F','🧴'],['#C2255C','💄'],['#A16207','◎']];const k=D.bud.jars.length%P.length;y.col=P[k][0];y.ic=P[k][1];D.bud.jars.push(y);}D.bud.u=Date.now();save();S=S.back==='jard'?{v:'jard',id:S.jid}:{v:S.back||'bud'};render();toast(x?'đã lưu lọ':'đã thêm lọ '+esc(n));};
+    D.bud=D.bud||{m:{},def:0};D.bud.jars=D.bud.jars||[];const y=x||{id:'j'+Date.now()};Object.assign(y,{n,amt:a,cats:[...sel]});if(S.jic)y.ic=S.jic;if(!x){const P=[['#2563EB','🧒'],['#C2410C','🍜'],['#0F8A5F','🧴'],['#C2255C','💄'],['#A16207','◎']];const k=D.bud.jars.length%P.length;y.col=P[k][0];y.ic=P[k][1];D.bud.jars.push(y);}D.bud.u=Date.now();save();S=S.back==='jard'?{v:'jard',id:S.jid}:{v:S.back||'bud'};render();toast(x?'đã lưu lọ':'đã thêm lọ '+esc(n));};
   if($('j_x'))$('j_x').onclick=()=>{D.bud.jars=D.bud.jars.filter(j=>j!==x);D.bud.u=Date.now();save();S={v:'bud'};render();toast('đã xoá lọ',()=>{D.bud.jars.push(x);D.bud.u=Date.now();save();render();});};}
 
 /* ── Cài đặt: đồng bộ, ẩn số, chép tay, phiên bản ── */
@@ -11022,7 +11027,7 @@ function caiView(){const c=syncCfg(),n=syncPending(),s=stats();
     <div class="topb"><div><div class="hi">${VO?'Của mình':'Quét chi'}</div><b>Cài đặt</b></div></div>
     <div class="sgrp"><div class="sgl">Dữ liệu</div>
       ${row('s_sync','☁',VO?'Sao lưu':'Đồng bộ sang Mac',c?(syncErr?'⚠ chưa gửi được — '+esc(syncErr):n?'đang chờ gửi '+n+' khoản':'đã đồng bộ hết'):(VO?'chưa kết nối — mở lại đúng đường link':'chưa bật — bật để sổ trên Mac tự nhận'),c?(syncErr||n?'<span class="bd">!</span>':'✓'):'Bật ›')}
-      ${VO?'':row('s_vi','💼','Ví & số dư',WALLETS.filter(([k])=>wInfo(k)).length?WALLETS.filter(([k])=>wInfo(k)).map(([k,n])=>n).join(' · '):'chưa đặt — để biết còn bao nhiêu trong từng ví')}
+      ${true?'':row('s_vi','💼','Ví & số dư',WALLETS.filter(([k])=>wInfo(k)).length?WALLETS.filter(([k])=>wInfo(k)).map(([k,n])=>n).join(' · '):'chưa đặt — để biết còn bao nhiêu trong từng ví')}
       ${row('s_bud','◎','Tiền tháng này',budOf(today().slice(0,7))?short(budOf(today().slice(0,7)))+' · biết còn bao nhiêu, có lố không':'chưa đặt — để biết còn bao nhiêu')}
       ${row('s_rec','↻','Khoản định kỳ',(D.rec||[]).length?(D.rec.length+' khoản · tới ngày tự nhắc'):'tiền nhà, gia đình, gói đăng ký…')}
       ${(()=>{const ns=noSum();return row('s_no','🤝','Sổ nợ',ns.nThu+ns.nTra?[ns.thu?'cần thu '+short(ns.thu):'',ns.tra?'cần trả '+short(ns.tra):''].filter(Boolean).join(' · '):'ai nợ mình, mình nợ ai');})()}
