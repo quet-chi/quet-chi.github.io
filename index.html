@@ -10652,9 +10652,9 @@ function toast(msg,undo,lab){const t=$('toast');t.innerHTML=`<div class="toast">
   if(undo)$('undo').onclick=()=>{undo();t.innerHTML='';};clearTimeout(toastT);toastT=setTimeout(()=>t.innerHTML='',undo?12000:2600);}
 
 function stats(){const m=today().slice(0,7),td=today();
-  const out=D.tx.filter(x=>!notSpend(x.cat));
+  const out=TXV().filter(x=>!notSpend(x.cat));
   const mo=out.filter(x=>x.d.slice(0,7)===m),to=out.filter(x=>x.d===td);
-  const cho=D.tx.filter(x=>x.mine!=null&&!x.nhan);
+  const cho=TXV().filter(x=>x.mine!=null&&!x.nhan);
   return{mo:mo.reduce((a,x)=>a+mineOf(x),0),moN:mo.length,to:to.reduce((a,x)=>a+mineOf(x),0),toN:to.length,
     cho:cho.reduce((a,x)=>a+x.amt-x.mine,0),choN:cho.length,
     moi:D.tx.filter(x=>!x.synced).length,cu:unsyncedDays()};}
@@ -10699,13 +10699,13 @@ function bindTabs(){document.querySelectorAll('[data-tab]').forEach(b=>b.onclick
 const icoBg=k=>{const c=TKC[k];return c?`background:${c}26`:'';};
 function home(){
   const s=stats(),now=new Date(),T=today();
-  const L=D.tx.slice().sort((a,b)=>b.ts-a.ts).slice(0,60),dayT={},SY=syncCfg()?syncCfg().sent||{}:null;
+  const L=TXV().slice().sort((a,b)=>b.ts-a.ts).slice(0,60),dayT={},SY=syncCfg()?syncCfg().sent||{}:null;
   L.forEach(x=>{if(!notSpend(x.cat))dayT[x.d]=(dayT[x.d]||0)+mineOf(x);});
   /* 7 ngày gần nhất cho biểu đồ nhỏ */
   const d7=[...Array(7)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);const k=d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
-    return{k,lab:['CN','T2','T3','T4','T5','T6','T7'][d.getDay()],v:D.tx.filter(x=>x.d===k&&!notSpend(x.cat)).reduce((a,x)=>a+mineOf(x),0)};});
+    return{k,lab:['CN','T2','T3','T4','T5','T6','T7'][d.getDay()],v:TXV().filter(x=>x.d===k&&!notSpend(x.cat)).reduce((a,x)=>a+mineOf(x),0)};});
   const m7=Math.max(...d7.map(x=>x.v),1);
-  const pmK=mAdd(T.slice(0,7),-1),dn=+T.slice(8),pt=D.tx.filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===pmK&&+x.d.slice(8)<=dn).reduce((a,x)=>a+mineOf(x),0);
+  const pmK=mAdd(T.slice(0,7),-1),dn=+T.slice(8),pt=TXV().filter(x=>!notSpend(x.cat)&&x.d.slice(0,7)===pmK&&+x.d.slice(8)<=dn).reduce((a,x)=>a+mineOf(x),0);
   const dl=pt>0?(s.mo-pt)/pt*100:null;
   let last='',list='';
   L.forEach(x=>{if(x.d!==last){list+=`<div class="dh"><span>${dayLab(x.d)}</span><span>${dayT[x.d]?'−'+short(dayT[x.d]):''}</span></div>`;last=x.d;}
@@ -10744,6 +10744,11 @@ function home(){
   bindTabs();
   $('eye').onclick=()=>{D.hide=!D.hide;save();render();};
   $('fnd').onclick=()=>{S={v:'find'};render();};
+  /* cách mở phần Đầu tư: giữ ngón ~0,8 giây lên số "Tháng … đã chi" — giống mở Tài sản; giữ lần nữa để giấu lại */
+  const hv=!VO&&document.querySelector('.hcard .hcv'),hc=hv&&hv.closest('.hcard');if(hv){let tm=null,fired=false;const go=()=>{clearTimeout(tm);tm=null;};
+    hv.addEventListener('pointerdown',()=>{go();fired=false;tm=setTimeout(()=>{tm=null;fired=true;if(!tsOpen()){S={v:'tsk',ret:'home'};render();}else{tsOpenUntil=0;render();toast('đã giấu lại');}},800);});
+    ['pointerup','pointerleave','pointercancel'].forEach(ev=>hv.addEventListener(ev,go));hv.style.webkitUserSelect='none';hv.style.userSelect='none';
+    hc.addEventListener('click',e=>{if(fired){fired=false;e.stopImmediatePropagation();e.preventDefault();}},true);hc.addEventListener('contextmenu',e=>e.preventDefault());}
   if($('pullsy'))$('pullsy').onclick=()=>{S={v:'sync'};render();};
   document.querySelectorAll('[data-wv]').forEach(b=>b.onclick=()=>{S=b.dataset.wv?{v:'vi',w:b.dataset.wv}:{v:'vi'};render();});
   document.querySelectorAll('[data-rw]').forEach(b=>b.onclick=()=>{const r=D.rec.find(x=>x.id===b.dataset.rw);const x=recWrite(r);render();
@@ -10772,12 +10777,18 @@ function home(){
 /* BẮT ĐẦU TỪ HÔM NAY (09/10): D.bud.from={'YYYY-MM':'YYYY-MM-DD'} — tháng đó chỉ trừ các khoản từ ngày này (khoản cũ vẫn trong sổ, Thống kê vẫn thấy) */
 const budFrom=m=>(D.bud&&D.bud.from&&D.bud.from[m])||m+'-01';
 const inBud=(x,m)=>!notSpend(x.cat)&&x.d.slice(0,7)===m&&x.d>=budFrom(m);
-const monthSp=m=>D.tx.filter(x=>inBud(x,m)).reduce((a,x)=>a+mineOf(x),0);
+const monthSp=m=>TXV().filter(x=>inBud(x,m)).reduce((a,x)=>a+mineOf(x),0);
 const budAdd=m=>((D.bud&&D.bud.add&&D.bud.add[m])||[]).filter(x=>x&&x.amt>0);
 const budOf=m=>{const B=D.bud;if(!B)return 0;return ((B.m&&B.m[m]!=null)?B.m[m]:(B.def||0))+budAdd(m).reduce((a,x)=>a+x.amt,0);};   /* + tiền thêm trong tháng (09/10) */
 /* LỌ (08/10): chia tiền tháng thành từng lọ, mỗi lọ gắn với vài LOẠI chi → ghi khoản là tự trừ đúng lọ, không phải chọn thêm.
    D.bud.jars=[{id,n,amt,cats:[...]}] — giữ qua các tháng. Phần chưa chia = lọ "Chi khác" cho mọi loại còn lại. */
 const jarsOf=()=>((D.bud&&D.bud.jars)||[]).filter(j=>j&&j.id);
+/* GIẤU ĐẦU TƯ (09/10, app Mau): chưa giữ-ngón + gõ mật khẩu đồng bộ → khoản 'Đầu tư' và lọ Đầu tư biến mất khỏi MỌI màn xem
+   (danh sách, tổng tháng, thống kê, hạn mức, tìm kiếm). Dữ liệu thật (D.tx, đồng bộ, chép sang Mac) không đổi. */
+const hidInv=()=>!VO&&!tsOpen();
+const TXV=()=>hidInv()?D.tx.filter(x=>x.cat!=='dautu'):D.tx;
+const invJar=j=>/đầu tư/i.test(j.n||'')||((j.cats||[]).length>0&&j.cats.every(c=>c==='dautu'));
+const jarsV=()=>hidInv()?jarsOf().filter(j=>!invJar(j)):jarsOf();
 const jarIdOf=x=>{const J=jarsOf();if(x.jar==='_k')return'_k';if(x.jar&&J.some(j=>j.id===x.jar))return x.jar;const j=J.find(j=>(j.cats||[]).includes(x.cat));return j?j.id:'_k';};
 const jarInfo=x=>{const id=jarIdOf(x),j=jarsOf().find(j=>j.id===id);return j?{id,n:j.n,ic:j.ic||'◎',col:j.col||'#8B919A'}:{id:'_k',n:'Tiền tổng',ic:'💰',col:'#8B919A'};};
 /* ── MÀN SỔ BẢN VỢ (08/10, rà UI): MỘT thẻ hồng = còn bao nhiêu tháng này + các lọ ngay dưới. Bỏ thẻ "đã chi" trùng, bỏ cảnh báo nhịp báo nhầm. ── */
@@ -10791,8 +10802,8 @@ function voHero(s){const m=today().slice(0,7),A=budOf(m),H=D.hide,J=jarStats(m),
       <div class="vh-s"><span>Tháng ${+m.slice(5)} <b>${short(A)}</b></span><span>Vào lọ <b>${short(sumJ)}</b></span><span>Chi từ tổng <b>${short(T.sp)}</b></span></div>
       ${left<0&&!H?`<div class="vh-pool">⚠️ Tiền tổng đã âm ${short(-left)} — rút bớt từ lọ về <span>Chia ›</span></div>`:LJ.length&&!H?`<div class="vh-pool">Nạp thêm vào lọ <span>Chia ›</span></div>`:''}</button>
     <div class="tkc vjars"><div class="tkh"><span>Các lọ</span><small id="vchia">chia tiền ›</small></div><div class="jvs">${jr}<button class="jv add" id="jaradd"><span>＋</span><b>Lọ mới</b><small>&nbsp;</small></button></div></div>`;}
-function jarStats(m){const A=budOf(m),J=jarsOf().map(j=>Object.assign({},j,{sp:0})),other={id:'_k',n:'Tiền tổng',ic:'💰',col:'#8B919A',amt:Math.max(0,A-J.reduce((a,j)=>a+(j.amt||0),0)),sp:0,cats:null,auto:true};
-  D.tx.filter(x=>inBud(x,m)).forEach(x=>{const j=x.jar==='_k'?null:x.jar?(J.find(j=>j.id===x.jar)||J.find(j=>(j.cats||[]).includes(x.cat))):J.find(j=>(j.cats||[]).includes(x.cat));(j||other).sp+=mineOf(x);});
+function jarStats(m){const A=budOf(m),J=jarsV().map(j=>Object.assign({},j,{sp:0})),other={id:'_k',n:'Tiền tổng',ic:'💰',col:'#8B919A',amt:Math.max(0,A-J.reduce((a,j)=>a+(j.amt||0),0)),sp:0,cats:null,auto:true};
+  TXV().filter(x=>inBud(x,m)).forEach(x=>{const j=x.jar==='_k'?null:x.jar?(J.find(j=>j.id===x.jar)||J.find(j=>(j.cats||[]).includes(x.cat))):J.find(j=>(j.cats||[]).includes(x.cat));(j||other).sp+=mineOf(x);});
   return J.length?[...J,other]:[];}
 const jarOfCat=c=>jarsOf().find(j=>(j.cats||[]).includes(c));
 /* CHỌN LỌ khi ghi (08/10): chọn loại → tự chọn lọ của loại đó; bấm chip khác để trừ vào lọ khác. x.jar='_k' = Chi khác. */
@@ -10832,7 +10843,7 @@ function jarRow(sel,amtNow,exceptId){const m=today().slice(0,7);if(!jarsOf().len
   return `<div class="jsel${big?' big':''}"><span class="jsl">${big?'Chi từ lọ nào?':VO?'Trừ vào lọ':'Nhóm hạn mức'}</span><div class="jsc">${JS.map(j=>{const l=!VO&&j.auto?budOf(m)-allSp:j.amt-j.sp,nm=!VO&&j.auto?'Ngoài nhóm':j.n;return `<button type="button" class="jch${sel===j.id?' on':''}" data-jsel="${j.id}" style="--jk:${j.col||'#8B919A'}"><i>${j.ic||'…'}</i>${esc(nm)}<small>${D.hide?'':j.amt||j.auto?(l<0?'lố '+short(-l):'còn '+short(l)):(VO?'chưa nạp':'chưa đặt')}</small></button>`;}).join('')}</div>
     <div class="jarh" id="jarh">&nbsp;</div></div>`;}
 function jarHint(sel,amt,ownId){const h=$('jarh');if(!h)return;
-  if(!VO&&sel==='_k'){const m=today().slice(0,7),all=D.tx.filter(x=>inBud(x,m)&&x.id!==ownId).reduce((a,x)=>a+mineOf(x),0),l=budOf(m)-all-amt;
+  if(!VO&&sel==='_k'){const m=today().slice(0,7),all=TXV().filter(x=>inBud(x,m)&&x.id!==ownId).reduce((a,x)=>a+mineOf(x),0),l=budOf(m)-all-amt;
     h.innerHTML=D.hide?'&nbsp;':l<0?`<span style="color:var(--bad)">Tiền tháng sẽ âm ${short(-l)}</span>`:`Ngoài nhóm · tiền tháng còn ${short(l)} sau khoản này`;return;}const m=today().slice(0,7),js=jarStats(m).find(j=>j.id===sel);if(!js||D.hide){h.innerHTML='&nbsp;';return;}
   const own=ownId?D.tx.find(t=>t.id===ownId):null,base=own&&(own.jar||jarAuto(own.cat))===sel?mineOf(own):0,l=js.amt-js.sp+base-amt;
   h.innerHTML=!js.amt&&!js.auto?`Lọ <b>${esc(js.n)}</b> chưa nạp tiền — vào Chia tiền để nạp`:l<0?`<span style="color:var(--bad)">Lọ <b>${esc(js.n)}</b> sẽ lố ${short(-l)}</span>`:`Lọ <b>${esc(js.n)}</b> còn ${short(l)} sau khoản này`;}
@@ -10851,8 +10862,8 @@ function budCard(s){const m=today().slice(0,7),A=budOf(m);
   return `<div class="bud ${st}"><button class="bud-hd" id="budset"><div class="bud-t"><span>Tiền tháng ${+m.slice(5)}</span><small>${VO?'chia tiền':'hạn mức'} ›</small></div>
     <div class="bud-n"><div><small>Còn lại</small><b>${left<0?'−':''}${money(Math.abs(left))}<i> đ</i></b></div><div class="bud-r"><small>Có ${short(A)}</small><small>Đã xài ${short(sp)}</small></div></div>
     <div class="bud-bar"><i style="width:${pct.toFixed(1)}%"></i><b style="left:${Math.min(100,dn/dim*100).toFixed(1)}%"></b></div>
-    <div class="bud-m">${D.hide?'đang ẩn số':msg}</div>${!VO&&!D.hide&&(()=>{const sl=jarsOf().reduce((a,j)=>a+(j.amt||0),0);return sl>A?`<div class="overb sm">⚠️ Hạn mức vượt tiền tháng ${short(sl-A)}</div>`:'';})()||''}${(()=>{const pl=A-jarsOf().reduce((a,j)=>a+(j.amt||0),0);return VO&&jarsOf().length&&pl>0&&!D.hide?`<div class="bud-pool">💰 Còn <b>${short(pl)}</b> chưa chia vào lọ <span>Chia ›</span></div>`:'';})()}</button>${J.length?`<div class="jvs">${jr2}<button class="jv add" id="jaradd"><span>＋</span><b>Lọ mới</b><small>&nbsp;</small></button></div>`:''}</div>`;}
-function budView(){const m=today().slice(0,7),A=budOf(m)-budAdd(m).reduce((a,x)=>a+x.amt,0),J=jarsOf(),sumJ=J.reduce((a,j)=>a+(j.amt||0),0),JS=jarStats(m);
+    <div class="bud-m">${D.hide?'đang ẩn số':msg}</div>${!VO&&!D.hide&&(()=>{const sl=jarsV().reduce((a,j)=>a+(j.amt||0),0);return sl>A?`<div class="overb sm">⚠️ Hạn mức vượt tiền tháng ${short(sl-A)}</div>`:'';})()||''}${(()=>{const pl=A-jarsOf().reduce((a,j)=>a+(j.amt||0),0);return VO&&jarsOf().length&&pl>0&&!D.hide?`<div class="bud-pool">💰 Còn <b>${short(pl)}</b> chưa chia vào lọ <span>Chia ›</span></div>`:'';})()}</button>${J.length?`<div class="jvs">${jr2}<button class="jv add" id="jaradd"><span>＋</span><b>Lọ mới</b><small>&nbsp;</small></button></div>`:''}</div>`;}
+function budView(){const m=today().slice(0,7),A=budOf(m)-budAdd(m).reduce((a,x)=>a+x.amt,0),J=jarsV(),sumJ=J.reduce((a,j)=>a+(j.amt||0),0),JS=jarStats(m);
   $('app').innerHTML=`<div class="sheet"><div class="wrap">
     <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Tiền tháng ${+m.slice(5)}</b><span style="width:64px"></span></div>
     <label class="fl">Tháng này có bao nhiêu tiền để xài?<input id="b_a" inputmode="numeric" value="${A?Math.round(A).toLocaleString('vi-VN'):''}" placeholder="vd: 40.000.000"></label>
@@ -10886,7 +10897,7 @@ function budView(){const m=today().slice(0,7),A=budOf(m)-budAdd(m).reduce((a,x)=
    jar.amt = số đã nạp vào lọ (giữ qua các tháng, tháng mới chi tiêu tính lại từ 0). Chưa chia = tổng − Σ lọ. Rút = trả từ lọ về ví tổng. ══ */
 let chiaAnim=null;
 function chiaView(){if(!VO)return hanmucView();
-const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduce((a,j)=>a+(j.amt||0),0),JS=jarStats(m),tSp=(JS.find(j=>j.auto)||{sp:0}).sp,pool=A-sumJ-tSp;
+const m=today().slice(0,7),A=budOf(m),J=jarsV(),sumJ=J.reduce((a,j)=>a+(j.amt||0),0),JS=jarStats(m),tSp=(JS.find(j=>j.auto)||{sp:0}).sp,pool=A-sumJ-tSp;
   const pct=A?Math.min(100,(sumJ+tSp)/A*100):0,P=S.pick&&J.find(j=>j.id===S.pick);
   $('app').innerHTML=`<div class="sheet chia"><div class="wrap">
     <div class="bar1"><button class="back bk2" id="bk">‹ Xong</button><b>Chia tiền tháng ${+m.slice(5)}</b><button class="back bk2" id="ctot" style="text-align:right">Sửa tổng</button></div>
@@ -10945,7 +10956,7 @@ const m=today().slice(0,7),A=budOf(m),J=jarsOf(),sumJ=J.reduce((a,j)=>a+(j.amt||
       if(VO&&S.dir!=='out')setTimeout(()=>hearts(12),120);if(navigator.vibrate)navigator.vibrate(12);const d=S.dir;S={v:'chia'};render();toast((d==='out'?'đã rút ':'đã nạp ')+short(a)+(d==='out'?' từ lọ ':' vào lọ ')+esc(P.n));};}}
 /* CHI TIẾT LỌ (08/10, "muốn xem lọ của con chi gì"): hình lọ + nạp/xài/còn + mọi khoản tháng này trừ vào lọ. Chạm khoản → sửa / đổi lọ. */
 function jardView(){const m=S.m||today().slice(0,7),JS=jarStats(m),j=JS.find(x=>x.id===S.id);if(!j){S={v:'home'};render();return;}
-  const L=D.tx.filter(x=>inBud(x,m)&&jarIdOf(x)===j.id).sort((a,b)=>b.ts-a.ts),l=j.amt-j.sp;
+  const L=TXV().filter(x=>inBud(x,m)&&jarIdOf(x)===j.id).sort((a,b)=>b.ts-a.ts),l=j.amt-j.sp;
   const pm=mAdd(m,-1),nm=mAdd(m,1),cur=today().slice(0,7);let last='',list='';
   const dT={};L.forEach(x=>{dT[x.d]=(dT[x.d]||0)+mineOf(x);});
   L.forEach(x=>{if(x.d!==last){list+=`<div class="dh"><span>${dayLab(x.d)}</span><span class="dsum">−${short(dT[x.d])}</span></div>`;last=x.d;}const c=cat(x.cat),jo=jarOnly(),t=jTitle(x);
@@ -11304,7 +11315,7 @@ const tkCol=k=>TKC[k]||TKG;
 function mAdd(m,k){const [y,mo]=m.split('-').map(Number),d=new Date(y,mo-1+k,1);return d.getFullYear()+'-'+pad2(d.getMonth()+1);}
 function tkView(){
   const m=S.m,cur=today().slice(0,7),isCur=m===cur,first=D.tx.length?D.tx.map(x=>x.d).sort()[0].slice(0,7):cur;
-  const out=D.tx.filter(x=>!notSpend(x.cat)),L=out.filter(x=>x.d.slice(0,7)===m),tot=L.reduce((a,x)=>a+mineOf(x),0);
+  const out=TXV().filter(x=>!notSpend(x.cat)),L=out.filter(x=>x.d.slice(0,7)===m),tot=L.reduce((a,x)=>a+mineOf(x),0);
   const dim=new Date(+m.slice(0,4),+m.slice(5),0).getDate(),dayN=isCur?+today().slice(8):dim;
   const pm=mAdd(m,-1),P=out.filter(x=>x.d.slice(0,7)===pm&&+x.d.slice(8)<=dayN),ptot=P.reduce((a,x)=>a+mineOf(x),0);
   const avg=dayN?tot/dayN:0,proj=!VO&&isCur&&dayN>=3?avg*dim:null;   /* bản vợ: bỏ 'dự kiến cả tháng' (08/10) */
@@ -11331,7 +11342,7 @@ function tkView(){
   const who={};L.forEach(x=>{const k=kinName(x).toLowerCase();who[k]=who[k]||{n:kinName(x),v:0,c:0,cat:x.cat};who[k].v+=mineOf(x);who[k].c++;});
   const top=Object.values(who).sort((a,b)=>b.v-a.v).slice(0,5),tmx=top.length?top[0].v:1;
   const big=L.slice().sort((a,b)=>mineOf(b)-mineOf(a)).slice(0,3);
-  const nap=D.tx.filter(x=>notSpend(x.cat)&&x.d.slice(0,7)===m).reduce((a,x)=>a+x.amt,0);
+  const nap=TXV().filter(x=>notSpend(x.cat)&&x.d.slice(0,7)===m).reduce((a,x)=>a+x.amt,0);
   const once=L.filter(x=>x.once).reduce((a,x)=>a+mineOf(x),0);
   $('app').innerHTML=`<div class="wrap tk hm2">
     <div class="topb"><div><div class="hi">Chi tiêu</div><b>Thống kê</b></div></div>
@@ -11378,7 +11389,7 @@ function tkView(){
 
 /* ── chờ nhận lại: các lần trả dùm, bấm khi mọi người đã chuyển đủ ── */
 function choView(){
-  const L=D.tx.filter(x=>x.mine!=null).sort((a,b)=>b.ts-a.ts),W=L.filter(x=>!x.nhan),tot=W.reduce((a,x)=>a+x.amt-x.mine,0);
+  const L=TXV().filter(x=>x.mine!=null).sort((a,b)=>b.ts-a.ts),W=L.filter(x=>!x.nhan),tot=W.reduce((a,x)=>a+x.amt-x.mine,0);
   const row=x=>{const p=x.d.split('-');return `<div class="it"><div class="ic">${cat(x.cat)[2]}</div><div><div class="n">${esc(kinName(x))}</div>
     <div class="s">${p[2]}/${p[1]} · chuyển ${short(x.amt)}, mình ${short(x.mine)}${kinNote(x)?' · '+esc(kinNote(x)):''}</div></div>
     <div><div class="a">${short(x.amt-x.mine)}</div>${x.nhan?'<div class="s" style="text-align:right">đã nhận</div>':`<button class="ok" data-ok="${x.id}">Đã nhận đủ</button>`}</div></div>`;};
@@ -11528,7 +11539,7 @@ function viView(){const k=S.w;
     $('bk').onclick=()=>{S={v:'home'};render();};$('mvc').onclick=()=>{S={v:'mvf',kind:'chuyen'};render();};
     document.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{S={v:'vi',w:b.dataset.w};render();});return;}
   const i=wInfo(k),cut=i?i.at:0;
-  const rows=[...D.tx.filter(x=>(x.via||'mb')===k).map(x=>({id:x.id,ts:x.ts,d:x.d,t:kinName(x),s:SH[x.cat]||cat(x.cat)[1],v:-x.amt,ic:cat(x.cat)[2]})),
+  const rows=[...TXV().filter(x=>(x.via||'mb')===k).map(x=>({id:x.id,ts:x.ts,d:x.d,t:kinName(x),s:SH[x.cat]||cat(x.cat)[1],v:-x.amt,ic:cat(x.cat)[2]})),
     ...(D.mv||[]).filter(m=>m.w===k||m.from===k||m.to===k).map(m=>({ts:m.ts,d:m.d,ic:m.kind==='thu'?'⬇':m.kind==='dc'?'✎':'⇄',
       t:m.kind==='thu'?(m.note||'Tiền vào'):m.kind==='dc'?'Cập nhật số dư':(m.from===k?'Chuyển sang '+wName(m.to):'Nhận từ '+wName(m.from)),
       s:m.kind==='chuyen'?'chuyển giữa ví · không tính chi':m.kind==='dc'?'đặt lại mốc':'tiền vào',v:m.kind==='dc'?null:m.kind==='thu'||m.to===k?m.amt:-m.amt}))]
@@ -11727,7 +11738,7 @@ function nofView(){const x=S.id?(D.no||[]).find(y=>y.id===S.id):null,k=S.nk||(x?
 function findView(){const f=S.f||(S.f={q:'',c:'',w:'',m:''});
   const months=[...new Set(D.tx.map(x=>x.d.slice(0,7)))].sort().reverse();
   const qn=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/đ/g,'d').toLowerCase();
-  const R=D.tx.filter(x=>(!f.q||qn(x.name+' '+(x.note||'')+' '+(SH[x.cat]||'')).includes(qn(f.q)))&&(!f.c||x.cat===f.c)&&(!f.w||(x.via||'mb')===f.w)&&(!f.m||x.d.slice(0,7)===f.m))
+  const R=TXV().filter(x=>(!f.q||qn(x.name+' '+(x.note||'')+' '+(SH[x.cat]||'')).includes(qn(f.q)))&&(!f.c||x.cat===f.c)&&(!f.w||(x.via||'mb')===f.w)&&(!f.m||x.d.slice(0,7)===f.m))
     .sort((a,b)=>b.ts-a.ts);
   const tot=R.filter(x=>!notSpend(x.cat)).reduce((a,x)=>a+mineOf(x),0);
   const chip=(k,v,l,cur)=>`<button class="fc${cur===v?' on':''}" data-f="${k}" data-v="${v}">${l}</button>`;
@@ -11809,7 +11820,7 @@ let voPin1=null;
 function voLockView(){const has=D.as&&D.as.pin,setting=!has,step2=setting&&voPin1!=null;
   const title=has?'Nhập mã':step2?'Nhập lại mã':'Đặt mã 4 số';
   $('app').innerHTML=`<div class="wrap hm2">
-    <div class="topb"><div><button class="back bk2" id="tsb" style="padding:0">‹ Tài sản</button><b style="display:block">Bảo mật</b></div></div>
+    <div class="topb"><div><button class="back bk2" id="tsb" style="padding:0">‹ ${S.ret==='home'?'Sổ':'Tài sản'}</button><b style="display:block">Bảo mật</b></div></div>
     <div class="lockw"><div class="lockic">🔒</div><div class="lockt">${title}</div>
       <div class="dsub">${setting&&!step2?'Mã này để xem số thật trong tab Tài sản':'&nbsp;'}</div>
       <div class="pdots${tsWrong?' wrong':''}">${[...Array(4)].map((_,i)=>`<i class="${i<tsPin.length?'on':''}"></i>`).join('')}</div>
@@ -11827,7 +11838,7 @@ function voLockView(){const has=D.as&&D.as.pin,setting=!has,step2=setting&&voPin
     if(k==='⌫')tsPin=tsPin.slice(0,-1);else if(tsPin.length<4)tsPin+=k;render();if(tsPin.length===4)setTimeout(done,120);});}
 function tsLockView(){if(VO)return voLockView();const c=syncCfg();
   $('app').innerHTML=`<div class="wrap hm2">
-    <div class="topb"><div><button class="back bk2" id="tsb" style="padding:0">‹ Tài sản</button><b style="display:block">Bảo mật</b></div></div>
+    <div class="topb"><div><button class="back bk2" id="tsb" style="padding:0">‹ ${S.ret==='home'?'Sổ':'Tài sản'}</button><b style="display:block">Bảo mật</b></div></div>
     <div class="lockw"><div class="lockic">🔒</div><div class="lockt">Nhập mã</div>
       <div class="dsub">${c?'&nbsp;':'Bật đồng bộ ở Cài đặt trước — tài sản dùng chung mật khẩu đó'}</div>
       <div class="pdots${tsWrong?' wrong':''}">${c?[...Array(Math.max(8,tsPin.length))].map((_,i)=>`<i class="${i<tsPin.length?'on':''}"></i>`).join(''):''}</div>
@@ -11837,10 +11848,11 @@ function tsLockView(){if(VO)return voLockView();const c=syncCfg();
   </div>${tabbar('ts')}`;
   bindTabs();
   if($('gosy'))$('gosy').onclick=()=>{S={v:'sync'};render();};
-  $('tsb').onclick=()=>{tsPin='';tsWrong=false;S={v:'ts'};render();};
+  const back=S.ret==='home'?{v:'home'}:{v:'ts'};
+  $('tsb').onclick=()=>{tsPin='';tsWrong=false;S=back;render();};
   const tryOpen=async()=>{if(tsPin.length<8||tsChecking)return;tsChecking=true;tsWrong=false;render();
     let ok=false;try{const r=await deriveSync(tsPin);ok=r.k===syncCfg().k;}catch(e){}
-    tsChecking=false;if(ok){tsOpenUntil=Date.now()+5*60000;tsPin='';S={v:'ts'};render();tsPull();}else{tsWrong=true;tsPin='';render();}};
+    tsChecking=false;if(ok){tsOpenUntil=Date.now()+5*60000;tsPin='';S=back;render();if(back.v==='ts')tsPull();}else{tsWrong=true;tsPin='';render();}};
   document.querySelectorAll('[data-pk]').forEach(b=>b.onpointerdown=e=>{e.preventDefault();if(tsChecking)return;const k=b.dataset.pk;tsWrong=false;
     if(k==='⌫')tsPin=tsPin.slice(0,-1);else if(k==='✓'){tryOpen();return;}else if(tsPin.length<20)tsPin+=k;
     render();if(tsPin.length===8&&k!=='⌫')tryOpen();});}
