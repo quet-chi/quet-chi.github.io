@@ -11651,14 +11651,15 @@ function splView(){const L=splOpen(),tot=L.reduce((a,x)=>a+noLeft(x),0),hasJ=jar
       ${G.length>1?`<div class="spl-g">${G.map(g=>`<span><i>${g.ic}</i>${esc(g.n)} <b>${short(g.t)}</b></span>`).join('')}</div>`:''}
       <div class="pool-m">Chưa trừ vào tiền tháng. Trả hoá đơn xong bấm trả — app ghi thành khoản chi của lọ tương ứng, tháng trả.</div></div>
     ${G.map(g=>`<div class="spg" style="--jk:${g.col}"><div class="spg-h"><span><i>${g.ic}</i>${g.k==='_k'?'Nợ chung · Tiền tổng':'Nợ '+esc(g.n)}</span><b>${short(g.t)}</b><button data-spg="${g.k}">Trả nhóm này</button></div>
-      ${g.L.map(x=>{const l=noLeft(x);return `<div class="row" style="cursor:default"><div class="ic">💳</div><div class="mid"><div class="n">${esc(x.note||'món trả sau')}</div><div class="s">mua ${ddmm(x.d)}${l<x.amt?' · đã trả '+short(x.amt-l):''}</div></div><div class="r"><div class="a">${short(l)}</div><button class="x" data-spx="${x.id}">xoá</button></div></div>`;}).join('')}</div>`).join('')||'<div class="empty">Không còn nợ trả sau. 🎉</div>'}
+      ${g.L.map(x=>{const l=noLeft(x);return `<div class="row" data-spe="${x.id}" role="button"><div class="ic">💳</div><div class="mid"><div class="n">${esc(x.note||'món trả sau')}</div><div class="s">mua ${ddmm(x.d)}${l<x.amt?' · đã trả '+short(x.amt-l):''} · <span style="color:var(--accent)">sửa ›</span></div></div><div class="r"><div class="a">${short(l)}</div><button class="x" data-spx="${x.id}">xoá</button></div></div>`;}).join('')}</div>`).join('')||'<div class="empty">Không còn nợ trả sau. 🎉</div>'}
     ${tot?`<label class="fl">Hoặc trả theo hoá đơn — kỳ này trả bao nhiêu?<input id="sp_a" inputmode="numeric" value="${Math.round(tot).toLocaleString('vi-VN')}"></label>
       <div class="note" style="text-align:left">Món mua trước được gạch trước. Mỗi lọ thành một khoản chi riêng, ngày hôm nay.</div>
       <button class="cta" id="sp_ok">Trả & ghi vào chi tiêu</button>`:''}
   </div></div>`;
   const num=v=>+String(v||'').replace(/\D/g,'')||0;
   $('bk').onclick=()=>{S={v:'home'};render();};
-  document.querySelectorAll('[data-spx]').forEach(b=>b.onclick=()=>{const x=D.no.find(y=>y.id===b.dataset.spx);x.del=true;x.u=Date.now();save();render();toast('đã xoá',()=>{x.del=false;x.u=Date.now();save();render();});});
+  document.querySelectorAll('[data-spe]').forEach(b=>b.onclick=()=>{S={v:'spe',id:b.dataset.spe};render();});
+  document.querySelectorAll('[data-spx]').forEach(b=>b.onclick=e=>{e.stopPropagation();const x=D.no.find(y=>y.id===b.dataset.spx);x.del=true;x.u=Date.now();save();render();toast('đã xoá',()=>{x.del=false;x.u=Date.now();save();render();});});
   if($('sp_a'))$('sp_a').oninput=e=>{const n=num(e.target.value);e.target.value=n?n.toLocaleString('vi-VN'):'';};
   const pay=(items,amt)=>{let a=amt;const by={};
     for(const x of items){if(a<=0)break;const l=noLeft(x),t=Math.min(l,a);x.pays=x.pays||[];x.pays.push({d:today(),amt:t});if(noLeft(x)<=0)x.done=true;x.u=Date.now();a-=t;const k=gk(x);(by[k]=by[k]||{amt:0,n:[]}).amt+=t;by[k].n.push(x.note||'món');}
@@ -11666,6 +11667,26 @@ function splView(){const L=splOpen(),tot=L.reduce((a,x)=>a+noLeft(x),0),hasJ=jar
     save();S={v:'home'};render();toast('đã trả '+short(amt)+' · ghi vào chi tiêu tháng này');};
   document.querySelectorAll('[data-spg]').forEach(b=>b.onclick=()=>{const g=G.find(y=>y.k===b.dataset.spg);pay(g.L,g.t);});
   if($('sp_ok'))$('sp_ok').onclick=()=>{const a=Math.min(num($('sp_a').value),tot);if(!a){toast('gõ số tiền trả');return;}pay(L,a);};}
+/* SỬA MỘT MÓN TRẢ SAU (06/11, vợ Mau: "không sửa được chi tiết từng giao dịch"): ghi chú · số tiền · ngày mua · lọ. */
+function speView(){const x=(D.no||[]).find(y=>y.id===S.id);if(!x||x.del||!x.sp){S={v:'spl'};render();return;}
+  const paid=x.amt-noLeft(x),hasJ=jarsOf().length>0;S.jar=S.jar||x.jar||'_k';
+  $('app').innerHTML=`<div class="sheet"><div class="wrap">
+    <div class="bar1"><button class="back bk2" id="bk">‹ Huỷ</button><b>Sửa món trả sau</b><span style="width:64px"></span></div>
+    <label class="fl">Mua gì<input id="e_t" value="${esc(x.note||'')}" placeholder="vd: áo, nồi chiên, đồ cho bé"></label>
+    <div class="f2"><label class="fl">Số tiền<input id="e_a" inputmode="numeric" value="${Math.round(x.amt).toLocaleString('vi-VN')}"></label>
+      <label class="fl">Ngày mua<input id="e_d" type="date" value="${x.d}" max="${today()}"></label></div>
+    ${hasJ?jarRow(S.jar):''}
+    ${paid?`<div class="note" style="text-align:left">Món này đã trả ${short(paid)} — số tiền không được nhỏ hơn mức đó.</div>`:''}
+    <button class="cta" id="e_ok">Lưu</button>
+    <button class="del" id="e_del">Xoá món này</button></div></div>`;
+  const back=()=>{S={v:'spl'};render();};
+  $('bk').onclick=back;$('e_a').oninput=noFmt;
+  document.querySelectorAll('[data-jsel]').forEach(b=>b.onclick=()=>{S.jar=b.dataset.jsel;document.querySelectorAll('[data-jsel]').forEach(y=>y.classList.toggle('on',y===b));});
+  $('e_ok').onclick=()=>{const a=noNum($('e_a').value),d=$('e_d').value||x.d;
+    if(!a){toast('gõ số tiền');return;}if(a<paid){toast('đã trả '+short(paid)+' — số tiền phải từ mức đó trở lên');return;}
+    const old=JSON.parse(JSON.stringify(x));x.amt=a;x.d=d>today()?today():d;x.note=$('e_t').value.trim()||'món trả sau';if(hasJ)x.jar=S.jar;
+    x.done=noLeft(x)<=0;noTouch(x);back();toast('đã lưu',()=>{Object.keys(x).forEach(k=>delete x[k]);Object.assign(x,old);noTouch(x);render();});};
+  $('e_del').onclick=()=>{x.del=true;noTouch(x);back();toast('đã xoá',()=>{x.del=false;noTouch(x);render();});};}
 function noView(){const L=noList(),s=noSum(),tab=S.k||'thu';
   const op=L.filter(x=>x.k===tab&&noOpen(x)).sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:(a.due||'9')>(b.due||'9')?1:a.d<b.d?-1:1),
     dn=L.filter(x=>x.k===tab&&!noOpen(x)).sort((a,b)=>b.u-a.u);
@@ -12049,7 +12070,7 @@ function tsView(){const real=tsOpen(),a0=VO?voSummary():tsLive(tsGet()),a=VO?(re
   document.querySelectorAll('.tcl').forEach(b=>b.onclick=()=>{tsCls=tsCls===b.dataset.c?null:b.dataset.c;render();});}
 
 function render(){if(S.v!=='scan')stopCam();
-  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else if(S.v==='sync')syncView();else if(S.v==='cai')caiView();else if(S.v==='vi')viView();else if(S.v==='mvf')mvfView();else if(S.v==='rec')recView();else if(S.v==='find')findView();else if(S.v==='ts')tsView();else if(S.v==='tsk')tsLockView();else if(S.v==='asf')asfView();else if(S.v==='bud')budView();else if(S.v==='jarf')jarfView();else if(S.v==='chia')chiaView();else if(S.v==='jard')jardView();else if(S.v==='spl')splView();else if(S.v==='no')noView();else if(S.v==='nod')nodView();else if(S.v==='nof')nofView();else home();}
+  if(S.v==='scan')scan();else if(S.v==='amt')amtView();else if(S.v==='exp')expView();else if(S.v==='tk')tkView();else if(S.v==='cho')choView();else if(S.v==='ed')edView();else if(S.v==='sync')syncView();else if(S.v==='cai')caiView();else if(S.v==='vi')viView();else if(S.v==='mvf')mvfView();else if(S.v==='rec')recView();else if(S.v==='find')findView();else if(S.v==='ts')tsView();else if(S.v==='tsk')tsLockView();else if(S.v==='asf')asfView();else if(S.v==='bud')budView();else if(S.v==='jarf')jarfView();else if(S.v==='chia')chiaView();else if(S.v==='jard')jardView();else if(S.v==='spl')splView();else if(S.v==='spe')speView();else if(S.v==='no')noView();else if(S.v==='nod')nodView();else if(S.v==='nof')nofView();else home();}
 /* ĐƯỜNG TẮT: mở link có #quet → vào thẳng camera; #tay → vào thẳng ghi tay.
    Dùng cho Phím tắt iPhone (chạm 2 lần mặt lưng / nút Tác vụ / Trung tâm điều khiển). Xoá hash ngay
    để tải lại trang không bị bật camera lần nữa. */
